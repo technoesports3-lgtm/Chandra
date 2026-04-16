@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Calculator </title>
+    <title>Calculator + Chat</title>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
@@ -2552,9 +2552,13 @@
             }
         });
         
-        // Add a listener to scroll chat when keyboard appears/disappears
-        document.getElementById('chat-input').addEventListener('focus', () => {
-            setTimeout(scrollChatToBottom, 300); // Timeout to wait for keyboard animation
+        // ==================== KEYBOARD FIX (MODIFIED CODE) ====================
+        const chatInput = document.getElementById('chat-input');
+        chatInput.addEventListener('focus', () => {
+            // This is a more reliable way to handle the keyboard appearing
+            setTimeout(() => {
+                chatInput.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }, 300); // Timeout to wait for keyboard animation
         });
 
         // Initialize calculator display
