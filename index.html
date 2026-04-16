@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Calculator + Chat</title>
+    <title>Calculator </title>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
@@ -16,6 +16,8 @@
             padding: 0;
             box-sizing: border-box;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent; /* Removes blue tap highlight on mobile */
+            user-select: none;
         }
 
         body {
@@ -29,10 +31,13 @@
         .app-container {
             width: 100%;
             max-width: 400px;
-            height: 100vh;
+            height: 100vh; /* Changed for better mobile keyboard handling */
+            height: 100dvh; /* Dynamic viewport height */
             background: #121212;
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
         /* ==================== IMPROVED CALCULATOR ==================== */
@@ -63,7 +68,6 @@
             border-radius: 50%;
             transition: all 0.15s ease;
             -webkit-tap-highlight-color: transparent;
-            user-select: none;
         }
         
         .expand-icon:active {
@@ -141,7 +145,6 @@
             color: white;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(255, 255, 255, 0.05) inset;
             -webkit-tap-highlight-color: transparent;
-            user-select: none;
             font-feature-settings: "tnum";
             letter-spacing: 0.5px;
         }
@@ -701,14 +704,14 @@
             to { transform: rotate(360deg); }
         }
 
-        /* ==================== CHAT SCREEN (unchanged) ==================== */
+        /* ==================== CHAT SCREEN (IMPROVED) ==================== */
         .chat-screen {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: #0B0B0B;
+            background: #121212; /* Consistent background */
             z-index: 50;
             display: none;
             flex-direction: column;
@@ -721,6 +724,7 @@
             align-items: center;
             gap: 16px;
             border-bottom: 1px solid #2D2D2D;
+            flex-shrink: 0;
         }
 
         .back-btn {
@@ -761,8 +765,8 @@
             padding: 16px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            background: #0B0B0B;
+            gap: 12px; /* Increased gap */
+            background: #121212;
         }
 
         .message-wrapper {
@@ -780,28 +784,31 @@
 
         .message-bubble {
             max-width: 75%;
-            padding: 8px 12px;
-            border-radius: 18px;
+            padding: 10px 16px; /* Increased padding */
+            border-radius: 22px; /* Rounder bubbles */
             position: relative;
             word-wrap: break-word;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Added shadow */
+            cursor: pointer; /* For long press */
         }
 
         .sent .message-bubble {
             background: #A8C7FA;
             color: #121212;
-            border-bottom-right-radius: 4px;
+            border-bottom-right-radius: 6px; /* Modern look */
         }
 
         .received .message-bubble {
-            background: #1E1E1E;
+            background: #2A2A2A; /* Slightly lighter received bubble */
             color: white;
-            border-bottom-left-radius: 4px;
+            border-bottom-left-radius: 6px; /* Modern look */
         }
 
         .message-text {
             font-size: 15px;
             line-height: 1.4;
             margin-bottom: 4px;
+            user-select: text; /* Allow selecting text */
         }
 
         .message-image {
@@ -816,7 +823,17 @@
             display: flex;
             align-items: center;
             justify-content: flex-end;
-            gap: 4px;
+            gap: 6px; /* Increased gap */
+            margin-top: 4px;
+        }
+
+        .edited-label {
+            font-size: 10px;
+            color: rgba(255,255,255,0.4);
+        }
+        
+        .sent .edited-label {
+            color: rgba(18,18,18,0.4);
         }
 
         .message-time {
@@ -829,22 +846,38 @@
         }
 
         .message-status {
-            display: flex;
-            align-items: center;
-            gap: 2px;
-        }
-
-        .tick {
-            font-size: 12px;
-            color: rgba(18,18,18,0.5);
-        }
-
-        .tick.delivered {
-            color: #666;
+            font-size: 14px;
         }
 
         .tick.read {
             color: #4A90E2;
+        }
+
+        .chat-input-area {
+            flex-shrink: 0;
+        }
+
+        .editing-banner {
+            background: #2a2a2a;
+            padding: 8px 16px;
+            display: none; /* Hidden by default */
+            align-items: center;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+
+        .editing-banner-info {
+            color: #A8C7FA;
+        }
+
+        .editing-banner-info i {
+            margin-right: 8px;
+        }
+
+        .cancel-edit-btn {
+            color: #888;
+            cursor: pointer;
+            font-size: 20px;
         }
 
         .chat-input-container {
@@ -880,6 +913,7 @@
             padding: 12px 16px;
             color: white;
             font-size: 15px;
+            user-select: text;
         }
 
         .chat-input:focus {
@@ -911,17 +945,25 @@
             transform: none;
         }
 
-        .typing-dots {
+        .typing-indicator-bubble {
+            align-self: flex-start;
+            background: #2A2A2A;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 22px;
+            border-bottom-left-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
             display: flex;
-            gap: 4px;
-            padding: 4px 8px;
+            align-items: center;
         }
 
         .typing-dots span {
-            width: 6px;
-            height: 6px;
-            background: #888;
+            width: 8px;
+            height: 8px;
+            background-color: #8e8e8e;
             border-radius: 50%;
+            display: inline-block;
+            margin: 0 2px;
             animation: typing 1.4s infinite;
         }
 
@@ -930,7 +972,7 @@
 
         @keyframes typing {
             0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-            30% { transform: translateY(-4px); opacity: 1; }
+            30% { transform: translateY(-5px); opacity: 1; }
         }
 
         /* Image Preview */
@@ -972,6 +1014,55 @@
         .close-preview:active {
             background: rgba(255,255,255,0.2);
         }
+        
+        /* Message Options Modal */
+        .message-options-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 110;
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+        }
+        
+        .message-options-modal {
+            background: #1E1E1E;
+            width: 100%;
+            max-width: 400px;
+            padding: 16px;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .message-option {
+            padding: 16px;
+            color: white;
+            font-size: 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .message-option:active {
+            background: #2D2D2D;
+        }
+
+        .message-option.delete {
+            color: #ff4d4d;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
     </style>
 </head>
 <body>
@@ -1132,7 +1223,7 @@
             </div>
         </div>
 
-        <!-- Chat Screen (unchanged) -->
+        <!-- Chat Screen (IMPROVED) -->
         <div class="chat-screen" id="chat-screen">
             <div class="chat-header">
                 <button class="back-btn" onclick="goBackToUsers()">
@@ -1140,7 +1231,7 @@
                 </button>
                 <div class="chat-header-info">
                     <div class="chat-header-name" id="chat-header-name">Loading...</div>
-                    <div class="chat-header-status" id="chat-header-status"></div>
+                    <div class="chat-header-status" id="chat-header-status"></div> <!-- Status is no longer used here -->
                 </div>
             </div>
 
@@ -1150,15 +1241,24 @@
             
             <div class="messages-container" id="messages-container"></div>
 
-            <div class="chat-input-container">
-                <button class="attach-btn" onclick="selectImage()">
-                    <i class="fas fa-paperclip"></i>
-                </button>
-                <input type="file" id="image-input" accept="image/*" style="display: none;" onchange="handleImageSelect(event)">
-                <input type="text" class="chat-input" id="chat-input" placeholder="Type a message" onkeyup="handleTyping(event)">
-                <button class="send-btn" onclick="sendMessage()" id="send-btn">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
+            <div class="chat-input-area">
+                <div class="editing-banner" id="editing-banner">
+                    <div class="editing-banner-info">
+                        <i class="fas fa-pencil-alt"></i>
+                        <span>Editing Message</span>
+                    </div>
+                    <i class="fas fa-times cancel-edit-btn" onclick="cancelEdit()"></i>
+                </div>
+                <div class="chat-input-container">
+                    <button class="attach-btn" onclick="selectImage()">
+                        <i class="fas fa-paperclip"></i>
+                    </button>
+                    <input type="file" id="image-input" accept="image/*" style="display: none;" onchange="handleImageSelect(event)">
+                    <input type="text" class="chat-input" id="chat-input" placeholder="Type a message" onkeyup="handleTyping(event)">
+                    <button class="send-btn" onclick="sendMessage()" id="send-btn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -1166,6 +1266,18 @@
         <div class="image-preview-modal" id="image-preview" onclick="closeImagePreview()">
             <span class="close-preview">&times;</span>
             <img class="preview-image" id="preview-image" src="">
+        </div>
+
+        <!-- Message Options Modal -->
+        <div class="message-options-modal-overlay" id="message-options-overlay" onclick="closeMessageOptions()">
+            <div class="message-options-modal" onclick="event.stopPropagation()">
+                <div class="message-option" id="edit-option" onclick="handleEditOption()">
+                    <i class="fas fa-pencil-alt"></i><span>Edit</span>
+                </div>
+                <div class="message-option delete" id="delete-option" onclick="handleDeleteOption()">
+                    <i class="fas fa-trash-alt"></i><span>Delete</span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1207,6 +1319,11 @@
         let selectedUserData = null;
         let typingTimeout = null;
         let selectedImage = null;
+        
+        // --- NEW VARIABLES FOR EDIT/DELETE ---
+        let longPressTimer;
+        let selectedMessageData = { id: null, text: null };
+        let isEditing = false;
         
         // Firebase Listeners
         let usersListener = null;
@@ -1292,7 +1409,9 @@
             try {
                 // Secret code to open chat
                 if (currentResult === SECRET_CODE) {
-                    if (currentUser) {
+                    // PERFORMANCE FIX: Check auth state directly for faster transition
+                    const user = auth.currentUser;
+                    if (user) {
                         showUsersList();
                     } else {
                         showAuthScreen();
@@ -1408,6 +1527,7 @@
             
             // Hide error banners
             document.getElementById('chat-error-banner').style.display = 'none';
+            cancelEdit(); // Ensure edit mode is cancelled
         }
 
         function cleanupListeners() {
@@ -2010,16 +2130,9 @@
             
             const name = userData.name || userData.email?.split('@')[0] || 'User';
             document.getElementById('chat-header-name').textContent = name;
-            document.getElementById('chat-header-status').innerHTML = '';
             
-            if (messagesListener) {
-                messagesListener();
-                messagesListener = null;
-            }
-            if (typingListener) {
-                typingListener();
-                typingListener = null;
-            }
+            if (messagesListener) messagesListener();
+            if (typingListener) typingListener();
             
             document.getElementById('chat-error-banner').style.display = 'none';
             
@@ -2075,14 +2188,9 @@
                     .onSnapshot((snapshot) => {
                         container.innerHTML = '';
                         
-                        if (snapshot.empty) {
-                            container.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">No messages yet. Say hello! 👋</div>';
-                            return;
-                        }
-                        
                         let messageCount = 0;
                         snapshot.forEach((doc) => {
-                            const msg = doc.data();
+                            const msg = { id: doc.id, ...doc.data() };
                             if ((msg.senderId === currentUserId && msg.receiverId === otherUserId) ||
                                 (msg.senderId === otherUserId && msg.receiverId === currentUserId)) {
                                 
@@ -2096,7 +2204,7 @@
                             container.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">No messages yet. Say hello! 👋</div>';
                         }
                         
-                        container.scrollTop = container.scrollHeight;
+                        scrollChatToBottom();
                         errorBanner.style.display = 'none';
                     }, (error) => {
                         console.error('Messages listener error:', error);
@@ -2109,6 +2217,11 @@
                 errorBanner.style.display = 'block';
             }
         }
+        
+        function scrollChatToBottom() {
+            const container = document.getElementById('messages-container');
+            container.scrollTop = container.scrollHeight;
+        }
 
         function retryLoadMessages() {
             if (selectedUserId) {
@@ -2120,10 +2233,25 @@
             const wrapper = document.createElement('div');
             const isSent = message.senderId === auth.currentUser?.uid;
             wrapper.className = `message-wrapper ${isSent ? 'sent' : 'received'}`;
+            wrapper.id = `msg-${message.id}`;
             
             const bubble = document.createElement('div');
             bubble.className = 'message-bubble';
             
+            if (isSent) {
+                // Add long-press event listeners only for sent messages
+                bubble.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    openMessageOptions(message);
+                });
+                bubble.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    longPressTimer = setTimeout(() => openMessageOptions(message), 500);
+                });
+                bubble.addEventListener('touchend', () => clearTimeout(longPressTimer));
+                bubble.addEventListener('touchmove', () => clearTimeout(longPressTimer));
+            }
+
             let content = '';
             if (message.text) {
                 content = `<div class="message-text">${escapeHtml(message.text)}</div>`;
@@ -2134,17 +2262,14 @@
             let status = '';
             if (isSent) {
                 let tickClass = '';
-                let ticks = '✓';
+                let ticks = '<i class="fas fa-check"></i>';
                 
                 if (message.status === 'delivered') {
-                    ticks = '✓✓';
-                    tickClass = 'delivered';
+                    ticks = '<i class="fas fa-check-double"></i>';
                 } else if (message.status === 'read') {
-                    ticks = '✓✓';
-                    tickClass = 'read';
+                    ticks = '<i class="fas fa-check-double tick read"></i>';
                 }
-                
-                status = `<span class="message-status"><span class="tick ${tickClass}">${ticks}</span></span>`;
+                status = `<span class="message-status">${ticks}</span>`;
             }
             
             const time = message.timestamp ? 
@@ -2153,6 +2278,7 @@
             bubble.innerHTML = `
                 ${content}
                 <div class="message-footer">
+                    ${message.edited ? '<span class="edited-label">(edited)</span>' : ''}
                     <span class="message-time">${time}</span>
                     ${status}
                 </div>
@@ -2180,28 +2306,38 @@
             sendBtn.disabled = true;
             
             try {
-                const messageData = {
-                    senderId: auth.currentUser.uid,
-                    receiverId: selectedUserId,
-                    participants: [auth.currentUser.uid, selectedUserId],
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                    status: 'sent'
-                };
-                
-                if (selectedImage) {
-                    messageData.imageUrl = selectedImage;
-                    selectedImage = null;
+                if(isEditing) {
+                    await db.collection('messages').doc(selectedMessageData.id).update({
+                        text: text,
+                        edited: true
+                    });
+                    cancelEdit();
                 } else {
-                    messageData.text = text;
-                    input.value = '';
+                    const messageData = {
+                        senderId: auth.currentUser.uid,
+                        receiverId: selectedUserId,
+                        participants: [auth.currentUser.uid, selectedUserId],
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        status: 'sent'
+                    };
+                    
+                    if (selectedImage) {
+                        messageData.imageUrl = selectedImage;
+                        selectedImage = null;
+                    } else {
+                        messageData.text = text;
+                        input.value = '';
+                    }
+                    
+                    await db.collection('messages').add(messageData);
+                    
+                    try {
+                        await db.collection('typing').doc(`${auth.currentUser.uid}_${selectedUserId}`).delete();
+                    } catch (e) {}
                 }
                 
-                await db.collection('messages').add(messageData);
-                
-                try {
-                    await db.collection('typing').doc(`${auth.currentUser.uid}_${selectedUserId}`).delete();
-                } catch (e) {}
-                
+                scrollChatToBottom();
+
             } catch (error) {
                 console.error('Error sending message:', error);
                 alert('Failed to send message. Please try again.');
@@ -2209,8 +2345,57 @@
                 sendBtn.disabled = false;
             }
         }
+        
+        // ==================== MESSAGE EDIT/DELETE FUNCTIONS (NEW) ====================
+        function openMessageOptions(message) {
+            if (!message.id) return;
+            selectedMessageData = { id: message.id, text: message.text || '' };
 
-        // ==================== TYPING INDICATOR ====================
+            document.getElementById('edit-option').style.display = message.text ? 'flex' : 'none';
+            document.getElementById('message-options-overlay').style.display = 'flex';
+        }
+
+        function closeMessageOptions() {
+            document.getElementById('message-options-overlay').style.display = 'none';
+        }
+
+        function handleEditOption() {
+            if (!selectedMessageData.id || !selectedMessageData.text) return;
+            isEditing = true;
+            closeMessageOptions();
+            
+            document.getElementById('editing-banner').style.display = 'flex';
+            const input = document.getElementById('chat-input');
+            input.value = selectedMessageData.text;
+            input.focus();
+            
+            document.getElementById('send-btn').innerHTML = '<i class="fas fa-check"></i>';
+        }
+
+        function cancelEdit() {
+            isEditing = false;
+            selectedMessageData = { id: null, text: null };
+            document.getElementById('editing-banner').style.display = 'none';
+            document.getElementById('chat-input').value = '';
+            document.getElementById('send-btn').innerHTML = '<i class="fas fa-paper-plane"></i>';
+        }
+
+        async function handleDeleteOption() {
+            if (!selectedMessageData.id) return;
+            const msgId = selectedMessageData.id;
+            closeMessageOptions();
+
+            if (confirm('Are you sure you want to delete this message?')) {
+                try {
+                    await db.collection('messages').doc(msgId).delete();
+                } catch (error) {
+                    console.error('Error deleting message:', error);
+                    alert('Failed to delete message.');
+                }
+            }
+        }
+
+        // ==================== TYPING INDICATOR (REWORKED) ====================
         function handleTyping(event) {
             if (!selectedUserId || !auth.currentUser) return;
             
@@ -2237,18 +2422,33 @@
         }
 
         function setupTypingListener(otherUserId) {
-            const statusEl = document.getElementById('chat-header-status');
-            
+            const container = document.getElementById('messages-container');
             if (!auth.currentUser) return;
-            
+
             try {
                 typingListener = db.collection('typing')
                     .doc(`${otherUserId}_${auth.currentUser.uid}`)
                     .onSnapshot((doc) => {
+                        const typingIndicator = document.getElementById('typing-indicator');
                         if (doc.exists && doc.data().isTyping) {
-                            statusEl.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+                            if (!typingIndicator) {
+                                const indicatorEl = document.createElement('div');
+                                indicatorEl.className = 'message-wrapper received';
+                                indicatorEl.id = 'typing-indicator';
+                                indicatorEl.innerHTML = `
+                                    <div class="typing-indicator-bubble">
+                                        <div class="typing-dots">
+                                            <span></span><span></span><span></span>
+                                        </div>
+                                    </div>
+                                `;
+                                container.appendChild(indicatorEl);
+                                scrollChatToBottom();
+                            }
                         } else {
-                            statusEl.innerHTML = '';
+                            if (typingIndicator) {
+                                typingIndicator.remove();
+                            }
                         }
                     }, (error) => {
                         console.error('Typing listener error:', error);
@@ -2332,6 +2532,7 @@
                     }
                 }).catch(e => console.error('Error checking user doc:', e));
                 
+                // If the auth screen is visible, it means the user just logged in, so transition.
                 if (document.getElementById('auth-screen').style.display === 'block') {
                     showUsersList();
                 }
@@ -2343,8 +2544,17 @@
                 acceptedChats.clear();
                 pendingRequests.clear();
                 
-                returnToCalculator();
+                // If a protected screen is visible, go back to calculator
+                if (document.getElementById('users-screen').style.display !== 'none' || 
+                    document.getElementById('chat-screen').style.display !== 'none') {
+                    returnToCalculator();
+                }
             }
+        });
+        
+        // Add a listener to scroll chat when keyboard appears/disappears
+        document.getElementById('chat-input').addEventListener('focus', () => {
+            setTimeout(scrollChatToBottom, 300); // Timeout to wait for keyboard animation
         });
 
         // Initialize calculator display
