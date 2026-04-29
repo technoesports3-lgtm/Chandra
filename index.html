@@ -4,10 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Calculator + Chat</title>
+
     <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js">
+    </script>
+    <!-- NEW: Firebase Storage for voice notes -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js">
+    </script>
+
+    <!-- NEW: OneSignal Web SDK -->
+    <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async="">
+    </script>
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -16,7 +28,7 @@
             padding: 0;
             box-sizing: border-box;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            -webkit-tap-highlight-color: transparent; /* Removes blue tap highlight on mobile */
+            -webkit-tap-highlight-color: transparent;
             user-select: none;
         }
 
@@ -31,8 +43,8 @@
         .app-container {
             width: 100%;
             max-width: 400px;
-            height: 100vh; /* Changed for better mobile keyboard handling */
-            height: 100dvh; /* Dynamic viewport height */
+            height: 100vh;
+            height: 100dvh;
             background: #121212;
             position: relative;
             overflow: hidden;
@@ -40,7 +52,7 @@
             flex-direction: column;
         }
 
-        /* ==================== IMPROVED CALCULATOR ==================== */
+        /* ==================== CALCULATOR (unchanged core) ==================== */
         .calculator {
             width: 100%;
             height: 100%;
@@ -67,9 +79,8 @@
             margin: -8px;
             border-radius: 50%;
             transition: all 0.15s ease;
-            -webkit-tap-highlight-color: transparent;
         }
-        
+
         .expand-icon:active {
             background: rgba(168, 199, 250, 0.2);
             transform: scale(0.92);
@@ -85,7 +96,7 @@
             background: #1E1E1E;
             border-radius: 32px;
             min-height: 140px;
-            box-shadow: inset 0 2px 8px rgba(0,0,0,0.6);
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6);
         }
 
         .expression {
@@ -105,7 +116,7 @@
             word-wrap: break-word;
             word-break: break-all;
             line-height: 1.1;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
             font-feature-settings: "tnum";
         }
 
@@ -144,7 +155,6 @@
             background: #2D2D2D;
             color: white;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(255, 255, 255, 0.05) inset;
-            -webkit-tap-highlight-color: transparent;
             font-feature-settings: "tnum";
             letter-spacing: 0.5px;
         }
@@ -153,7 +163,7 @@
             transform: scale(0.92);
             filter: brightness(1.3);
             background: #404040;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.6);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
         }
 
         .calc-btn.operator {
@@ -162,7 +172,7 @@
             font-weight: 600;
             font-size: 32px;
         }
-        
+
         .calc-btn.operator:active {
             background: #b8d4ff;
             filter: brightness(1.1);
@@ -174,7 +184,7 @@
             font-weight: 600;
             font-size: 26px;
         }
-        
+
         .calc-btn.ac:active {
             background: #6f82a5;
         }
@@ -194,12 +204,12 @@
             background: #3a3f4b;
             color: #d0dcff;
         }
-        
+
         .scientific-row .calc-btn:active {
             background: #525b6b;
         }
 
-        /* ==================== AUTH SCREEN (unchanged) ==================== */
+        /* ==================== AUTH SCREEN ==================== */
         .auth-screen {
             position: absolute;
             top: 0;
@@ -226,7 +236,6 @@
             text-align: center;
             margin-bottom: 32px;
         }
-
         .auth-header h2 {
             color: #A8C7FA;
             margin-bottom: 8px;
@@ -320,13 +329,12 @@
             transform: scale(0.97);
             background: #8bb5f0;
         }
-
         .auth-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
 
-        /* ==================== USERS SCREEN (unchanged) ==================== */
+        /* ==================== USERS SCREEN ==================== */
         .users-screen {
             position: absolute;
             top: 0;
@@ -385,7 +393,6 @@
             color: #888;
             margin-right: 8px;
         }
-
         .search-box input {
             flex: 1;
             background: none;
@@ -443,17 +450,14 @@
             cursor: pointer;
             transition: background 0.2s;
             border-bottom: 1px solid #2D2D2D;
-            position: relative;
         }
 
         .user-item:hover {
             background: #1E1E1E;
         }
-
         .user-item:active {
             background: #2D2D2D;
         }
-
         .user-item.unread {
             background: rgba(168, 199, 250, 0.1);
             border-left: 4px solid #A8C7FA;
@@ -576,23 +580,19 @@
         .request-item:active {
             background: #2D2D2D;
         }
-
         .request-info {
             flex: 1;
         }
-
         .request-name {
             color: white;
             font-size: 16px;
             font-weight: 500;
             margin-bottom: 4px;
         }
-
         .request-email {
             color: #888;
             font-size: 13px;
         }
-
         .request-actions {
             display: flex;
             gap: 8px;
@@ -608,7 +608,6 @@
             font-weight: 500;
             cursor: pointer;
         }
-
         .accept-btn:active {
             transform: scale(0.95);
             background: #3d9c42;
@@ -624,7 +623,6 @@
             font-weight: 500;
             cursor: pointer;
         }
-
         .reject-btn:active {
             transform: scale(0.95);
             background: #b71c1c;
@@ -640,7 +638,6 @@
             gap: 12px;
             border: 1px solid #A8C7FA;
         }
-
         .badge-avatar {
             width: 40px;
             height: 40px;
@@ -652,22 +649,19 @@
             color: #121212;
             font-weight: 600;
         }
-
         .badge-info {
             flex: 1;
         }
-
         .badge-name {
             color: white;
             font-size: 14px;
             font-weight: 500;
         }
-
         .badge-label {
             color: #A8C7FA;
             font-size: 12px;
         }
-        
+
         .error-banner {
             background: #d32f2f;
             color: white;
@@ -678,7 +672,7 @@
             border-radius: 8px;
             display: none;
         }
-        
+
         .retry-btn {
             background: white;
             color: #d32f2f;
@@ -701,17 +695,19 @@
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
-        /* ==================== CHAT SCREEN (IMPROVED) ==================== */
+        /* ==================== CHAT SCREEN ==================== */
         .chat-screen {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: #121212; /* Consistent background */
+            background: #121212;
             z-index: 50;
             display: none;
             flex-direction: column;
@@ -722,7 +718,7 @@
             padding: 12px 16px;
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
             border-bottom: 1px solid #2D2D2D;
             flex-shrink: 0;
         }
@@ -736,27 +732,44 @@
             padding: 8px;
             margin: -8px;
             border-radius: 50%;
-            transition: background 0.2s;
         }
-
         .back-btn:active {
             background: rgba(168, 199, 250, 0.2);
+        }
+
+        /* NEW: Bell icon for OneSignal disguised notification */
+        .bell-btn {
+            background: none;
+            border: none;
+            color: #A8C7FA;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+            margin: -8px;
+            border-radius: 50%;
+            transition: all 0.15s;
+        }
+        .bell-btn:active {
+            background: rgba(168, 199, 250, 0.2);
+            transform: scale(0.9);
         }
 
         .chat-header-info {
             flex: 1;
         }
-
         .chat-header-name {
             color: white;
             font-size: 16px;
             font-weight: 600;
         }
-
+        /* NEW: Online / Last Seen status */
         .chat-header-status {
             color: #888;
             font-size: 12px;
             height: 18px;
+        }
+        .chat-header-status.online {
+            color: #4CAF50;
         }
 
         .messages-container {
@@ -765,50 +778,51 @@
             padding: 16px;
             display: flex;
             flex-direction: column;
-            gap: 12px; /* Increased gap */
+            gap: 8px;
             background: #121212;
         }
 
         .message-wrapper {
             display: flex;
             margin-bottom: 4px;
+            position: relative;
         }
 
         .message-wrapper.sent {
             justify-content: flex-end;
         }
-
         .message-wrapper.received {
             justify-content: flex-start;
         }
 
         .message-bubble {
             max-width: 75%;
-            padding: 10px 16px; /* Increased padding */
-            border-radius: 22px; /* Rounder bubbles */
+            padding: 10px 16px;
+            border-radius: 22px;
             position: relative;
             word-wrap: break-word;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Added shadow */
-            cursor: pointer; /* For long press */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: background 0.1s;
         }
 
         .sent .message-bubble {
             background: #A8C7FA;
             color: #121212;
-            border-bottom-right-radius: 6px; /* Modern look */
+            border-bottom-right-radius: 6px;
         }
 
         .received .message-bubble {
-            background: #2A2A2A; /* Slightly lighter received bubble */
+            background: #2A2A2A;
             color: white;
-            border-bottom-left-radius: 6px; /* Modern look */
+            border-bottom-left-radius: 6px;
         }
 
         .message-text {
             font-size: 15px;
             line-height: 1.4;
             margin-bottom: 4px;
-            user-select: text; /* Allow selecting text */
+            user-select: text;
         }
 
         .message-image {
@@ -819,130 +833,256 @@
             margin-bottom: 4px;
         }
 
+        /* NEW: Voice note bubble */
+        .voice-note-bubble {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 0;
+            cursor: pointer;
+            min-width: 140px;
+        }
+        .voice-play-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+            transition: all 0.15s;
+        }
+        .sent .voice-play-btn {
+            background: rgba(18, 18, 18, 0.2);
+        }
+        .voice-play-btn:active {
+            transform: scale(0.9);
+        }
+        .voice-waveform {
+            flex: 1;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+        .voice-waveform .bar {
+            width: 3px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 2px;
+            transition: height 0.1s;
+        }
+        .sent .voice-waveform .bar {
+            background: rgba(18, 18, 18, 0.4);
+        }
+        .voice-duration {
+            font-size: 12px;
+            margin-left: 6px;
+        }
+
+        /* NEW: Reply preview */
+        .reply-preview {
+            background: #2a2a2a;
+            padding: 8px 16px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            border-left: 4px solid #A8C7FA;
+            font-size: 13px;
+        }
+        .reply-preview-content {
+            flex: 1;
+            color: #ccc;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .reply-preview-name {
+            color: #A8C7FA;
+            font-weight: 600;
+            font-size: 12px;
+            margin-bottom: 2px;
+        }
+        .cancel-reply-btn {
+            color: #888;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 4px 8px;
+        }
+
+        /* NEW: Quoted message inside bubble */
+        .quoted-message-preview {
+            background: rgba(0, 0, 0, 0.15);
+            border-left: 3px solid rgba(255, 255, 255, 0.5);
+            padding: 6px 10px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            font-size: 12px;
+            opacity: 0.85;
+        }
+        .sent .quoted-message-preview {
+            background: rgba(18, 18, 18, 0.1);
+            border-left-color: rgba(18, 18, 18, 0.4);
+        }
+        .quoted-sender {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        /* NEW: Reaction display on messages */
+        .message-reaction {
+            position: absolute;
+            bottom: -14px;
+            right: 8px;
+            background: #1E1E1E;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 14px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+            z-index: 5;
+            cursor: default;
+        }
+        .sent .message-reaction {
+            right: auto;
+            left: 8px;
+        }
+
+        /* NEW: Read receipt text (Instagram style) */
+        .message-status-text {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.45);
+            text-align: right;
+            padding-right: 16px;
+            padding-bottom: 6px;
+            margin-top: -4px;
+        }
+        .sent .message-status-text {
+            color: rgba(18, 18, 18, 0.45);
+        }
+
         .message-footer {
             display: flex;
             align-items: center;
             justify-content: flex-end;
-            gap: 6px; /* Increased gap */
+            gap: 6px;
             margin-top: 4px;
         }
 
         .edited-label {
             font-size: 10px;
-            color: rgba(255,255,255,0.4);
+            color: rgba(255, 255, 255, 0.4);
         }
-        
         .sent .edited-label {
-            color: rgba(18,18,18,0.4);
+            color: rgba(18, 18, 18, 0.4);
         }
 
         .message-time {
             font-size: 11px;
-            color: rgba(255,255,255,0.5);
+            color: rgba(255, 255, 255, 0.5);
         }
-
         .sent .message-time {
-            color: rgba(18,18,18,0.5);
+            color: rgba(18, 18, 18, 0.5);
         }
 
-        .message-status {
-            font-size: 14px;
+        /* NEW: Heart like animation */
+        .heart-animation {
+            position: absolute;
+            font-size: 28px;
+            pointer-events: none;
+            animation: heartPop 0.8s ease-out forwards;
+            z-index: 10;
+        }
+        @keyframes heartPop {
+            0% {
+                transform: scale(0.3);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.4);
+                opacity: 0.9;
+            }
+            100% {
+                transform: scale(1.8);
+                opacity: 0;
+            }
         }
 
-        .tick.read {
-            color: #4A90E2;
+        /* NEW: Emoji reaction tray */
+        .emoji-tray-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 120;
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.3);
         }
-
-        .chat-input-area {
-            flex-shrink: 0;
-        }
-
-        .editing-banner {
-            background: #2a2a2a;
-            padding: 8px 16px;
-            display: none; /* Hidden by default */
-            align-items: center;
-            justify-content: space-between;
-            font-size: 14px;
-        }
-
-        .editing-banner-info {
-            color: #A8C7FA;
-        }
-
-        .editing-banner-info i {
-            margin-right: 8px;
-        }
-
-        .cancel-edit-btn {
-            color: #888;
-            cursor: pointer;
-            font-size: 20px;
-        }
-
-        .chat-input-container {
+        .emoji-tray {
             background: #1E1E1E;
-            padding: 12px 16px;
+            width: 100%;
+            max-width: 400px;
+            padding: 16px;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            animation: slideUp 0.3s ease-out;
+        }
+        .emoji-option {
+            font-size: 32px;
+            padding: 10px 14px;
+            cursor: pointer;
+            border-radius: 16px;
+            transition: all 0.15s;
+            background: transparent;
+            border: none;
+        }
+        .emoji-option:active {
+            background: #2D2D2D;
+            transform: scale(1.2);
+        }
+        .emoji-tray-actions {
+            width: 100%;
             display: flex;
             gap: 12px;
-            align-items: center;
+            margin-top: 8px;
+            padding-top: 8px;
             border-top: 1px solid #2D2D2D;
         }
-
-        .attach-btn {
-            background: none;
-            border: none;
-            color: #A8C7FA;
-            font-size: 22px;
-            cursor: pointer;
-            padding: 8px;
-            margin: -8px;
-            border-radius: 50%;
-            transition: background 0.2s;
-        }
-
-        .attach-btn:active {
-            background: rgba(168, 199, 250, 0.2);
-        }
-
-        .chat-input {
+        .emoji-tray-action-btn {
             flex: 1;
-            background: #2D2D2D;
+            padding: 12px;
+            border-radius: 12px;
             border: none;
-            border-radius: 24px;
-            padding: 12px 16px;
-            color: white;
-            font-size: 15px;
-            user-select: text;
-        }
-
-        .chat-input:focus {
-            outline: 2px solid #A8C7FA;
-        }
-
-        .send-btn {
-            background: #A8C7FA;
-            color: #121212;
-            border: none;
-            border-radius: 50%;
-            width: 44px;
-            height: 44px;
-            font-size: 18px;
+            font-size: 14px;
             cursor: pointer;
+            color: white;
+            background: #2D2D2D;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.1s ease;
+            gap: 8px;
+        }
+        .emoji-tray-action-btn:active {
+            background: #404040;
+        }
+        .emoji-tray-action-btn.delete {
+            color: #ff4d4d;
         }
 
-        .send-btn:active {
-            transform: scale(0.9);
-            background: #8bb5f0;
-        }
-
-        .send-btn:disabled {
-            opacity: 0.5;
-            transform: none;
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+            }
+            to {
+                transform: translateY(0);
+            }
         }
 
         .typing-indicator-bubble {
@@ -952,11 +1092,10 @@
             padding: 10px 16px;
             border-radius: 22px;
             border-bottom-left-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
             display: flex;
             align-items: center;
         }
-
         .typing-dots span {
             width: 8px;
             height: 8px;
@@ -966,13 +1105,155 @@
             margin: 0 2px;
             animation: typing 1.4s infinite;
         }
-
-        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
 
         @keyframes typing {
-            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-            30% { transform: translateY(-5px); opacity: 1; }
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+                opacity: 0.4;
+            }
+            30% {
+                transform: translateY(-5px);
+                opacity: 1;
+            }
+        }
+
+        /* ==================== CHAT INPUT AREA ==================== */
+        .chat-input-area {
+            flex-shrink: 0;
+        }
+
+        .editing-banner {
+            background: #2a2a2a;
+            padding: 8px 16px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+        .editing-banner-info {
+            color: #A8C7FA;
+        }
+        .editing-banner-info i {
+            margin-right: 8px;
+        }
+        .cancel-edit-btn {
+            color: #888;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .chat-input-container {
+            background: #1E1E1E;
+            padding: 10px 12px;
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            border-top: 1px solid #2D2D2D;
+        }
+
+        .attach-btn {
+            background: none;
+            border: none;
+            color: #A8C7FA;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 8px 4px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .attach-btn:active {
+            background: rgba(168, 199, 250, 0.2);
+        }
+
+        /* NEW: Auto-expanding textarea */
+        .chat-input {
+            flex: 1;
+            background: #2D2D2D;
+            border: none;
+            border-radius: 24px;
+            padding: 10px 16px;
+            color: white;
+            font-size: 15px;
+            user-select: text;
+            resize: none;
+            outline: none;
+            max-height: 120px;
+            line-height: 1.4;
+            font-family: inherit;
+            overflow-y: auto;
+            transition: height 0.1s ease;
+        }
+        .chat-input:focus {
+            outline: 2px solid #A8C7FA;
+        }
+
+        /* NEW: Mic button for voice notes */
+        .mic-btn {
+            background: none;
+            border: none;
+            color: #A8C7FA;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 8px 4px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            transition: all 0.15s;
+        }
+        .mic-btn:active {
+            background: rgba(168, 199, 250, 0.2);
+            transform: scale(0.9);
+        }
+        .mic-btn.recording {
+            color: #ff4d4d;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.15);
+            }
+        }
+        .recording-timer {
+            color: #ff4d4d;
+            font-size: 14px;
+            font-weight: 600;
+            margin: 0 8px;
+            display: none;
+        }
+
+        .send-btn {
+            background: #A8C7FA;
+            color: #121212;
+            border: none;
+            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.1s ease;
+            flex-shrink: 0;
+        }
+        .send-btn:active {
+            transform: scale(0.9);
+            background: #8bb5f0;
+        }
+        .send-btn:disabled {
+            opacity: 0.5;
+            transform: none;
         }
 
         /* Image Preview */
@@ -982,19 +1263,17 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.98);
+            background: rgba(0, 0, 0, 0.98);
             z-index: 100;
             display: none;
             align-items: center;
             justify-content: center;
         }
-
         .preview-image {
             max-width: 90%;
             max-height: 90%;
             border-radius: 12px;
         }
-
         .close-preview {
             position: absolute;
             top: 20px;
@@ -1008,27 +1287,25 @@
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .close-preview:active {
+            background: rgba(255, 255, 255, 0.2);
         }
 
-        .close-preview:active {
-            background: rgba(255,255,255,0.2);
-        }
-        
-        /* Message Options Modal */
+        /* Message Options Modal (legacy, now part of emoji tray) */
         .message-options-modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             z-index: 110;
             display: none;
             align-items: flex-end;
             justify-content: center;
         }
-        
         .message-options-modal {
             background: #1E1E1E;
             width: 100%;
@@ -1038,7 +1315,6 @@
             border-top-right-radius: 20px;
             animation: slideUp 0.3s ease-out;
         }
-
         .message-option {
             padding: 16px;
             color: white;
@@ -1049,25 +1325,17 @@
             align-items: center;
             gap: 16px;
         }
-
         .message-option:active {
             background: #2D2D2D;
         }
-
         .message-option.delete {
             color: #ff4d4d;
         }
-
-        @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
-
     </style>
 </head>
 <body>
     <div class="app-container">
-        <!-- Calculator (IMPROVED) -->
+        <!-- Calculator -->
         <div class="calculator" id="calculator">
             <div class="calculator-header">
                 <span></span>
@@ -1075,12 +1343,10 @@
                     <i class="fas fa-chevron-up"></i>
                 </span>
             </div>
-            
             <div class="calculator-display">
                 <div class="expression" id="expression"></div>
                 <div class="result" id="result">0</div>
             </div>
-
             <div class="scientific-row" id="scientificRow">
                 <button class="calc-btn" onclick="appendScientific('sin')">sin</button>
                 <button class="calc-btn" onclick="appendScientific('cos')">cos</button>
@@ -1091,88 +1357,64 @@
                 <button class="calc-btn" onclick="appendScientific('^')">^</button>
                 <button class="calc-btn" onclick="appendScientific('!')">!</button>
             </div>
-
             <div class="buttons-grid">
                 <button class="calc-btn ac" onclick="clearAll()">AC</button>
                 <button class="calc-btn" onclick="backspace()">⌫</button>
                 <button class="calc-btn operator" onclick="appendOperator('%')">%</button>
                 <button class="calc-btn operator" onclick="appendOperator('/')">÷</button>
-                
                 <button class="calc-btn" onclick="appendNumber('7')">7</button>
                 <button class="calc-btn" onclick="appendNumber('8')">8</button>
                 <button class="calc-btn" onclick="appendNumber('9')">9</button>
                 <button class="calc-btn operator" onclick="appendOperator('*')">×</button>
-                
                 <button class="calc-btn" onclick="appendNumber('4')">4</button>
                 <button class="calc-btn" onclick="appendNumber('5')">5</button>
                 <button class="calc-btn" onclick="appendNumber('6')">6</button>
                 <button class="calc-btn operator" onclick="appendOperator('-')">−</button>
-                
                 <button class="calc-btn" onclick="appendNumber('1')">1</button>
                 <button class="calc-btn" onclick="appendNumber('2')">2</button>
                 <button class="calc-btn" onclick="appendNumber('3')">3</button>
                 <button class="calc-btn operator" onclick="appendOperator('+')">+</button>
-                
                 <button class="calc-btn zero" onclick="appendNumber('0')">0</button>
                 <button class="calc-btn" onclick="appendDecimal()">.</button>
                 <button class="calc-btn operator" onclick="calculate()">=</button>
             </div>
         </div>
 
-        <!-- Auth Screen (unchanged) -->
+        <!-- Auth Screen -->
         <div class="auth-screen" id="auth-screen">
             <div class="auth-container">
-                <div class="auth-header">
-                    <h2>Welcome</h2>
-                    <p>Sign in to continue</p>
-                </div>
-
+                <div class="auth-header"><h2>Welcome</h2><p>Sign in to continue</p></div>
                 <div class="auth-tabs">
                     <div class="auth-tab active" onclick="switchAuthTab('login')">Login</div>
                     <div class="auth-tab" onclick="switchAuthTab('signup')">Sign Up</div>
                 </div>
-
-                <!-- Login Form -->
                 <div class="auth-form active" id="login-form">
                     <input type="email" class="auth-input" id="login-email" placeholder="Email" autocomplete="email">
-                    
                     <div class="input-group">
                         <input type="password" class="auth-input password-input" id="login-password" placeholder="Password" autocomplete="current-password">
-                        <span class="password-toggle" onclick="togglePasswordVisibility('login-password', this)">
-                            <i class="far fa-eye"></i>
-                        </span>
+                        <span class="password-toggle" onclick="togglePasswordVisibility('login-password', this)"><i class="far fa-eye"></i></span>
                     </div>
-                    
                     <button class="auth-btn" onclick="handleLogin()" id="login-btn">Login</button>
-                    <div id="login-error" class="error-banner" style="display: none; margin-top: 8px;"></div>
+                    <div id="login-error" class="error-banner" style="display:none;margin-top:8px;"></div>
                 </div>
-
-                <!-- Signup Form -->
                 <div class="auth-form" id="signup-form">
                     <input type="text" class="auth-input" id="signup-name" placeholder="Your Name" autocomplete="name">
                     <input type="email" class="auth-input" id="signup-email" placeholder="Email" autocomplete="email">
-                    
                     <div class="input-group">
                         <input type="password" class="auth-input password-input" id="signup-password" placeholder="Password" autocomplete="new-password">
-                        <span class="password-toggle" onclick="togglePasswordVisibility('signup-password', this)">
-                            <i class="far fa-eye"></i>
-                        </span>
+                        <span class="password-toggle" onclick="togglePasswordVisibility('signup-password', this)"><i class="far fa-eye"></i></span>
                     </div>
-                    
                     <div class="input-group">
                         <input type="password" class="auth-input password-input" id="signup-confirm-password" placeholder="Confirm Password" autocomplete="new-password">
-                        <span class="password-toggle" onclick="togglePasswordVisibility('signup-confirm-password', this)">
-                            <i class="far fa-eye"></i>
-                        </span>
+                        <span class="password-toggle" onclick="togglePasswordVisibility('signup-confirm-password', this)"><i class="far fa-eye"></i></span>
                     </div>
-                    
                     <button class="auth-btn" onclick="handleSignup()" id="signup-btn">Sign Up</button>
-                    <div id="signup-error" class="error-banner" style="display: none; margin-top: 8px;"></div>
+                    <div id="signup-error" class="error-banner" style="display:none;margin-top:8px;"></div>
                 </div>
             </div>
         </div>
 
-        <!-- Users List (unchanged) -->
+        <!-- Users Screen -->
         <div class="users-screen" id="users-screen">
             <div class="users-header">
                 <h2>Chats</h2>
@@ -1181,8 +1423,6 @@
                     <button onclick="returnToCalculator()"><i class="fas fa-calculator"></i></button>
                 </div>
             </div>
-            
-            <!-- Current User Badge -->
             <div class="current-user-badge" id="current-user-badge">
                 <div class="badge-avatar" id="current-user-avatar">?</div>
                 <div class="badge-info">
@@ -1190,74 +1430,62 @@
                     <div class="badge-label">You</div>
                 </div>
             </div>
-
-            <!-- Search Bar -->
             <div class="search-container">
                 <div class="search-box">
                     <i class="fas fa-search"></i>
                     <input type="text" id="search-input" placeholder="Search users by name or email" oninput="searchUsers()">
                 </div>
             </div>
-
-            <!-- Search Results -->
             <div class="search-results" id="search-results"></div>
-
-            <!-- Tabs: Chats / Requests -->
             <div class="requests-tab">
                 <button class="active" onclick="switchChatTab('chats')" id="chats-tab">Chats</button>
                 <button onclick="switchChatTab('requests')" id="requests-tab">Requests</button>
             </div>
-            
-            <!-- Chats Container -->
-            <div class="users-container" id="chats-container">
-                <div class="loading-spinner"></div>
-            </div>
-
-            <!-- Requests Container -->
-            <div class="requests-container" id="requests-container">
-                <div class="loading-spinner"></div>
-            </div>
-            
-            <div class="error-banner" id="user-error-banner">
-                Error loading data. <button class="retry-btn" onclick="loadData()">Retry</button>
-            </div>
+            <div class="users-container" id="chats-container"><div class="loading-spinner"></div></div>
+            <div class="requests-container" id="requests-container"><div class="loading-spinner"></div></div>
+            <div class="error-banner" id="user-error-banner">Error loading data. <button class="retry-btn" onclick="loadData()">Retry</button></div>
         </div>
 
-        <!-- Chat Screen (IMPROVED) -->
+        <!-- Chat Screen -->
         <div class="chat-screen" id="chat-screen">
             <div class="chat-header">
-                <button class="back-btn" onclick="goBackToUsers()">
-                    <i class="fas fa-arrow-left"></i>
+                <button class="back-btn" onclick="goBackToUsers()"><i class="fas fa-arrow-left"></i></button>
+                <!-- NEW: Bell icon for OneSignal disguised push notification -->
+                <button class="bell-btn" id="bell-btn" onclick="sendDisguisedNotification()" title="Notify user">
+                    <i class="fas fa-bell"></i>
                 </button>
                 <div class="chat-header-info">
                     <div class="chat-header-name" id="chat-header-name">Loading...</div>
-                    <div class="chat-header-status" id="chat-header-status"></div> <!-- Status is no longer used here -->
+                    <!-- NEW: Online / Last Seen status -->
+                    <div class="chat-header-status" id="chat-header-status"></div>
                 </div>
             </div>
-
-            <div class="error-banner" id="chat-error-banner">
-                Error loading messages. <button class="retry-btn" onclick="retryLoadMessages()">Retry</button>
-            </div>
-            
+            <div class="error-banner" id="chat-error-banner">Error loading messages. <button class="retry-btn" onclick="retryLoadMessages()">Retry</button></div>
             <div class="messages-container" id="messages-container"></div>
-
             <div class="chat-input-area">
-                <div class="editing-banner" id="editing-banner">
-                    <div class="editing-banner-info">
-                        <i class="fas fa-pencil-alt"></i>
-                        <span>Editing Message</span>
+                <!-- NEW: Reply preview bar -->
+                <div class="reply-preview" id="reply-preview">
+                    <div class="reply-preview-content">
+                        <div class="reply-preview-name" id="reply-preview-name"></div>
+                        <div id="reply-preview-text"></div>
                     </div>
+                    <span class="cancel-reply-btn" onclick="cancelReply()">&times;</span>
+                </div>
+                <div class="editing-banner" id="editing-banner">
+                    <div class="editing-banner-info"><i class="fas fa-pencil-alt"></i><span>Editing Message</span></div>
                     <i class="fas fa-times cancel-edit-btn" onclick="cancelEdit()"></i>
                 </div>
                 <div class="chat-input-container">
-                    <button class="attach-btn" onclick="selectImage()">
-                        <i class="fas fa-paperclip"></i>
+                    <button class="attach-btn" onclick="selectImage()"><i class="fas fa-paperclip"></i></button>
+                    <input type="file" id="image-input" accept="image/*" style="display:none;" onchange="handleImageSelect(event)">
+                    <!-- NEW: Auto-expanding textarea -->
+                    <textarea class="chat-input" id="chat-input" placeholder="Type a message" rows="1" onkeyup="handleTyping(event)" oninput="autoExpandTextarea()"></textarea>
+                    <!-- NEW: Mic button for voice notes -->
+                    <button class="mic-btn" id="mic-btn" onmousedown="startRecording()" onmouseup="stopRecording()" onmouseleave="stopRecording()" ontouchstart="startRecording()" ontouchend="stopRecording()" ontouchcancel="stopRecording()">
+                        <i class="fas fa-microphone"></i>
                     </button>
-                    <input type="file" id="image-input" accept="image/*" style="display: none;" onchange="handleImageSelect(event)">
-                    <input type="text" class="chat-input" id="chat-input" placeholder="Type a message" onkeyup="handleTyping(event)">
-                    <button class="send-btn" onclick="sendMessage()" id="send-btn">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
+                    <span class="recording-timer" id="recording-timer">0:00</span>
+                    <button class="send-btn" onclick="sendMessage()" id="send-btn"><i class="fas fa-paper-plane"></i></button>
                 </div>
             </div>
         </div>
@@ -1268,47 +1496,58 @@
             <img class="preview-image" id="preview-image" src="">
         </div>
 
-        <!-- Message Options Modal -->
-        <div class="message-options-modal-overlay" id="message-options-overlay" onclick="closeMessageOptions()">
-            <div class="message-options-modal" onclick="event.stopPropagation()">
-                <div class="message-option" id="edit-option" onclick="handleEditOption()">
-                    <i class="fas fa-pencil-alt"></i><span>Edit</span>
-                </div>
-                <div class="message-option delete" id="delete-option" onclick="handleDeleteOption()">
-                    <i class="fas fa-trash-alt"></i><span>Delete</span>
+        <!-- NEW: Emoji Reaction Tray -->
+        <div class="emoji-tray-overlay" id="emoji-tray-overlay" onclick="closeEmojiTray()">
+            <div class="emoji-tray" onclick="event.stopPropagation()">
+                <button class="emoji-option" onclick="addReaction('❤️')">❤️</button>
+                <button class="emoji-option" onclick="addReaction('😂')">😂</button>
+                <button class="emoji-option" onclick="addReaction('😮')">😮</button>
+                <button class="emoji-option" onclick="addReaction('😢')">😢</button>
+                <button class="emoji-option" onclick="addReaction('😡')">😡</button>
+                <button class="emoji-option" onclick="addReaction('👍')">👍</button>
+                <div class="emoji-tray-actions">
+                    <button class="emoji-tray-action-btn" id="tray-edit-btn" onclick="handleEditFromTray()"><i class="fas fa-pencil-alt"></i> Edit</button>
+                    <button class="emoji-tray-action-btn delete" id="tray-delete-btn" onclick="handleDeleteFromTray()"><i class="fas fa-trash-alt"></i> Unsend</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Firebase Config
+        // ==================== FIREBASE CONFIG ====================
         const firebaseConfig = {
-            apiKey: "AIzaSyC-6ctoVjMq5fO9_ahOILi7rSUmtnmS9EQ",
-            authDomain: "techno2-ccc7e.firebaseapp.com",
-            projectId: "techno2-ccc7e",
-            storageBucket: "techno2-ccc7e.firebasestorage.app",
-            messagingSenderId: "622625787951",
-            appId: "1:622625787951:web:a55ac204337af8b91636da"
-        };
+  apiKey: "AIzaSyAO51sUnrKtGbIn5S3G-mJ-S-sCn0qPg6s",
+  authDomain: "calculator-921ca.firebaseapp.com",
+  databaseURL: "https://calculator-921ca-default-rtdb.firebaseio.com",
+  projectId: "calculator-921ca",
+  storageBucket: "calculator-921ca.firebasestorage.app",
+  messagingSenderId: "27345618961",
+  appId: "1:27345618961:web:bf9c4064e66b582f8249b0",
+  measurementId: "G-XJVR74N4PF"
+};
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
-        
-        // Enable offline persistence for faster loading
+        /* NEW: Firebase Storage for voice notes */
+        const storage = firebase.storage();
+
+        /* NEW: Auth Persistence - keeps users logged in */
+        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+            .catch((err) => console.error('Persistence error:', err));
+
         db.enablePersistence()
             .catch((err) => {
-                if (err.code == 'failed-precondition') {
-                    console.log('Persistence failed');
-                } else if (err.code == 'unimplemented') {
-                    console.log('Persistence not available');
-                }
+                if (err.code == 'failed-precondition') console.log('Persistence failed');
+                else if (err.code == 'unimplemented') console.log('Persistence not available');
             });
-        
+
         const IMGBB_API_KEY = "db671a28c5c7d432622dc7e5bc74eecc";
         const SECRET_CODE = "14102008";
+        /* NEW: OneSignal App ID */
+        const ONESIGNAL_APP_ID = "aca4d5a8-52d7-4a9e-b276-117473b396d0";
+        /* NOTE: OneSignal REST API Key is needed for server-side push. Store securely in production. */
+        const ONESIGNAL_REST_API_KEY = "os_v2_app_vssnlkcs25fj5mtwcf2hhm4w2cemylytlfsuatmy5e2l4okp4m6hvtzxzjibmphn45o6lr65s6wvxzwergtz57htd5n56z27fgp7lda"; // <-- Replace with your OneSignal REST API Key
 
         // ==================== GLOBAL VARIABLES ====================
         let currentExpression = '';
@@ -1319,12 +1558,29 @@
         let selectedUserData = null;
         let typingTimeout = null;
         let selectedImage = null;
-        
-        // --- NEW VARIABLES FOR EDIT/DELETE ---
+
         let longPressTimer;
         let selectedMessageData = { id: null, text: null };
         let isEditing = false;
-        
+
+        /* NEW: Reply state */
+        let replyingTo = null;
+
+        /* NEW: Voice recording state */
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let recordingStartTime = 0;
+        let recordingTimerInterval = null;
+
+        /* NEW: Double-tap panic detection */
+        let lastTapTime = 0;
+        let lastTapTarget = null;
+
+        /* NEW: Swipe-to-reply tracking */
+        let swipeStartX = 0;
+        let swipeStartY = 0;
+        let swipeTargetMsgId = null;
+
         // Firebase Listeners
         let usersListener = null;
         let messagesListener = null;
@@ -1332,17 +1588,21 @@
         let unreadMessagesListener = null;
         let requestsListener = null;
         let acceptedChatsListener = null;
+        /* NEW: Presence listener */
+        let presenceListener = null;
+        /* NEW: Reactions listener */
+        let reactionsListener = null;
 
-        // Store data
         let chatListData = new Map();
         let acceptedChats = new Set();
         let pendingRequests = new Map();
+        /* NEW: Reactions cache */
+        let reactionsCache = new Map();
 
         // ==================== PASSWORD TOGGLE ====================
         function togglePasswordVisibility(inputId, element) {
             const input = document.getElementById(inputId);
             const icon = element.querySelector('i');
-            
             if (input.type === 'password') {
                 input.type = 'text';
                 icon.classList.remove('fa-eye');
@@ -1354,29 +1614,24 @@
             }
         }
 
-        // ==================== IMPROVED CALCULATOR FUNCTIONS ====================
+        // ==================== CALCULATOR FUNCTIONS ====================
         function toggleScientific() {
             scientificVisible = !scientificVisible;
             document.getElementById('scientificRow').classList.toggle('show');
-            document.getElementById('expandIcon').style.transform = scientificVisible ? 'rotate(180deg)' : 'rotate(0deg)';
+            document.getElementById('expandIcon').style.transform = scientificVisible ? 'rotate(180deg)' :
+            'rotate(0deg)';
         }
 
         function appendNumber(num) {
-            if (currentResult === '0' || currentResult === 'Error') {
-                currentResult = num;
-            } else {
-                currentResult += num;
-            }
+            if (currentResult === '0' || currentResult === 'Error') currentResult = num;
+            else currentResult += num;
             updateDisplay();
         }
 
         function appendOperator(op) {
             const lastChar = currentResult[currentResult.length - 1];
-            if ('+-*/%'.includes(lastChar)) {
-                currentResult = currentResult.slice(0, -1) + op;
-            } else {
-                currentResult += op;
-            }
+            if ('+-*/%'.includes(lastChar)) currentResult = currentResult.slice(0, -1) + op;
+            else currentResult += op;
             updateDisplay();
         }
 
@@ -1387,10 +1642,8 @@
         }
 
         function appendDecimal() {
-            if (!currentResult.includes('.')) {
-                currentResult += '.';
-                updateDisplay();
-            }
+            if (!currentResult.includes('.')) { currentResult += '.';
+                updateDisplay(); }
         }
 
         function backspace() {
@@ -1407,32 +1660,18 @@
 
         function calculate() {
             try {
-                // Secret code to open chat
                 if (currentResult === SECRET_CODE) {
-                    // PERFORMANCE FIX: Check auth state directly for faster transition
                     const user = auth.currentUser;
-                    if (user) {
-                        showUsersList();
-                    } else {
-                        showAuthScreen();
-                    }
+                    if (user) showUsersList();
+                    else showAuthScreen();
                     clearAll();
                     return;
                 }
-
                 let expression = currentResult
-                    .replace(/×/g, '*')
-                    .replace(/÷/g, '/')
-                    .replace(/−/g, '-')
-                    .replace(/sin/g, 'Math.sin')
-                    .replace(/cos/g, 'Math.cos')
-                    .replace(/tan/g, 'Math.tan')
-                    .replace(/log/g, 'Math.log10')
-                    .replace(/ln/g, 'Math.log')
-                    .replace(/√/g, 'Math.sqrt')
-                    .replace(/\^/g, '**');
-
-                // Handle factorial
+                    .replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-')
+                    .replace(/sin/g, 'Math.sin').replace(/cos/g, 'Math.cos')
+                    .replace(/tan/g, 'Math.tan').replace(/log/g, 'Math.log10')
+                    .replace(/ln/g, 'Math.log').replace(/√/g, 'Math.sqrt').replace(/\^/g, '**');
                 if (expression.includes('!')) {
                     const parts = expression.split('!');
                     if (parts.length === 2 && !isNaN(parts[0])) {
@@ -1440,9 +1679,7 @@
                         let fact = 1;
                         for (let i = 1; i <= num; i++) fact *= i;
                         currentResult = fact.toString();
-                    } else {
-                        throw new Error('Invalid factorial');
-                    }
+                    } else throw new Error('Invalid factorial');
                 } else {
                     currentExpression = currentResult + '=';
                     currentResult = eval(expression).toString();
@@ -1467,18 +1704,56 @@
             document.getElementById('chat-screen').style.display = 'none';
             document.getElementById('auth-screen').style.display = 'none';
             document.getElementById('calculator').style.display = 'flex';
-            
-            // Clear auth form fields
             document.getElementById('login-email').value = '';
             document.getElementById('login-password').value = '';
             document.getElementById('signup-name').value = '';
             document.getElementById('signup-email').value = '';
             document.getElementById('signup-password').value = '';
             document.getElementById('signup-confirm-password').value = '';
-            
-            // Hide error messages
             document.getElementById('login-error').style.display = 'none';
             document.getElementById('signup-error').style.display = 'none';
+        }
+
+        /* NEW: Panic action - double-tap on chat/users screen hides everything */
+        function setupPanicDetection() {
+            const chatScreen = document.getElementById('chat-screen');
+            const usersScreen = document.getElementById('users-screen');
+
+            [chatScreen, usersScreen].forEach(screen => {
+                screen.addEventListener('click', function(e) {
+                    const now = Date.now();
+                    // Only trigger panic if double-tap is on the screen background, not on interactive elements
+                    const isInteractive = e.target.closest(
+                        'button, input, textarea, .message-bubble, .user-item, .search-result-item, .request-item, .emoji-option, .emoji-tray-action-btn'
+                        );
+                    if (isInteractive) {
+                        lastTapTime = 0;
+                        return;
+                    }
+                    if (now - lastTapTime < 350 && lastTapTarget === screen) {
+                        // Double tap detected - PANIC!
+                        panicHide();
+                        lastTapTime = 0;
+                        lastTapTarget = null;
+                    } else {
+                        lastTapTime = now;
+                        lastTapTarget = screen;
+                    }
+                });
+            });
+        }
+
+        function panicHide() {
+            cleanupListeners();
+            document.getElementById('users-screen').style.display = 'none';
+            document.getElementById('chat-screen').style.display = 'none';
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('calculator').style.display = 'flex';
+            cancelEdit();
+            cancelReply();
+            selectedUserId = null;
+            selectedUserData = null;
+            console.log('PANIC: Hidden all chat UI');
         }
 
         function showAuthScreen() {
@@ -1492,42 +1767,35 @@
             document.getElementById('calculator').style.display = 'none';
             document.getElementById('chat-screen').style.display = 'none';
             document.getElementById('users-screen').style.display = 'flex';
-            
-            // Update current user badge
             if (currentUser) {
                 const name = currentUser.displayName || currentUser.email.split('@')[0];
                 const initial = name[0].toUpperCase();
                 document.getElementById('current-user-avatar').textContent = initial;
                 document.getElementById('current-user-name').textContent = name;
             }
-            
-            // Show chats tab by default
             switchChatTab('chats');
-            
             loadData();
+            /* NEW: Update presence */
+            updatePresence(true);
         }
 
         function goBackToUsers() {
-            if (messagesListener) {
-                messagesListener();
-                messagesListener = null;
-            }
-            if (typingListener) {
-                typingListener();
-                typingListener = null;
-            }
-            
-            // Mark all messages from this chat as read when going back
-            if (selectedUserId && currentUser) {
-                markAllMessagesAsRead(selectedUserId);
-            }
-            
+            if (messagesListener) { messagesListener();
+                messagesListener = null; }
+            if (typingListener) { typingListener();
+                typingListener = null; }
+            if (presenceListener) { presenceListener();
+                presenceListener = null; }
+            if (reactionsListener) { reactionsListener();
+                reactionsListener = null; }
+            if (selectedUserId && currentUser) markAllMessagesAsRead(selectedUserId);
             document.getElementById('chat-screen').style.display = 'none';
             document.getElementById('users-screen').style.display = 'flex';
-            
-            // Hide error banners
             document.getElementById('chat-error-banner').style.display = 'none';
-            cancelEdit(); // Ensure edit mode is cancelled
+            cancelEdit();
+            cancelReply();
+            /* NEW: Update presence */
+            updatePresence(true);
         }
 
         function cleanupListeners() {
@@ -1537,8 +1805,10 @@
             if (unreadMessagesListener) unreadMessagesListener();
             if (requestsListener) requestsListener();
             if (acceptedChatsListener) acceptedChatsListener();
-            
-            usersListener = messagesListener = typingListener = unreadMessagesListener = requestsListener = acceptedChatsListener = null;
+            if (presenceListener) presenceListener();
+            if (reactionsListener) reactionsListener();
+            usersListener = messagesListener = typingListener = unreadMessagesListener = requestsListener =
+                acceptedChatsListener = presenceListener = reactionsListener = null;
         }
 
         function switchChatTab(tab) {
@@ -1546,7 +1816,6 @@
             const requestsTab = document.getElementById('requests-tab');
             const chatsContainer = document.getElementById('chats-container');
             const requestsContainer = document.getElementById('requests-container');
-            
             if (tab === 'chats') {
                 chatsTab.classList.add('active');
                 requestsTab.classList.remove('active');
@@ -1566,12 +1835,9 @@
         function switchAuthTab(tab) {
             document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-            
             if (tab === 'login') {
                 document.querySelectorAll('.auth-tab')[0].classList.add('active');
                 document.getElementById('login-form').classList.add('active');
-                
-                // Clear signup fields when switching to login
                 document.getElementById('signup-name').value = '';
                 document.getElementById('signup-email').value = '';
                 document.getElementById('signup-password').value = '';
@@ -1580,8 +1846,6 @@
             } else {
                 document.querySelectorAll('.auth-tab')[1].classList.add('active');
                 document.getElementById('signup-form').classList.add('active');
-                
-                // Clear login fields when switching to signup
                 document.getElementById('login-email').value = '';
                 document.getElementById('login-password').value = '';
                 document.getElementById('login-error').style.display = 'none';
@@ -1593,56 +1857,33 @@
             const email = document.getElementById('signup-email').value.trim();
             const password = document.getElementById('signup-password').value;
             const confirmPassword = document.getElementById('signup-confirm-password').value;
-            
             const errorDiv = document.getElementById('signup-error');
             errorDiv.style.display = 'none';
-            
-            if (!name || !email || !password || !confirmPassword) {
-                showError('signup-error', 'Please fill all fields');
-                return;
-            }
-            
-            if (password !== confirmPassword) {
-                showError('signup-error', 'Passwords do not match');
-                return;
-            }
-            
-            if (password.length < 6) {
-                showError('signup-error', 'Password must be at least 6 characters');
-                return;
-            }
-
+            if (!name || !email || !password || !confirmPassword) { showError('signup-error',
+                    'Please fill all fields'); return; }
+            if (password !== confirmPassword) { showError('signup-error', 'Passwords do not match'); return; }
+            if (password.length < 6) { showError('signup-error', 'Password must be at least 6 characters'); return; }
             const btn = document.getElementById('signup-btn');
             btn.disabled = true;
             btn.innerHTML = 'Creating Account...';
-
             try {
                 const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                 const user = userCredential.user;
-                
                 await user.updateProfile({ displayName: name });
-                
                 await db.collection('users').doc(user.uid).set({
                     name: name,
                     email: email,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
-
                 currentUser = user;
+                /* NEW: Set OneSignal external user ID */
+                setupOneSignalUser(user.uid);
                 showUsersList();
-                
             } catch (error) {
-                console.error('Signup error:', error);
                 let errorMessage = error.message;
-                
-                if (error.code === 'auth/email-already-in-use') {
-                    errorMessage = 'Email already in use';
-                } else if (error.code === 'auth/invalid-email') {
-                    errorMessage = 'Invalid email address';
-                } else if (error.code === 'auth/weak-password') {
-                    errorMessage = 'Password is too weak';
-                }
-                
+                if (error.code === 'auth/email-already-in-use') errorMessage = 'Email already in use';
+                else if (error.code === 'auth/invalid-email') errorMessage = 'Invalid email address';
+                else if (error.code === 'auth/weak-password') errorMessage = 'Password is too weak';
                 showError('signup-error', errorMessage);
                 btn.disabled = false;
                 btn.innerHTML = 'Sign Up';
@@ -1652,36 +1893,21 @@
         async function handleLogin() {
             const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value;
-            
             const errorDiv = document.getElementById('login-error');
             errorDiv.style.display = 'none';
-            
-            if (!email || !password) {
-                showError('login-error', 'Please fill all fields');
-                return;
-            }
-
+            if (!email || !password) { showError('login-error', 'Please fill all fields'); return; }
             const btn = document.getElementById('login-btn');
             btn.disabled = true;
             btn.innerHTML = 'Logging in...';
-
             try {
                 await auth.signInWithEmailAndPassword(email, password);
-                // Auth state observer will handle showing users list
             } catch (error) {
-                console.error('Login error:', error);
                 let errorMessage = error.message;
-                
-                if (error.code === 'auth/user-not-found') {
-                    errorMessage = 'No account found with this email';
-                } else if (error.code === 'auth/wrong-password') {
-                    errorMessage = 'Incorrect password';
-                } else if (error.code === 'auth/invalid-email') {
-                    errorMessage = 'Invalid email address';
-                } else if (error.code === 'auth/too-many-requests') {
-                    errorMessage = 'Too many failed attempts. Try again later';
-                }
-                
+                if (error.code === 'auth/user-not-found') errorMessage = 'No account found with this email';
+                else if (error.code === 'auth/wrong-password') errorMessage = 'Incorrect password';
+                else if (error.code === 'auth/invalid-email') errorMessage = 'Invalid email address';
+                else if (error.code === 'auth/too-many-requests') errorMessage =
+                    'Too many failed attempts. Try again later';
                 showError('login-error', errorMessage);
                 btn.disabled = false;
                 btn.innerHTML = 'Login';
@@ -1696,115 +1922,81 @@
 
         async function logout() {
             cleanupListeners();
-            
+            /* NEW: Set offline before logout */
+            if (currentUser) await updatePresence(false);
             try {
                 await auth.signOut();
                 currentUser = null;
-                
-                // Clear all fields
+                chatListData.clear();
+                acceptedChats.clear();
+                pendingRequests.clear();
+                reactionsCache.clear();
                 document.getElementById('login-email').value = '';
                 document.getElementById('login-password').value = '';
                 document.getElementById('signup-name').value = '';
                 document.getElementById('signup-email').value = '';
                 document.getElementById('signup-password').value = '';
                 document.getElementById('signup-confirm-password').value = '';
-                
-                // Clear data
-                chatListData.clear();
-                acceptedChats.clear();
-                pendingRequests.clear();
-                
                 returnToCalculator();
-                
-            } catch (error) {
-                console.error('Logout error:', error);
-            }
+            } catch (error) { console.error('Logout error:', error); }
         }
 
-        // ==================== SEARCH FUNCTIONALITY ====================
+        // ==================== SEARCH ====================
         let searchTimeout = null;
+
         function searchUsers() {
             const query = document.getElementById('search-input').value.trim().toLowerCase();
             const resultsDiv = document.getElementById('search-results');
-            
             if (searchTimeout) clearTimeout(searchTimeout);
-            
-            if (query.length < 2) {
-                resultsDiv.style.display = 'none';
-                return;
-            }
-            
+            if (query.length < 2) { resultsDiv.style.display = 'none'; return; }
             searchTimeout = setTimeout(async () => {
                 try {
                     const usersSnapshot = await db.collection('users').get();
                     const results = [];
-                    
                     usersSnapshot.forEach((doc) => {
                         if (doc.id === currentUser.uid) return;
-                        
                         const userData = doc.data();
                         const name = (userData.name || '').toLowerCase();
                         const email = (userData.email || '').toLowerCase();
-                        
-                        if (name.includes(query) || email.includes(query)) {
-                            results.push({ id: doc.id, ...userData });
-                        }
+                        if (name.includes(query) || email.includes(query)) results.push({ id: doc
+                                .id, ...userData });
                     });
-                    
-                    if (results.length === 0) {
-                        resultsDiv.innerHTML = '<div style="padding: 16px; text-align: center; color: #888;">No users found</div>';
-                    } else {
-                        resultsDiv.innerHTML = results.map(user => createSearchResultItem(user)).join('');
-                    }
-                    
+                    if (results.length === 0) resultsDiv.innerHTML =
+                        '<div style="padding:16px;text-align:center;color:#888;">No users found</div>';
+                    else resultsDiv.innerHTML = results.map(user => createSearchResultItem(user)).join('');
                     resultsDiv.style.display = 'block';
-                } catch (error) {
-                    console.error('Search error:', error);
-                }
-            }, 300); // Slightly faster response
+                } catch (error) { console.error('Search error:', error); }
+            }, 300);
         }
 
         function createSearchResultItem(user) {
             const isPending = pendingRequests.has(user.id);
             const isAccepted = acceptedChats.has(user.id);
-            
             let buttonHtml = '';
-            if (isAccepted) {
-                buttonHtml = `<span class="request-badge">Added</span>`;
-            } else if (isPending) {
-                buttonHtml = `<span class="request-badge">Request Sent</span>`;
-            } else {
-                buttonHtml = `<button class="accept-btn" onclick="sendChatRequest('${user.id}')">Add</button>`;
-            }
-            
+            if (isAccepted) buttonHtml = '<span class="request-badge">Added</span>';
+            else if (isPending) buttonHtml = '<span class="request-badge">Request Sent</span>';
+            else buttonHtml =
+                `<button class="accept-btn" onclick="sendChatRequest('${user.id}')">Add</button>`;
             return `
-                <div class="search-result-item">
-                    <div class="user-avatar">${(user.name || 'U')[0].toUpperCase()}</div>
-                    <div class="user-info">
-                        <div class="user-name">${escapeHtml(user.name || 'User')}</div>
-                        <div class="user-email">${escapeHtml(user.email)}</div>
-                    </div>
-                    ${buttonHtml}
-                </div>
-            `;
+            <div class="search-result-item">
+              <div class="user-avatar">${(user.name || 'U')[0].toUpperCase()}</div>
+              <div class="user-info">
+                <div class="user-name">${escapeHtml(user.name || 'User')}</div>
+                <div class="user-email">${escapeHtml(user.email)}</div>
+              </div>
+              ${buttonHtml}
+            </div>`;
         }
 
         // ==================== CHAT REQUEST SYSTEM ====================
         async function sendChatRequest(targetUserId) {
             if (!currentUser || targetUserId === currentUser.uid) return;
-            
             try {
                 const existingRequest = await db.collection('chatRequests')
                     .where('fromUserId', '==', currentUser.uid)
                     .where('toUserId', '==', targetUserId)
-                    .where('status', '==', 'pending')
-                    .get();
-                
-                if (!existingRequest.empty) {
-                    alert('Request already sent');
-                    return;
-                }
-                
+                    .where('status', '==', 'pending').get();
+                if (!existingRequest.empty) { alert('Request already sent'); return; }
                 await db.collection('chatRequests').add({
                     fromUserId: currentUser.uid,
                     fromUserName: currentUser.displayName || currentUser.email.split('@')[0],
@@ -1812,48 +2004,31 @@
                     status: 'pending',
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
-                
                 document.getElementById('search-results').style.display = 'none';
                 document.getElementById('search-input').value = '';
-                
                 alert('Chat request sent successfully!');
-                
-            } catch (error) {
-                console.error('Error sending request:', error);
-                alert('Failed to send request');
-            }
+            } catch (error) { console.error('Error sending request:', error);
+                alert('Failed to send request'); }
         }
 
         async function acceptChatRequest(requestId, fromUserId) {
             try {
-                await db.collection('chatRequests').doc(requestId).update({
-                    status: 'accepted'
-                });
-                
+                await db.collection('chatRequests').doc(requestId).update({ status: 'accepted' });
                 await db.collection('acceptedChats').add({
                     userId1: currentUser.uid,
                     userId2: fromUserId,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
-                
                 loadRequests();
-                
-            } catch (error) {
-                console.error('Error accepting request:', error);
-                alert('Failed to accept request');
-            }
+            } catch (error) { console.error('Error accepting request:', error);
+                alert('Failed to accept request'); }
         }
 
         async function rejectChatRequest(requestId) {
             try {
-                await db.collection('chatRequests').doc(requestId).update({
-                    status: 'rejected'
-                });
-                
+                await db.collection('chatRequests').doc(requestId).update({ status: 'rejected' });
                 loadRequests();
-            } catch (error) {
-                console.error('Error rejecting request:', error);
-            }
+            } catch (error) { console.error('Error rejecting request:', error); }
         }
 
         // ==================== LOAD DATA ====================
@@ -1865,11 +2040,7 @@
 
         function loadAcceptedChats() {
             if (!currentUser) return;
-            
-            if (acceptedChatsListener) {
-                acceptedChatsListener();
-            }
-            
+            if (acceptedChatsListener) acceptedChatsListener();
             acceptedChatsListener = db.collection('acceptedChats')
                 .where('userId1', '==', currentUser.uid)
                 .onSnapshot((snapshot) => {
@@ -1878,33 +2049,24 @@
                         acceptedChats.add(data.userId2);
                         loadUserData(data.userId2);
                     });
-                    
-                    db.collection('acceptedChats')
-                        .where('userId2', '==', currentUser.uid)
-                        .get()
-                        .then((snapshot2) => {
-                            snapshot2.forEach((doc) => {
-                                const data = doc.data();
-                                acceptedChats.add(data.userId1);
-                                loadUserData(data.userId1);
-                            });
-                            
-                            renderChatList();
+                    db.collection('acceptedChats').where('userId2', '==', currentUser.uid).get().then((
+                        snapshot2) => {
+                        snapshot2.forEach((doc) => {
+                            const data = doc.data();
+                            acceptedChats.add(data.userId1);
+                            loadUserData(data.userId1);
                         });
+                        renderChatList();
+                    });
                 });
         }
 
         function loadUserData(userId) {
             db.collection('users').doc(userId).get().then((doc) => {
                 if (doc.exists) {
-                    if (!chatListData.has(userId)) {
-                        chatListData.set(userId, {
-                            userData: doc.data(),
-                            lastMessage: null,
-                            unreadCount: 0,
-                            lastMessageTime: null
-                        });
-                    } else {
+                    if (!chatListData.has(userId)) chatListData.set(userId, { userData: doc.data(),
+                        lastMessage: null, unreadCount: 0, lastMessageTime: null });
+                    else {
                         const data = chatListData.get(userId);
                         data.userData = doc.data();
                         chatListData.set(userId, data);
@@ -1916,27 +2078,18 @@
 
         function loadRequests() {
             if (!currentUser) return;
-            
-            if (requestsListener) {
-                requestsListener();
-            }
-            
+            if (requestsListener) requestsListener();
             requestsListener = db.collection('chatRequests')
                 .where('toUserId', '==', currentUser.uid)
                 .where('status', '==', 'pending')
                 .onSnapshot((snapshot) => {
                     pendingRequests.clear();
-                    
                     snapshot.forEach((doc) => {
                         const request = doc.data();
-                        pendingRequests.set(request.fromUserId, {
-                            requestId: doc.id,
-                            ...request
-                        });
-                        
+                        pendingRequests.set(request.fromUserId, { requestId: doc.id,
+                            ...request });
                         loadRequesterData(request.fromUserId, doc.id, request);
                     });
-                    
                     renderRequestsList();
                 });
         }
@@ -1945,11 +2098,9 @@
             db.collection('users').doc(userId).get().then((doc) => {
                 if (doc.exists) {
                     const request = pendingRequests.get(userId);
-                    if (request) {
-                        request.fromUserData = doc.data();
+                    if (request) { request.fromUserData = doc.data();
                         pendingRequests.set(userId, request);
-                        renderRequestsList();
-                    }
+                        renderRequestsList(); }
                 }
             });
         }
@@ -1958,7 +2109,6 @@
         function renderChatList() {
             const container = document.getElementById('chats-container');
             container.innerHTML = '';
-            
             const sortedChats = Array.from(chatListData.entries())
                 .filter(([userId]) => acceptedChats.has(userId))
                 .sort((a, b) => {
@@ -1966,57 +2116,45 @@
                     const timeB = b[1].lastMessageTime ? b[1].lastMessageTime.toDate() : new Date(0);
                     return timeB - timeA;
                 });
-            
             if (sortedChats.length === 0) {
-                container.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">No chats yet. Search for users to start chatting!</div>';
+                container.innerHTML =
+                    '<div style="text-align:center;color:#888;padding:20px;">No chats yet. Search for users to start chatting!</div>';
                 return;
             }
-            
             sortedChats.forEach(([userId, data]) => {
-                if (data.userData) {
-                    const userElement = createChatListItem(userId, data);
-                    container.appendChild(userElement);
-                }
+                if (data.userData) container.appendChild(createChatListItem(userId, data));
             });
         }
 
         function renderRequestsList() {
             const container = document.getElementById('requests-container');
             container.innerHTML = '';
-            
             if (pendingRequests.size === 0) {
-                container.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">No pending requests</div>';
+                container.innerHTML =
+                    '<div style="text-align:center;color:#888;padding:20px;">No pending requests</div>';
                 return;
             }
-            
             pendingRequests.forEach((request, userId) => {
-                if (request.fromUserData) {
-                    const requestElement = createRequestItem(userId, request);
-                    container.appendChild(requestElement);
-                }
+                if (request.fromUserData) container.appendChild(createRequestItem(userId, request));
             });
         }
 
         function createRequestItem(userId, request) {
             const div = document.createElement('div');
             div.className = 'request-item';
-            
             const userData = request.fromUserData;
             const name = userData.name || userData.email?.split('@')[0] || 'User';
             const email = userData.email || 'No email';
-            
             div.innerHTML = `
-                <div class="user-avatar">${name[0].toUpperCase()}</div>
-                <div class="request-info">
-                    <div class="request-name">${escapeHtml(name)}</div>
-                    <div class="request-email">${escapeHtml(email)}</div>
-                </div>
-                <div class="request-actions">
-                    <button class="accept-btn" onclick="acceptChatRequest('${request.requestId}', '${userId}')">Accept</button>
-                    <button class="reject-btn" onclick="rejectChatRequest('${request.requestId}')">Reject</button>
-                </div>
-            `;
-            
+            <div class="user-avatar">${name[0].toUpperCase()}</div>
+            <div class="request-info">
+              <div class="request-name">${escapeHtml(name)}</div>
+              <div class="request-email">${escapeHtml(email)}</div>
+            </div>
+            <div class="request-actions">
+              <button class="accept-btn" onclick="acceptChatRequest('${request.requestId}','${userId}')">Accept</button>
+              <button class="reject-btn" onclick="rejectChatRequest('${request.requestId}')">Reject</button>
+            </div>`;
             return div;
         }
 
@@ -2024,75 +2162,44 @@
             const div = document.createElement('div');
             div.className = `user-item ${data.unreadCount > 0 ? 'unread' : ''}`;
             div.onclick = () => openChat(userId, data.userData);
-            
             const userData = data.userData;
             const name = userData.name || userData.email?.split('@')[0] || 'User';
             const initial = name[0]?.toUpperCase() || '?';
-            
             let timeString = '';
             if (data.lastMessageTime) {
                 const date = data.lastMessageTime.toDate();
                 const now = new Date();
                 const diff = now - date;
-                
-                if (diff < 86400000) {
-                    timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                } else {
-                    timeString = date.toLocaleDateString([], { month: 'short', day: 'numeric' });
-                }
+                if (diff < 86400000) timeString = date.toLocaleTimeString([], { hour: '2-digit',
+                    minute: '2-digit' });
+                else timeString = date.toLocaleDateString([], { month: 'short', day: 'numeric' });
             }
-            
             let lastMessagePreview = '';
-            let statusIcon = '';
             if (data.lastMessage) {
-                if (data.lastMessage.text) {
-                    lastMessagePreview = data.lastMessage.text;
-                } else if (data.lastMessage.imageUrl) {
-                    lastMessagePreview = '📷 Image';
-                }
-                
-                if (data.lastMessage.senderId === currentUser?.uid) {
-                    if (data.lastMessage.status === 'read') {
-                        statusIcon = '<span class="message-status-icon read"><i class="fas fa-check-double"></i></span>';
-                    } else if (data.lastMessage.status === 'delivered') {
-                        statusIcon = '<span class="message-status-icon"><i class="fas fa-check-double"></i></span>';
-                    } else {
-                        statusIcon = '<span class="message-status-icon"><i class="fas fa-check"></i></span>';
-                    }
-                }
+                if (data.lastMessage.text) lastMessagePreview = data.lastMessage.text;
+                else if (data.lastMessage.imageUrl) lastMessagePreview = '📷 Image';
+                else if (data.lastMessage.audioUrl) lastMessagePreview = '🎤 Voice Note';
             }
-            
-            if (lastMessagePreview.length > 30) {
-                lastMessagePreview = lastMessagePreview.substring(0, 27) + '...';
-            }
-            
+            if (lastMessagePreview.length > 30) lastMessagePreview = lastMessagePreview.substring(0, 27) + '...';
             div.innerHTML = `
-                <div class="user-avatar">${initial}</div>
-                <div class="user-info">
-                    <div class="user-name-row">
-                        <div class="user-name">${escapeHtml(name)}</div>
-                        <div class="user-time">${timeString}</div>
-                    </div>
-                    <div class="user-last-message">
-                        <div class="last-message-text">
-                            ${statusIcon ? statusIcon + ' ' : ''}${escapeHtml(lastMessagePreview)}
-                        </div>
-                        ${data.unreadCount > 0 ? `<div class="unread-badge">${data.unreadCount}</div>` : ''}
-                    </div>
-                </div>
-            `;
-            
+            <div class="user-avatar">${initial}</div>
+            <div class="user-info">
+              <div class="user-name-row">
+                <div class="user-name">${escapeHtml(name)}</div>
+                <div class="user-time">${timeString}</div>
+              </div>
+              <div class="user-last-message">
+                <div class="last-message-text">${escapeHtml(lastMessagePreview)}</div>
+                ${data.unreadCount > 0 ? `<div class="unread-badge">${data.unreadCount}</div>` : ''}
+              </div>
+            </div>`;
             return div;
         }
 
         // ==================== UNREAD MESSAGES LISTENER ====================
         function setupUnreadMessagesListener() {
             if (!currentUser) return;
-            
-            if (unreadMessagesListener) {
-                unreadMessagesListener();
-            }
-            
+            if (unreadMessagesListener) unreadMessagesListener();
             unreadMessagesListener = db.collection('messages')
                 .where('receiverId', '==', currentUser.uid)
                 .where('status', '==', 'sent')
@@ -2101,18 +2208,13 @@
                         if (change.type === 'added') {
                             const message = change.doc.data();
                             const senderId = message.senderId;
-                            
                             if (acceptedChats.has(senderId)) {
-                                if (!chatListData.has(senderId)) {
-                                    loadUserData(senderId);
-                                }
-                                
-                                const data = chatListData.get(senderId) || { unreadCount: 0 };
-                                data.lastMessage = message;
-                                data.unreadCount = (data.unreadCount || 0) + 1;
-                                data.lastMessageTime = message.timestamp;
-                                chatListData.set(senderId, data);
-                                
+                                if (!chatListData.has(senderId)) loadUserData(senderId);
+                                const d = chatListData.get(senderId) || { unreadCount: 0 };
+                                d.lastMessage = message;
+                                d.unreadCount = (d.unreadCount || 0) + 1;
+                                d.lastMessageTime = message.timestamp;
+                                chatListData.set(senderId, d);
                                 renderChatList();
                             }
                         }
@@ -2124,86 +2226,85 @@
         function openChat(userId, userData) {
             selectedUserId = userId;
             selectedUserData = userData;
-            
             document.getElementById('users-screen').style.display = 'none';
             document.getElementById('chat-screen').style.display = 'flex';
-            
             const name = userData.name || userData.email?.split('@')[0] || 'User';
             document.getElementById('chat-header-name').textContent = name;
-            
             if (messagesListener) messagesListener();
             if (typingListener) typingListener();
-            
+            if (presenceListener) presenceListener();
+            if (reactionsListener) reactionsListener();
             document.getElementById('chat-error-banner').style.display = 'none';
-            
+            cancelEdit();
+            cancelReply();
             markAllMessagesAsRead(userId);
-            
             loadMessages(userId);
             setupTypingListener(userId);
+            /* NEW: Listen to presence */
+            setupPresenceListener(userId);
+            /* NEW: Listen to reactions */
+            setupReactionsListener(userId);
+            /* NEW: Update own presence */
+            updatePresence(true);
         }
 
         async function markAllMessagesAsRead(senderId) {
             if (!currentUser) return;
-            
             try {
                 const snapshot = await db.collection('messages')
                     .where('senderId', '==', senderId)
                     .where('receiverId', '==', currentUser.uid)
-                    .where('status', '==', 'sent')
-                    .get();
-                
+                    .where('status', 'in', ['sent', 'delivered']).get();
                 const batch = db.batch();
-                snapshot.forEach(doc => {
-                    batch.update(doc.ref, { status: 'delivered' });
-                });
+                snapshot.forEach(doc => batch.update(doc.ref, { status: 'read' }));
                 await batch.commit();
-                
                 if (chatListData.has(senderId)) {
-                    const data = chatListData.get(senderId);
-                    data.unreadCount = 0;
-                    chatListData.set(senderId, data);
+                    const d = chatListData.get(senderId);
+                    d.unreadCount = 0;
+                    chatListData.set(senderId, d);
                     renderChatList();
                 }
-            } catch (error) {
-                console.error('Error marking messages as read:', error);
-            }
+            } catch (error) { console.error('Error marking messages as read:', error); }
         }
 
         function loadMessages(otherUserId) {
             const container = document.getElementById('messages-container');
             const errorBanner = document.getElementById('chat-error-banner');
             const currentUserId = auth.currentUser?.uid;
-            
-            if (!currentUserId || !otherUserId) {
-                console.error('Missing user IDs');
-                return;
-            }
-            
+            if (!currentUserId || !otherUserId) return;
             container.innerHTML = '<div class="loading-spinner"></div>';
             errorBanner.style.display = 'none';
-            
             try {
                 messagesListener = db.collection('messages')
                     .orderBy('timestamp', 'asc')
                     .onSnapshot((snapshot) => {
                         container.innerHTML = '';
-                        
                         let messageCount = 0;
+                        /* NEW: Track the last sent message ID for read receipts */
+                        let lastSentMsgId = null;
+                        const allMessages = [];
                         snapshot.forEach((doc) => {
                             const msg = { id: doc.id, ...doc.data() };
                             if ((msg.senderId === currentUserId && msg.receiverId === otherUserId) ||
                                 (msg.senderId === otherUserId && msg.receiverId === currentUserId)) {
-                                
-                                const messageEl = createMessageElement(msg);
-                                container.appendChild(messageEl);
+                                allMessages.push(msg);
                                 messageCount++;
                             }
                         });
-                        
-                        if (messageCount === 0) {
-                            container.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">No messages yet. Say hello! 👋</div>';
+                        // Find last sent message
+                        for (let i = allMessages.length - 1; i >= 0; i--) {
+                            if (allMessages[i].senderId === currentUserId) {
+                                lastSentMsgId = allMessages[i].id;
+                                break;
+                            }
                         }
-                        
+                        allMessages.forEach(msg => {
+                            const messageEl = createMessageElement(msg, msg.id ===
+                                lastSentMsgId);
+                            container.appendChild(messageEl);
+                        });
+                        if (messageCount === 0) container.innerHTML =
+                            '<div style="text-align:center;color:#888;padding:20px;">No messages yet. Say hello! 👋</div>';
                         scrollChatToBottom();
                         errorBanner.style.display = 'none';
                     }, (error) => {
@@ -2217,100 +2318,265 @@
                 errorBanner.style.display = 'block';
             }
         }
-        
+
         function scrollChatToBottom() {
             const container = document.getElementById('messages-container');
             container.scrollTop = container.scrollHeight;
         }
 
         function retryLoadMessages() {
-            if (selectedUserId) {
-                loadMessages(selectedUserId);
-            }
+            if (selectedUserId) loadMessages(selectedUserId);
         }
 
-        function createMessageElement(message) {
+        /* NEW: Create message element with reaction, reply, voice note, read receipt support */
+        function createMessageElement(message, isLastSent) {
             const wrapper = document.createElement('div');
             const isSent = message.senderId === auth.currentUser?.uid;
             wrapper.className = `message-wrapper ${isSent ? 'sent' : 'received'}`;
             wrapper.id = `msg-${message.id}`;
-            
+            wrapper.setAttribute('data-msg-id', message.id);
+
             const bubble = document.createElement('div');
             bubble.className = 'message-bubble';
-            
-            if (isSent) {
-                // Add long-press event listeners only for sent messages
-                bubble.addEventListener('contextmenu', (e) => {
-                    e.preventDefault();
-                    openMessageOptions(message);
-                });
-                bubble.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    longPressTimer = setTimeout(() => openMessageOptions(message), 500);
-                });
-                bubble.addEventListener('touchend', () => clearTimeout(longPressTimer));
-                bubble.addEventListener('touchmove', () => clearTimeout(longPressTimer));
-            }
+            bubble.setAttribute('data-msg-id', message.id);
+
+            // Long-press for emoji tray
+            bubble.addEventListener('touchstart', function(e) {
+                longPressTimer = setTimeout(() => openEmojiTray(message, e), 500);
+            });
+            bubble.addEventListener('touchend', () => clearTimeout(longPressTimer));
+            bubble.addEventListener('touchmove', () => clearTimeout(longPressTimer));
+            bubble.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                openEmojiTray(message, e);
+            });
+
+            /* NEW: Double-tap to like */
+            bubble.addEventListener('click', function(e) {
+                const now = Date.now();
+                if (now - (bubble._lastTap || 0) < 350) {
+                    // Double tap detected
+                    addReactionDirect('❤️', message.id);
+                    showHeartAnimation(bubble, e);
+                }
+                bubble._lastTap = now;
+            });
+
+            /* NEW: Swipe to reply */
+            bubble.addEventListener('touchstart', function(e) {
+                swipeStartX = e.touches[0].clientX;
+                swipeStartY = e.touches[0].clientY;
+                swipeTargetMsgId = message.id;
+            });
+            bubble.addEventListener('touchend', function(e) {
+                const dx = e.changedTouches[0].clientX - swipeStartX;
+                const dy = e.changedTouches[0].clientY - swipeStartY;
+                if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 2 && dx > 0 &&
+                    swipeTargetMsgId === message.id) {
+                    // Swiped right - reply
+                    setupReply(message);
+                }
+                swipeTargetMsgId = null;
+            });
 
             let content = '';
+            /* NEW: Reply quoting */
+            if (message.replyTo) {
+                content += `
+              <div class="quoted-message-preview">
+                <div class="quoted-sender">${escapeHtml(message.replyTo.senderName || 'User')}</div>
+                <div>${escapeHtml((message.replyTo.text || '📷 Image').substring(0, 60))}</div>
+              </div>`;
+            }
             if (message.text) {
-                content = `<div class="message-text">${escapeHtml(message.text)}</div>`;
+                content += `<div class="message-text">${escapeHtml(message.text)}</div>`;
             } else if (message.imageUrl) {
-                content = `<img src="${message.imageUrl}" class="message-image" onclick="showImagePreview('${message.imageUrl}')">`;
-            }
-            
-            let status = '';
-            if (isSent) {
-                let tickClass = '';
-                let ticks = '<i class="fas fa-check"></i>';
-                
-                if (message.status === 'delivered') {
-                    ticks = '<i class="fas fa-check-double"></i>';
-                } else if (message.status === 'read') {
-                    ticks = '<i class="fas fa-check-double tick read"></i>';
+                content +=
+                    `<img src="${message.imageUrl}" class="message-image" onclick="showImagePreview('${message.imageUrl}')">`;
+            } else if (message.audioUrl) {
+                /* NEW: Voice note */
+                const duration = message.audioDuration || 0;
+                const mins = Math.floor(duration / 60);
+                const secs = Math.floor(duration % 60);
+                const durationStr = `${mins}:${secs.toString().padStart(2, '0')}`;
+                const barCount = Math.min(Math.max(Math.floor(duration * 2), 8), 30);
+                let barsHtml = '';
+                for (let i = 0; i < barCount; i++) {
+                    const h = Math.floor(Math.random() * 20 + 6);
+                    barsHtml += `<span class="bar" style="height:${h}px;"></span>`;
                 }
-                status = `<span class="message-status">${ticks}</span>`;
+                content += `
+              <div class="voice-note-bubble" onclick="playVoiceNote(this, '${message.audioUrl}', ${duration})">
+                <div class="voice-play-btn"><i class="fas fa-play"></i></div>
+                <div class="voice-waveform">${barsHtml}</div>
+                <span class="voice-duration">${durationStr}</span>
+              </div>`;
             }
-            
-            const time = message.timestamp ? 
-                new Date(message.timestamp.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
-            
+
+            const time = message.timestamp ?
+                new Date(message.timestamp.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) :
+                '';
+
             bubble.innerHTML = `
-                ${content}
-                <div class="message-footer">
-                    ${message.edited ? '<span class="edited-label">(edited)</span>' : ''}
-                    <span class="message-time">${time}</span>
-                    ${status}
-                </div>
-            `;
-            
+            ${content}
+            <div class="message-footer">
+              ${message.edited ? '<span class="edited-label">(edited)</span>' : ''}
+              <span class="message-time">${time}</span>
+            </div>`;
+
+            /* NEW: Reaction display */
+            const reactionEmoji = reactionsCache.get(message.id);
+            if (reactionEmoji) {
+                const reactionSpan = document.createElement('span');
+                reactionSpan.className = 'message-reaction';
+                reactionSpan.textContent = reactionEmoji;
+                bubble.appendChild(reactionSpan);
+            }
+
             wrapper.appendChild(bubble);
+
+            /* NEW: Read receipt text only on last sent message */
+            if (isSent && isLastSent && message.status) {
+                const statusDiv = document.createElement('div');
+                statusDiv.className = 'message-status-text';
+                if (message.status === 'sent') statusDiv.textContent = 'Sent';
+                else if (message.status === 'delivered') statusDiv.textContent = 'Delivered';
+                else if (message.status === 'read') statusDiv.textContent = 'Seen';
+                wrapper.appendChild(statusDiv);
+            }
+
             return wrapper;
         }
 
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+        /* NEW: Heart animation on double-tap */
+        function showHeartAnimation(bubble, event) {
+            const heart = document.createElement('span');
+            heart.className = 'heart-animation';
+            heart.textContent = '❤️';
+            const rect = bubble.getBoundingClientRect();
+            heart.style.left = (event.clientX - rect.left - 14) + 'px';
+            heart.style.top = (event.clientY - rect.top - 14) + 'px';
+            bubble.style.position = 'relative';
+            bubble.appendChild(heart);
+            setTimeout(() => heart.remove(), 800);
+        }
+
+        /* NEW: Emoji tray */
+        function openEmojiTray(message, event) {
+            selectedMessageData = { id: message.id, text: message.text || '' };
+            document.getElementById('tray-edit-btn').style.display = message.text ? 'flex' : 'none';
+            document.getElementById('emoji-tray-overlay').style.display = 'flex';
+            // Prevent default long-press context menu on mobile
+            if (event && event.preventDefault) event.preventDefault();
+        }
+
+        function closeEmojiTray() {
+            document.getElementById('emoji-tray-overlay').style.display = 'none';
+        }
+
+        function addReaction(emoji) {
+            if (!selectedMessageData.id) return;
+            addReactionDirect(emoji, selectedMessageData.id);
+            closeEmojiTray();
+        }
+
+        async function addReactionDirect(emoji, messageId) {
+            if (!currentUser || !messageId) return;
+            try {
+                const reactionRef = db.collection('reactions').doc(messageId);
+                await reactionRef.set({
+                    emoji: emoji,
+                    userId: currentUser.uid,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+            } catch (error) { console.error('Error adding reaction:', error); }
+        }
+
+        function setupReactionsListener(otherUserId) {
+            if (!currentUser) return;
+            if (reactionsListener) reactionsListener();
+            reactionsListener = db.collection('reactions')
+                .onSnapshot((snapshot) => {
+                    snapshot.docChanges().forEach((change) => {
+                        if (change.type === 'added' || change.type === 'modified') {
+                            const data = change.doc.data();
+                            reactionsCache.set(change.doc.id, data.emoji);
+                        } else if (change.type === 'removed') {
+                            reactionsCache.delete(change.doc.id);
+                        }
+                    });
+                    // Refresh messages to show updated reactions
+                    if (selectedUserId) loadMessages(selectedUserId);
+                });
+        }
+
+        function handleEditFromTray() {
+            if (!selectedMessageData.id || !selectedMessageData.text) return;
+            isEditing = true;
+            closeEmojiTray();
+            document.getElementById('editing-banner').style.display = 'flex';
+            const input = document.getElementById('chat-input');
+            input.value = selectedMessageData.text;
+            input.focus();
+            autoExpandTextarea();
+            document.getElementById('send-btn').innerHTML = '<i class="fas fa-check"></i>';
+        }
+
+        function handleDeleteFromTray() {
+            if (!selectedMessageData.id) return;
+            const msgId = selectedMessageData.id;
+            closeEmojiTray();
+            if (confirm('Unsend this message? It will be removed for everyone.')) {
+                /* NEW: Unsend - completely delete from Firestore */
+                db.collection('messages').doc(msgId).delete()
+                    .then(() => {
+                        // Also delete any reaction
+                        db.collection('reactions').doc(msgId).delete().catch(() => {});
+                    })
+                    .catch(error => { console.error('Error deleting message:', error);
+                        alert('Failed to unsend message.'); });
+            }
+        }
+
+        function cancelEdit() {
+            isEditing = false;
+            selectedMessageData = { id: null, text: null };
+            document.getElementById('editing-banner').style.display = 'none';
+            document.getElementById('chat-input').value = '';
+            document.getElementById('send-btn').innerHTML = '<i class="fas fa-paper-plane"></i>';
+            autoExpandTextarea();
+        }
+
+        /* NEW: Reply functions */
+        function setupReply(message) {
+            replyingTo = {
+                id: message.id,
+                text: message.text || (message.imageUrl ? '📷 Image' : '🎤 Voice Note'),
+                senderName: message.senderId === currentUser?.uid ? 'You' : (selectedUserData?.name ||
+                    'User')
+            };
+            document.getElementById('reply-preview').style.display = 'flex';
+            document.getElementById('reply-preview-name').textContent = replyingTo.senderName;
+            document.getElementById('reply-preview-text').textContent = replyingTo.text.substring(0, 80);
+            document.getElementById('chat-input').focus();
+        }
+
+        function cancelReply() {
+            replyingTo = null;
+            document.getElementById('reply-preview').style.display = 'none';
         }
 
         async function sendMessage() {
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
-            
-            if (!text && !selectedImage) return;
+            if (!text && !selectedImage && !isEditing) return;
             if (!selectedUserId || !auth.currentUser) return;
-            
             const sendBtn = document.getElementById('send-btn');
             sendBtn.disabled = true;
-            
             try {
-                if(isEditing) {
-                    await db.collection('messages').doc(selectedMessageData.id).update({
-                        text: text,
-                        edited: true
-                    });
+                if (isEditing) {
+                    await db.collection('messages').doc(selectedMessageData.id).update({ text: text,
+                        edited: true });
                     cancelEdit();
                 } else {
                     const messageData = {
@@ -2320,111 +2586,66 @@
                         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                         status: 'sent'
                     };
-                    
+                    /* NEW: Include reply data */
+                    if (replyingTo) {
+                        messageData.replyTo = {
+                            messageId: replyingTo.id,
+                            text: replyingTo.text,
+                            senderName: replyingTo.senderName
+                        };
+                        cancelReply();
+                    }
                     if (selectedImage) {
                         messageData.imageUrl = selectedImage;
                         selectedImage = null;
                     } else {
                         messageData.text = text;
                         input.value = '';
+                        autoExpandTextarea();
                     }
-                    
                     await db.collection('messages').add(messageData);
-                    
-                    try {
-                        await db.collection('typing').doc(`${auth.currentUser.uid}_${selectedUserId}`).delete();
-                    } catch (e) {}
+                    try { await db.collection('typing').doc(
+                            `${auth.currentUser.uid}_${selectedUserId}`).delete(); } catch (e) {}
                 }
-                
                 scrollChatToBottom();
-
-            } catch (error) {
-                console.error('Error sending message:', error);
-                alert('Failed to send message. Please try again.');
-            } finally {
-                sendBtn.disabled = false;
-            }
-        }
-        
-        // ==================== MESSAGE EDIT/DELETE FUNCTIONS (NEW) ====================
-        function openMessageOptions(message) {
-            if (!message.id) return;
-            selectedMessageData = { id: message.id, text: message.text || '' };
-
-            document.getElementById('edit-option').style.display = message.text ? 'flex' : 'none';
-            document.getElementById('message-options-overlay').style.display = 'flex';
+            } catch (error) { console.error('Error sending message:', error);
+                alert('Failed to send message.'); } finally { sendBtn.disabled = false;
+                autoExpandTextarea(); }
         }
 
-        function closeMessageOptions() {
-            document.getElementById('message-options-overlay').style.display = 'none';
+        /* NEW: Auto-expanding textarea */
+        function autoExpandTextarea() {
+            const textarea = document.getElementById('chat-input');
+            textarea.style.height = 'auto';
+            const newHeight = Math.min(textarea.scrollHeight, 120);
+            textarea.style.height = newHeight + 'px';
+            // Toggle mic/send button visibility
+            const micBtn = document.getElementById('mic-btn');
+            const sendBtn = document.getElementById('send-btn');
+            const hasText = textarea.value.trim().length > 0;
+            micBtn.style.display = hasText ? 'none' : 'inline-flex';
+            sendBtn.style.display = hasText || selectedImage ? 'flex' : 'none';
         }
 
-        function handleEditOption() {
-            if (!selectedMessageData.id || !selectedMessageData.text) return;
-            isEditing = true;
-            closeMessageOptions();
-            
-            document.getElementById('editing-banner').style.display = 'flex';
-            const input = document.getElementById('chat-input');
-            input.value = selectedMessageData.text;
-            input.focus();
-            
-            document.getElementById('send-btn').innerHTML = '<i class="fas fa-check"></i>';
-        }
-
-        function cancelEdit() {
-            isEditing = false;
-            selectedMessageData = { id: null, text: null };
-            document.getElementById('editing-banner').style.display = 'none';
-            document.getElementById('chat-input').value = '';
-            document.getElementById('send-btn').innerHTML = '<i class="fas fa-paper-plane"></i>';
-        }
-
-        async function handleDeleteOption() {
-            if (!selectedMessageData.id) return;
-            const msgId = selectedMessageData.id;
-            closeMessageOptions();
-
-            if (confirm('Are you sure you want to delete this message?')) {
-                try {
-                    await db.collection('messages').doc(msgId).delete();
-                } catch (error) {
-                    console.error('Error deleting message:', error);
-                    alert('Failed to delete message.');
-                }
-            }
-        }
-
-        // ==================== TYPING INDICATOR (REWORKED) ====================
+        // ==================== TYPING INDICATOR ====================
         function handleTyping(event) {
             if (!selectedUserId || !auth.currentUser) return;
-            
             if (event.key === 'Enter' && !event.shiftKey) {
                 event.preventDefault();
                 sendMessage();
                 return;
             }
-            
+            autoExpandTextarea();
             const typingRef = db.collection('typing').doc(`${auth.currentUser.uid}_${selectedUserId}`);
-            
-            typingRef.set({
-                isTyping: true,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).catch(e => console.log('Typing error:', e));
-            
+            typingRef.set({ isTyping: true, timestamp: firebase.firestore.FieldValue.serverTimestamp() }).catch(
+                e => {});
             if (typingTimeout) clearTimeout(typingTimeout);
-            
-            typingTimeout = setTimeout(async () => {
-                try {
-                    await typingRef.delete();
-                } catch (e) {}
-            }, 2000);
+            typingTimeout = setTimeout(async () => { try { await typingRef.delete(); } catch (e) {} }, 2000);
         }
 
         function setupTypingListener(otherUserId) {
             const container = document.getElementById('messages-container');
             if (!auth.currentUser) return;
-
             try {
                 typingListener = db.collection('typing')
                     .doc(`${otherUserId}_${auth.currentUser.uid}`)
@@ -2435,76 +2656,39 @@
                                 const indicatorEl = document.createElement('div');
                                 indicatorEl.className = 'message-wrapper received';
                                 indicatorEl.id = 'typing-indicator';
-                                indicatorEl.innerHTML = `
-                                    <div class="typing-indicator-bubble">
-                                        <div class="typing-dots">
-                                            <span></span><span></span><span></span>
-                                        </div>
-                                    </div>
-                                `;
+                                indicatorEl.innerHTML =
+                                    '<div class="typing-indicator-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>';
                                 container.appendChild(indicatorEl);
                                 scrollChatToBottom();
                             }
                         } else {
-                            if (typingIndicator) {
-                                typingIndicator.remove();
-                            }
+                            if (typingIndicator) typingIndicator.remove();
                         }
-                    }, (error) => {
-                        console.error('Typing listener error:', error);
                     });
-            } catch (error) {
-                console.error('Error setting up typing listener:', error);
-            }
+            } catch (error) { console.error('Typing listener error:', error); }
         }
 
         // ==================== IMAGE UPLOAD ====================
-        function selectImage() {
-            document.getElementById('image-input').click();
-        }
+        function selectImage() { document.getElementById('image-input').click(); }
 
         async function handleImageSelect(event) {
             const file = event.target.files[0];
             if (!file) return;
-            
-            if (!file.type.startsWith('image/')) {
-                alert('Please select an image');
-                return;
-            }
-            
-            if (file.size > 5 * 1024 * 1024) {
-                alert('Image must be less than 5MB');
-                return;
-            }
-            
+            if (!file.type.startsWith('image/')) { alert('Please select an image'); return; }
+            if (file.size > 5 * 1024 * 1024) { alert('Image must be less than 5MB'); return; }
             const sendBtn = document.getElementById('send-btn');
             sendBtn.disabled = true;
-            
             try {
                 const formData = new FormData();
                 formData.append('image', file);
-                
-                const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
-                    method: 'POST',
-                    body: formData
-                });
-                
+                const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST',
+                    body: formData });
                 const result = await response.json();
-                
-                if (result.success) {
-                    selectedImage = result.data.url;
-                    await sendMessage();
-                } else {
-                    alert('Image upload failed');
-                }
-                
-            } catch (error) {
-                console.error('Error uploading image:', error);
-                alert('Upload failed. Please try again.');
-            } finally {
-                sendBtn.disabled = false;
-                event.target.value = '';
-            }
+                if (result.success) { selectedImage = result.data.url;
+                    await sendMessage(); } else alert('Image upload failed');
+            } catch (error) { console.error('Error uploading image:', error);
+                alert('Upload failed.'); } finally { sendBtn.disabled = false;
+                event.target.value = ''; }
         }
 
         function showImagePreview(url) {
@@ -2512,8 +2696,253 @@
             document.getElementById('image-preview').style.display = 'flex';
         }
 
-        function closeImagePreview() {
-            document.getElementById('image-preview').style.display = 'none';
+        function closeImagePreview() { document.getElementById('image-preview').style.display = 'none'; }
+
+        // ==================== NEW: VOICE NOTES ====================
+        async function startRecording() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert('Voice recording not supported on this device.');
+                return;
+            }
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
+                audioChunks = [];
+                mediaRecorder.addEventListener('dataavailable', (event) => {
+                    if (event.data.size > 0) audioChunks.push(event.data);
+                });
+                mediaRecorder.addEventListener('stop', uploadVoiceNote);
+                mediaRecorder.start();
+                recordingStartTime = Date.now();
+                document.getElementById('mic-btn').classList.add('recording');
+                document.getElementById('recording-timer').style.display = 'inline';
+                recordingTimerInterval = setInterval(updateRecordingTimer, 200);
+            } catch (error) {
+                console.error('Microphone access denied:', error);
+                alert('Please allow microphone access to record voice notes.');
+            }
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                document.getElementById('mic-btn').classList.remove('recording');
+                document.getElementById('recording-timer').style.display = 'none';
+                if (recordingTimerInterval) clearInterval(recordingTimerInterval);
+            }
+        }
+
+        function updateRecordingTimer() {
+            const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+            const mins = Math.floor(elapsed / 60);
+            const secs = elapsed % 60;
+            document.getElementById('recording-timer').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        async function uploadVoiceNote() {
+            if (audioChunks.length === 0) return;
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            const duration = Math.floor((Date.now() - recordingStartTime) / 1000);
+            if (duration < 1) return; // Ignore recordings shorter than 1 second
+            const messageId = db.collection('messages').doc().id;
+            const storageRef = storage.ref(`voice_notes/${messageId}.webm`);
+            try {
+                const snapshot = await storageRef.put(audioBlob);
+                const audioUrl = await snapshot.ref.getDownloadURL();
+                const messageData = {
+                    senderId: auth.currentUser.uid,
+                    receiverId: selectedUserId,
+                    participants: [auth.currentUser.uid, selectedUserId],
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    status: 'sent',
+                    audioUrl: audioUrl,
+                    audioDuration: duration
+                };
+                /* NEW: Include reply data if replying */
+                if (replyingTo) {
+                    messageData.replyTo = {
+                        messageId: replyingTo.id,
+                        text: replyingTo.text,
+                        senderName: replyingTo.senderName
+                    };
+                    cancelReply();
+                }
+                await db.collection('messages').doc(messageId).set(messageData);
+                scrollChatToBottom();
+            } catch (error) {
+                console.error('Error uploading voice note:', error);
+                alert('Failed to send voice note.');
+            }
+            audioChunks = [];
+        }
+
+        /* NEW: Play voice note */
+        function playVoiceNote(element, audioUrl, duration) {
+            const playBtn = element.querySelector('.voice-play-btn i');
+            const allPlayBtns = document.querySelectorAll('.voice-play-btn i');
+            // Stop all other playing audio
+            allPlayBtns.forEach(btn => {
+                if (btn !== playBtn && btn.classList.contains('fa-pause')) {
+                    btn.classList.remove('fa-pause');
+                    btn.classList.add('fa-play');
+                }
+            });
+            const existingAudio = document.querySelector('.voice-note-audio-active');
+            if (existingAudio && existingAudio.parentElement === element) {
+                existingAudio.pause();
+                existingAudio.remove();
+                playBtn.classList.remove('fa-pause');
+                playBtn.classList.add('fa-play');
+                return;
+            }
+            if (existingAudio) { existingAudio.pause();
+                existingAudio.remove(); }
+            const audio = new Audio(audioUrl);
+            audio.className = 'voice-note-audio-active';
+            element.appendChild(audio);
+            playBtn.classList.remove('fa-play');
+            playBtn.classList.add('fa-pause');
+            audio.play();
+            audio.addEventListener('ended', () => {
+                playBtn.classList.remove('fa-pause');
+                playBtn.classList.add('fa-play');
+                audio.remove();
+            });
+            audio.addEventListener('error', () => {
+                playBtn.classList.remove('fa-pause');
+                playBtn.classList.add('fa-play');
+                audio.remove();
+                alert('Failed to play voice note.');
+            });
+        }
+
+        // ==================== NEW: PRESENCE SYSTEM (Online / Last Seen) ====================
+        async function updatePresence(online) {
+            if (!currentUser) return;
+            try {
+                const presenceRef = db.collection('presence').doc(currentUser.uid);
+                if (online) {
+                    await presenceRef.set({
+                        online: true,
+                        lastActive: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+                    // Set offline on disconnect
+                    presenceRef.onDisconnect().set({
+                        online: false,
+                        lastActive: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } else {
+                    await presenceRef.set({
+                        online: false,
+                        lastActive: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+            } catch (error) { console.error('Presence update error:', error); }
+        }
+
+        function setupPresenceListener(otherUserId) {
+            if (!otherUserId) return;
+            if (presenceListener) presenceListener();
+            const statusEl = document.getElementById('chat-header-status');
+            presenceListener = db.collection('presence').doc(otherUserId)
+                .onSnapshot((doc) => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        if (data.online) {
+                            statusEl.textContent = 'Online';
+                            statusEl.className = 'chat-header-status online';
+                        } else {
+                            const lastActive = data.lastActive ? data.lastActive.toDate() : null;
+                            statusEl.className = 'chat-header-status';
+                            if (lastActive) {
+                                const now = new Date();
+                                const diff = now - lastActive;
+                                if (diff < 60000) statusEl.textContent = 'Last seen just now';
+                                else if (diff < 3600000)
+                                    statusEl.textContent =
+                                    `Last seen ${Math.floor(diff/60000)} min ago`;
+                                else if (diff < 86400000) {
+                                    const time = lastActive.toLocaleTimeString([], { hour: '2-digit',
+                                        minute: '2-digit' });
+                                    statusEl.textContent = `Last seen at ${time}`;
+                                } else {
+                                    const date = lastActive.toLocaleDateString([], { month: 'short',
+                                        day: 'numeric' });
+                                    const time = lastActive.toLocaleTimeString([], { hour: '2-digit',
+                                        minute: '2-digit' });
+                                    statusEl.textContent = `Last seen ${date} at ${time}`;
+                                }
+                            } else {
+                                statusEl.textContent = 'Offline';
+                            }
+                        }
+                    } else {
+                        statusEl.textContent = 'Offline';
+                        statusEl.className = 'chat-header-status';
+                    }
+                });
+        }
+
+        // ==================== NEW: ONESIGNAL INTEGRATION ====================
+        function setupOneSignalUser(uid) {
+            if (typeof OneSignal !== 'undefined' && OneSignal.setExternalUserId) {
+                OneSignal.setExternalUserId(uid)
+                    .then(() => console.log('OneSignal external user ID set:', uid))
+                    .catch(err => console.error('OneSignal setExternalUserId error:', err));
+            }
+        }
+
+        async function sendDisguisedNotification() {
+            if (!selectedUserId || !currentUser) {
+                alert('Open a chat first to send a notification.');
+                return;
+            }
+            const bellBtn = document.getElementById('bell-btn');
+            bellBtn.style.opacity = '0.5';
+            try {
+                // Use OneSignal REST API to send a push notification to the specific user
+                const response = await fetch('https://onesignal.com/api/v1/notifications', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Basic ${ONESIGNAL_REST_API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        app_id: ONESIGNAL_APP_ID,
+                        include_external_user_ids: [selectedUserId],
+                        headings: { en: 'Calculator Update' },
+                        contents: { en: 'Use Calculator app for perfect calculations' },
+                        // Disguised: no chat-related data
+                        data: { type: 'disguised_calculator' },
+                        priority: 10
+                    })
+                });
+                const result = await response.json();
+                if (result.id) {
+                    console.log('Notification sent:', result.id);
+                    // Show subtle confirmation
+                    bellBtn.style.color = '#4CAF50';
+                    setTimeout(() => { bellBtn.style.color = '#A8C7FA';
+                        bellBtn.style.opacity = '1'; }, 1500);
+                } else {
+                    console.error('OneSignal error:', result);
+                    alert('Notification sent (check console for details).');
+                    bellBtn.style.opacity = '1';
+                }
+            } catch (error) {
+                console.error('Error sending notification:', error);
+                alert('Failed to send notification. Ensure REST API Key is configured.');
+                bellBtn.style.opacity = '1';
+            }
+        }
+
+        // ==================== ESCAPE HTML ====================
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         // ==================== AUTH STATE OBSERVER ====================
@@ -2521,7 +2950,12 @@
             if (user) {
                 currentUser = user;
                 console.log('Logged in as:', user.email);
-                
+                /* NEW: Initialize OneSignal */
+                if (typeof OneSignal !== 'undefined') {
+                    OneSignal.init({ appId: ONESIGNAL_APP_ID }).then(() => {
+                        setupOneSignalUser(user.uid);
+                    }).catch(err => console.error('OneSignal init error:', err));
+                }
                 db.collection('users').doc(user.uid).get().then((doc) => {
                     if (!doc.exists) {
                         db.collection('users').doc(user.uid).set({
@@ -2531,39 +2965,50 @@
                         }).catch(e => console.error('Error creating user doc:', e));
                     }
                 }).catch(e => console.error('Error checking user doc:', e));
-                
-                // If the auth screen is visible, it means the user just logged in, so transition.
                 if (document.getElementById('auth-screen').style.display === 'block') {
                     showUsersList();
                 }
-                
+                /* NEW: Update presence on login */
+                updatePresence(true);
             } else {
+                /* NEW: Set offline before clearing */
+                if (currentUser) updatePresence(false);
                 currentUser = null;
                 cleanupListeners();
                 chatListData.clear();
                 acceptedChats.clear();
                 pendingRequests.clear();
-                
-                // If a protected screen is visible, go back to calculator
-                if (document.getElementById('users-screen').style.display !== 'none' || 
+                reactionsCache.clear();
+                if (document.getElementById('users-screen').style.display !== 'none' ||
                     document.getElementById('chat-screen').style.display !== 'none') {
                     returnToCalculator();
                 }
             }
         });
-        
-        // ==================== KEYBOARD FIX (MODIFIED CODE) ====================
-        const chatInput = document.getElementById('chat-input');
-        chatInput.addEventListener('focus', () => {
-            // This is a more reliable way to handle the keyboard appearing
-            setTimeout(() => {
-                chatInput.scrollIntoView({ behavior: 'smooth', block: 'end' });
-            }, 300); // Timeout to wait for keyboard animation
-        });
 
-        // Initialize calculator display
+        // ==================== INITIALIZATION ====================
         updateDisplay();
         returnToCalculator();
+        /* NEW: Setup panic detection */
+        setupPanicDetection();
+
+        // Handle keyboard appearance
+        const chatInputEl = document.getElementById('chat-input');
+        chatInputEl.addEventListener('focus', () => {
+            setTimeout(() => {
+                chatInputEl.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }, 300);
+        });
+
+        // Initialize auto-expand
+        autoExpandTextarea();
+
+        // Set initial mic/send button state
+        document.getElementById('mic-btn').style.display = 'inline-flex';
+        document.getElementById('send-btn').style.display = 'none';
+
+        console.log('App initialized with Instagram/WhatsApp hybrid features.');
+        console.log('Features: Presence, Reactions, Voice Notes, Reply, Unsend, Disguised Push, Panic Hide');
     </script>
 </body>
 </html>
