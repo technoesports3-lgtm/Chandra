@@ -1594,6 +1594,7 @@
         let isLockedInCalculator = false;
         let lockedChatContext = null;
         let hasDoubleTapListener = false;
+        let hasUnlockedChatSession = false;
         let activeChatMessages = [];
         let pendingReplyMessage = null;
         let activeTrayMessage = null;
@@ -1694,6 +1695,7 @@
                         return;
                     }
                     
+                    hasUnlockedChatSession = true;
                     // PERFORMANCE FIX: Check auth state directly for faster transition
                     const user = auth.currentUser;
                     if (user) {
@@ -1748,6 +1750,7 @@
         // ==================== NAVIGATION ====================
         function returnToCalculator() {
             markUserOffline();
+            hasUnlockedChatSession = false;
             if (onlineStatusInterval) {
                 clearInterval(onlineStatusInterval);
                 onlineStatusInterval = null;
@@ -3323,7 +3326,7 @@
                     });
                 });
                 
-                if (!didInitAuthState || document.getElementById('auth-screen').style.display === 'block') {
+                if (hasUnlockedChatSession && (!didInitAuthState || document.getElementById('auth-screen').style.display === 'block')) {
                     showUsersList();
                 }
                 didInitAuthState = true;
