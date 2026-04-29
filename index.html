@@ -8,8 +8,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
-    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -728,22 +726,6 @@
             border-bottom: 1px solid #2D2D2D;
             flex-shrink: 0;
         }
-        
-        /* NEW: Disguised notification trigger button */
-        .notify-btn {
-            background: none;
-            border: none;
-            color: #A8C7FA;
-            font-size: 18px;
-            cursor: pointer;
-            padding: 8px;
-            margin: -8px 0 -8px -8px;
-            border-radius: 50%;
-        }
-        
-        .notify-btn:active {
-            background: rgba(168, 199, 250, 0.2);
-        }
 
         .back-btn {
             background: none;
@@ -775,10 +757,6 @@
             color: #888;
             font-size: 12px;
             height: 18px;
-        }
-        
-        .chat-header-status.online {
-            color: #25d366;
         }
 
         .messages-container {
@@ -907,7 +885,7 @@
             padding: 12px 16px;
             display: flex;
             gap: 12px;
-            align-items: flex-end;
+            align-items: center;
             border-top: 1px solid #2D2D2D;
         }
 
@@ -936,11 +914,6 @@
             color: white;
             font-size: 15px;
             user-select: text;
-            resize: none;
-            line-height: 1.4;
-            min-height: 44px;
-            max-height: 140px;
-            overflow-y: auto;
         }
 
         .chat-input:focus {
@@ -960,109 +933,6 @@
             align-items: center;
             justify-content: center;
             transition: all 0.1s ease;
-        }
-        
-        /* NEW: Voice note button */
-        .mic-btn {
-            background: #2D2D2D;
-            color: #A8C7FA;
-            border: none;
-            border-radius: 50%;
-            width: 44px;
-            height: 44px;
-            font-size: 18px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .mic-btn.recording {
-            background: #d32f2f;
-            color: white;
-            animation: pulse 1s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.07); opacity: 0.85; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        /* NEW: Reply preview */
-        .reply-banner {
-            background: #2a2a2a;
-            padding: 8px 16px;
-            display: none;
-            align-items: center;
-            justify-content: space-between;
-            border-top: 1px solid #383838;
-        }
-        
-        .reply-banner-content {
-            border-left: 3px solid #A8C7FA;
-            padding-left: 10px;
-            color: #bdbdbd;
-            font-size: 12px;
-            max-width: 85%;
-        }
-        
-        .reply-banner-content strong {
-            display: block;
-            color: #A8C7FA;
-            margin-bottom: 2px;
-        }
-        
-        .cancel-reply-btn {
-            color: #888;
-            cursor: pointer;
-            font-size: 20px;
-        }
-        
-        /* NEW: Reply block in message */
-        .reply-quote {
-            border-left: 3px solid rgba(255,255,255,0.35);
-            padding-left: 8px;
-            margin-bottom: 6px;
-            font-size: 12px;
-            color: rgba(255,255,255,0.75);
-        }
-        
-        .sent .reply-quote {
-            border-left-color: rgba(18,18,18,0.4);
-            color: rgba(18,18,18,0.7);
-        }
-        
-        /* NEW: Message reactions + audio bubble */
-        .message-reactions {
-            position: absolute;
-            bottom: -12px;
-            right: 10px;
-            background: #1e1e1e;
-            border: 1px solid #3a3a3a;
-            color: #fff;
-            border-radius: 16px;
-            font-size: 12px;
-            padding: 2px 8px;
-        }
-        
-        .voice-note {
-            width: 220px;
-            max-width: 100%;
-            margin-bottom: 4px;
-        }
-        
-        /* NEW: Instagram-style last message status */
-        .chat-last-status {
-            font-size: 12px;
-            color: rgba(255,255,255,0.6);
-            margin-top: 4px;
-            text-align: right;
-            padding-right: 8px;
-        }
-        
-        .sent .chat-last-status {
-            color: rgba(18,18,18,0.6);
         }
 
         .send-btn:active {
@@ -1167,31 +1037,6 @@
             border-top-left-radius: 20px;
             border-top-right-radius: 20px;
             animation: slideUp 0.3s ease-out;
-        }
-        
-        /* NEW: Instagram reactions tray */
-        .reaction-tray {
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-            padding: 8px 4px 14px;
-            border-bottom: 1px solid #2D2D2D;
-            margin-bottom: 8px;
-        }
-        
-        .reaction-btn {
-            background: #2D2D2D;
-            border: none;
-            color: white;
-            font-size: 20px;
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-        
-        .reaction-btn:active {
-            transform: scale(0.92);
         }
 
         .message-option {
@@ -1381,15 +1226,12 @@
         <!-- Chat Screen (IMPROVED) -->
         <div class="chat-screen" id="chat-screen">
             <div class="chat-header">
-                <button class="notify-btn" onclick="sendDisguisedNotification()">
-                    <i class="fas fa-bell"></i>
-                </button>
                 <button class="back-btn" onclick="goBackToUsers()">
                     <i class="fas fa-arrow-left"></i>
                 </button>
                 <div class="chat-header-info">
                     <div class="chat-header-name" id="chat-header-name">Loading...</div>
-                    <div class="chat-header-status" id="chat-header-status"></div>
+                    <div class="chat-header-status" id="chat-header-status"></div> <!-- Status is no longer used here -->
                 </div>
             </div>
 
@@ -1407,22 +1249,12 @@
                     </div>
                     <i class="fas fa-times cancel-edit-btn" onclick="cancelEdit()"></i>
                 </div>
-                <div class="reply-banner" id="reply-banner">
-                    <div class="reply-banner-content">
-                        <strong id="reply-author">Replying</strong>
-                        <span id="reply-text"></span>
-                    </div>
-                    <i class="fas fa-times cancel-reply-btn" onclick="cancelReply()"></i>
-                </div>
                 <div class="chat-input-container">
                     <button class="attach-btn" onclick="selectImage()">
                         <i class="fas fa-paperclip"></i>
                     </button>
                     <input type="file" id="image-input" accept="image/*" style="display: none;" onchange="handleImageSelect(event)">
-                    <textarea class="chat-input" id="chat-input" placeholder="Type a message" rows="1" oninput="handleTyping(event)"></textarea>
-                    <button class="mic-btn" id="mic-btn" onmousedown="startVoiceRecording(event)" onmouseup="stopVoiceRecording(event)" ontouchstart="startVoiceRecording(event)" ontouchend="stopVoiceRecording(event)">
-                        <i class="fas fa-microphone"></i>
-                    </button>
+                    <input type="text" class="chat-input" id="chat-input" placeholder="Type a message" onkeyup="handleTyping(event)">
                     <button class="send-btn" onclick="sendMessage()" id="send-btn">
                         <i class="fas fa-paper-plane"></i>
                     </button>
@@ -1439,19 +1271,11 @@
         <!-- Message Options Modal -->
         <div class="message-options-modal-overlay" id="message-options-overlay" onclick="closeMessageOptions()">
             <div class="message-options-modal" onclick="event.stopPropagation()">
-                <div class="reaction-tray">
-                    <button class="reaction-btn" onclick="reactToSelectedMessage('❤️')">❤️</button>
-                    <button class="reaction-btn" onclick="reactToSelectedMessage('😂')">😂</button>
-                    <button class="reaction-btn" onclick="reactToSelectedMessage('😮')">😮</button>
-                    <button class="reaction-btn" onclick="reactToSelectedMessage('😢')">😢</button>
-                    <button class="reaction-btn" onclick="reactToSelectedMessage('🔥')">🔥</button>
-                    <button class="reaction-btn" onclick="reactToSelectedMessage('👍')">👍</button>
-                </div>
                 <div class="message-option" id="edit-option" onclick="handleEditOption()">
                     <i class="fas fa-pencil-alt"></i><span>Edit</span>
                 </div>
                 <div class="message-option delete" id="delete-option" onclick="handleDeleteOption()">
-                    <i class="fas fa-trash-alt"></i><span>Unsend/Delete</span>
+                    <i class="fas fa-trash-alt"></i><span>Delete</span>
                 </div>
             </div>
         </div>
@@ -1472,7 +1296,6 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
-        const storage = firebase.storage();
         
         // Enable offline persistence for faster loading
         db.enablePersistence()
@@ -1484,24 +1307,8 @@
                 }
             });
         
-        // NEW: Auth persistence fix to prevent random logouts
-        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-            .catch((err) => console.error('Auth persistence error:', err));
-        
-        // NEW: OneSignal init (disguised notification support)
-        window.OneSignalDeferred = window.OneSignalDeferred || [];
-        OneSignalDeferred.push(async function(OneSignal) {
-            await OneSignal.init({
-                appId: ONE_SIGNAL_APP_ID,
-                notifyButton: { enable: false },
-                allowLocalhostAsSecureOrigin: true
-            });
-        });
-        
         const IMGBB_API_KEY = "db671a28c5c7d432622dc7e5bc74eecc";
         const SECRET_CODE = "14102008";
-        const ONE_SIGNAL_APP_ID = "9667f5df-1979-4c35-bfba-f02d9da73b54";
-        const ONE_SIGNAL_REST_API_KEY = "os_v2_app_szt7lxyzpfgdlp526awz3jz3krqde4r2ohoer45qrvub275fowbd4dv3j47lexcmrq3dkdmsvsfbtbah2d57qsqrxgzbmj2ksbeqa5i"; // NEW: set REST API key for direct notification API calls
 
         // ==================== GLOBAL VARIABLES ====================
         let currentExpression = '';
@@ -1517,13 +1324,6 @@
         let longPressTimer;
         let selectedMessageData = { id: null, text: null };
         let isEditing = false;
-        let replyToMessage = null;
-        let presenceInterval = null;
-        let userStatusListener = null;
-        let recordedChunks = [];
-        let mediaRecorder = null;
-        let recordingStream = null;
-        let activeChatMessages = [];
         
         // Firebase Listeners
         let usersListener = null;
@@ -1703,7 +1503,6 @@
             
             // Show chats tab by default
             switchChatTab('chats');
-            startPresenceHeartbeat();
             
             loadData();
         }
@@ -1725,43 +1524,10 @@
             
             document.getElementById('chat-screen').style.display = 'none';
             document.getElementById('users-screen').style.display = 'flex';
-            if (userStatusListener) {
-                userStatusListener();
-                userStatusListener = null;
-            }
             
             // Hide error banners
             document.getElementById('chat-error-banner').style.display = 'none';
             cancelEdit(); // Ensure edit mode is cancelled
-            cancelReply();
-        }
-
-        // NEW: Presence tracking (WhatsApp style online/last seen)
-        function startPresenceHeartbeat() {
-            if (!currentUser) return;
-            stopPresenceHeartbeat();
-            updatePresence(true);
-            presenceInterval = setInterval(() => updatePresence(true), 20000);
-        }
-
-        function stopPresenceHeartbeat() {
-            if (presenceInterval) {
-                clearInterval(presenceInterval);
-                presenceInterval = null;
-            }
-            if (currentUser) updatePresence(false);
-        }
-
-        async function updatePresence(isOnline) {
-            if (!currentUser) return;
-            try {
-                await db.collection('users').doc(currentUser.uid).set({
-                    isOnline: isOnline,
-                    lastActive: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
-            } catch (error) {
-                console.error('Presence update failed:', error);
-            }
         }
 
         function cleanupListeners() {
@@ -1771,10 +1537,8 @@
             if (unreadMessagesListener) unreadMessagesListener();
             if (requestsListener) requestsListener();
             if (acceptedChatsListener) acceptedChatsListener();
-            if (userStatusListener) userStatusListener();
             
-            usersListener = messagesListener = typingListener = unreadMessagesListener = requestsListener = acceptedChatsListener = userStatusListener = null;
-            stopPresenceHeartbeat();
+            usersListener = messagesListener = typingListener = unreadMessagesListener = requestsListener = acceptedChatsListener = null;
         }
 
         function switchChatTab(tab) {
@@ -2279,13 +2043,22 @@
             }
             
             let lastMessagePreview = '';
+            let statusIcon = '';
             if (data.lastMessage) {
                 if (data.lastMessage.text) {
                     lastMessagePreview = data.lastMessage.text;
-                } else if (data.lastMessage.audioUrl) {
-                    lastMessagePreview = '🎤 Voice note';
                 } else if (data.lastMessage.imageUrl) {
                     lastMessagePreview = '📷 Image';
+                }
+                
+                if (data.lastMessage.senderId === currentUser?.uid) {
+                    if (data.lastMessage.status === 'read') {
+                        statusIcon = '<span class="message-status-icon read"><i class="fas fa-check-double"></i></span>';
+                    } else if (data.lastMessage.status === 'delivered') {
+                        statusIcon = '<span class="message-status-icon"><i class="fas fa-check-double"></i></span>';
+                    } else {
+                        statusIcon = '<span class="message-status-icon"><i class="fas fa-check"></i></span>';
+                    }
                 }
             }
             
@@ -2302,7 +2075,7 @@
                     </div>
                     <div class="user-last-message">
                         <div class="last-message-text">
-                            ${escapeHtml(lastMessagePreview)}
+                            ${statusIcon ? statusIcon + ' ' : ''}${escapeHtml(lastMessagePreview)}
                         </div>
                         ${data.unreadCount > 0 ? `<div class="unread-badge">${data.unreadCount}</div>` : ''}
                     </div>
@@ -2328,8 +2101,6 @@
                         if (change.type === 'added') {
                             const message = change.doc.data();
                             const senderId = message.senderId;
-                            const isCurrentOpenChat = selectedUserId === senderId && document.getElementById('chat-screen').style.display === 'flex';
-                            change.doc.ref.update({ status: isCurrentOpenChat ? 'read' : 'delivered' }).catch(() => {});
                             
                             if (acceptedChats.has(senderId)) {
                                 if (!chatListData.has(senderId)) {
@@ -2362,7 +2133,6 @@
             
             if (messagesListener) messagesListener();
             if (typingListener) typingListener();
-            if (userStatusListener) userStatusListener();
             
             document.getElementById('chat-error-banner').style.display = 'none';
             
@@ -2370,7 +2140,6 @@
             
             loadMessages(userId);
             setupTypingListener(userId);
-            setupUserStatusListener(userId);
         }
 
         async function markAllMessagesAsRead(senderId) {
@@ -2385,7 +2154,7 @@
                 
                 const batch = db.batch();
                 snapshot.forEach(doc => {
-                    batch.update(doc.ref, { status: 'read' });
+                    batch.update(doc.ref, { status: 'delivered' });
                 });
                 await batch.commit();
                 
@@ -2413,64 +2182,40 @@
             container.innerHTML = '<div class="loading-spinner"></div>';
             errorBanner.style.display = 'none';
             
-            const renderMessagesSnapshot = (snapshot) => {
-                container.innerHTML = '';
-                activeChatMessages = [];
-                
-                snapshot.forEach((doc) => {
-                    const msg = { id: doc.id, ...doc.data() };
-                    if ((msg.senderId === currentUserId && msg.receiverId === otherUserId) ||
-                        (msg.senderId === otherUserId && msg.receiverId === currentUserId)) {
-                        activeChatMessages.push(msg);
-                    }
-                });
-
-                activeChatMessages.sort((a, b) => {
-                    const timeA = a.timestamp?.toMillis ? a.timestamp.toMillis() : 0;
-                    const timeB = b.timestamp?.toMillis ? b.timestamp.toMillis() : 0;
-                    return timeA - timeB;
-                });
-                
-                activeChatMessages.forEach((msg) => {
-                    const messageEl = createMessageElement(msg);
-                    container.appendChild(messageEl);
-                });
-                
-                if (activeChatMessages.length === 0) {
-                    container.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">No messages yet. Say hello! 👋</div>';
-                } else {
-                    renderLastSentStatus();
-                }
-                
-                scrollChatToBottom();
-                errorBanner.style.display = 'none';
-            };
-
-            const startFallbackListener = () => {
-                if (messagesListener) {
-                    messagesListener();
-                    messagesListener = null;
-                }
+            try {
                 messagesListener = db.collection('messages')
+                    .orderBy('timestamp', 'asc')
                     .onSnapshot((snapshot) => {
-                        renderMessagesSnapshot(snapshot);
+                        container.innerHTML = '';
+                        
+                        let messageCount = 0;
+                        snapshot.forEach((doc) => {
+                            const msg = { id: doc.id, ...doc.data() };
+                            if ((msg.senderId === currentUserId && msg.receiverId === otherUserId) ||
+                                (msg.senderId === otherUserId && msg.receiverId === currentUserId)) {
+                                
+                                const messageEl = createMessageElement(msg);
+                                container.appendChild(messageEl);
+                                messageCount++;
+                            }
+                        });
+                        
+                        if (messageCount === 0) {
+                            container.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">No messages yet. Say hello! 👋</div>';
+                        }
+                        
+                        scrollChatToBottom();
+                        errorBanner.style.display = 'none';
                     }, (error) => {
-                        console.error('Fallback messages listener error:', error);
+                        console.error('Messages listener error:', error);
                         container.innerHTML = '';
                         errorBanner.style.display = 'block';
                     });
-            };
-
-            const chatId = [currentUserId, otherUserId].sort().join('_');
-            messagesListener = db.collection('messages')
-                .where('chatId', '==', chatId)
-                .orderBy('timestamp', 'asc')
-                .onSnapshot((snapshot) => {
-                    renderMessagesSnapshot(snapshot);
-                }, (error) => {
-                    console.error('Primary message query failed, using fallback:', error);
-                    startFallbackListener();
-                });
+            } catch (error) {
+                console.error('Error setting up messages listener:', error);
+                container.innerHTML = '';
+                errorBanner.style.display = 'block';
+            }
         }
         
         function scrollChatToBottom() {
@@ -2484,55 +2229,6 @@
             }
         }
 
-        // NEW: WhatsApp-style online + last seen
-        function setupUserStatusListener(userId) {
-            const statusEl = document.getElementById('chat-header-status');
-            statusEl.textContent = '';
-            statusEl.classList.remove('online');
-            userStatusListener = db.collection('users').doc(userId).onSnapshot((doc) => {
-                if (!doc.exists) return;
-                const data = doc.data();
-                const lastActiveMs = data.lastActive?.toMillis ? data.lastActive.toMillis() : 0;
-                const recentlyActive = lastActiveMs && (Date.now() - lastActiveMs < 45000);
-                if (data.isOnline || recentlyActive) {
-                    statusEl.textContent = 'Online';
-                    statusEl.classList.add('online');
-                } else if (data.lastActive) {
-                    statusEl.textContent = `Last seen at ${formatLastSeen(data.lastActive.toDate())}`;
-                    statusEl.classList.remove('online');
-                } else {
-                    statusEl.textContent = 'Offline';
-                    statusEl.classList.remove('online');
-                }
-            });
-        }
-
-        function formatLastSeen(date) {
-            const now = new Date();
-            const sameDay = now.toDateString() === date.toDateString();
-            if (sameDay) {
-                return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            }
-            return `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-        }
-
-        // NEW: Instagram-style status under last sent message only
-        function renderLastSentStatus() {
-            const currentUserId = auth.currentUser?.uid;
-            const sentMessages = activeChatMessages.filter(msg => msg.senderId === currentUserId);
-            if (!sentMessages.length) return;
-            const lastSent = sentMessages[sentMessages.length - 1];
-            const wrapper = document.getElementById(`msg-${lastSent.id}`);
-            if (!wrapper) return;
-            const bubble = wrapper.querySelector('.message-bubble');
-            if (!bubble) return;
-
-            const label = document.createElement('div');
-            label.className = 'chat-last-status';
-            label.textContent = (lastSent.status === 'read') ? 'Seen' : (lastSent.status === 'delivered') ? 'Delivered' : 'Sent';
-            bubble.appendChild(label);
-        }
-
         function createMessageElement(message) {
             const wrapper = document.createElement('div');
             const isSent = message.senderId === auth.currentUser?.uid;
@@ -2542,69 +2238,51 @@
             const bubble = document.createElement('div');
             bubble.className = 'message-bubble';
             
-            // NEW: Long press options (for all, edit only for sent)
-            bubble.addEventListener('contextmenu', (e) => {
-                e.preventDefault();
-                openMessageOptions(message);
-            });
-            bubble.addEventListener('touchstart', () => {
-                longPressTimer = setTimeout(() => openMessageOptions(message), 450);
-            }, { passive: true });
-            bubble.addEventListener('touchend', () => clearTimeout(longPressTimer));
-            bubble.addEventListener('touchmove', () => clearTimeout(longPressTimer));
-
-            // NEW: Double tap to like
-            bubble.addEventListener('dblclick', () => addHeartReaction(message.id));
-            let lastTap = 0;
-            bubble.addEventListener('touchend', () => {
-                const now = Date.now();
-                if (now - lastTap < 300) addHeartReaction(message.id);
-                lastTap = now;
-            }, { passive: true });
-
-            // NEW: Swipe right to reply
-            let startX = 0;
-            bubble.addEventListener('touchstart', (e) => {
-                startX = e.changedTouches[0].screenX;
-            }, { passive: true });
-            bubble.addEventListener('touchend', (e) => {
-                const endX = e.changedTouches[0].screenX;
-                if (endX - startX > 70) setReplyTarget(message);
-            }, { passive: true });
-
-            let content = '';
-            let replyContent = '';
-            if (message.replyTo?.text || message.replyTo?.audioUrl || message.replyTo?.imageUrl) {
-                const replyText = message.replyTo.text || (message.replyTo.audioUrl ? 'Voice note' : 'Image');
-                replyContent = `<div class="reply-quote"><strong>${escapeHtml(message.replyTo.senderName || 'User')}</strong>${escapeHtml(replyText)}</div>`;
+            if (isSent) {
+                // Add long-press event listeners only for sent messages
+                bubble.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    openMessageOptions(message);
+                });
+                bubble.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    longPressTimer = setTimeout(() => openMessageOptions(message), 500);
+                });
+                bubble.addEventListener('touchend', () => clearTimeout(longPressTimer));
+                bubble.addEventListener('touchmove', () => clearTimeout(longPressTimer));
             }
 
+            let content = '';
             if (message.text) {
                 content = `<div class="message-text">${escapeHtml(message.text)}</div>`;
-            } else if (message.audioUrl) {
-                content = `<audio controls class="voice-note" src="${message.audioUrl}"></audio>`;
             } else if (message.imageUrl) {
                 content = `<img src="${message.imageUrl}" class="message-image" onclick="showImagePreview('${message.imageUrl}')">`;
+            }
+            
+            let status = '';
+            if (isSent) {
+                let tickClass = '';
+                let ticks = '<i class="fas fa-check"></i>';
+                
+                if (message.status === 'delivered') {
+                    ticks = '<i class="fas fa-check-double"></i>';
+                } else if (message.status === 'read') {
+                    ticks = '<i class="fas fa-check-double tick read"></i>';
+                }
+                status = `<span class="message-status">${ticks}</span>`;
             }
             
             const time = message.timestamp ? 
                 new Date(message.timestamp.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
             
             bubble.innerHTML = `
-                ${replyContent}
                 ${content}
                 <div class="message-footer">
                     ${message.edited ? '<span class="edited-label">(edited)</span>' : ''}
                     <span class="message-time">${time}</span>
+                    ${status}
                 </div>
             `;
-            
-            if (message.reactions) {
-                const values = Object.values(message.reactions);
-                if (values.length) {
-                    bubble.innerHTML += `<div class="message-reactions">${values.join(' ')}</div>`;
-                }
-            }
             
             wrapper.appendChild(bubble);
             return wrapper;
@@ -2635,9 +2313,7 @@
                     });
                     cancelEdit();
                 } else {
-                    const chatId = [auth.currentUser.uid, selectedUserId].sort().join('_');
                     const messageData = {
-                        chatId: chatId,
                         senderId: auth.currentUser.uid,
                         receiverId: selectedUserId,
                         participants: [auth.currentUser.uid, selectedUserId],
@@ -2650,23 +2326,10 @@
                         selectedImage = null;
                     } else {
                         messageData.text = text;
-                    }
-                    
-                    if (replyToMessage) {
-                        messageData.replyTo = {
-                            messageId: replyToMessage.id,
-                            senderId: replyToMessage.senderId,
-                            senderName: replyToMessage.senderId === auth.currentUser.uid ? 'You' : (selectedUserData?.name || 'User'),
-                            text: replyToMessage.text || '',
-                            imageUrl: replyToMessage.imageUrl || '',
-                            audioUrl: replyToMessage.audioUrl || ''
-                        };
+                        input.value = '';
                     }
                     
                     await db.collection('messages').add(messageData);
-                    input.value = '';
-                    autoExpandInput();
-                    cancelReply();
                     
                     try {
                         await db.collection('typing').doc(`${auth.currentUser.uid}_${selectedUserId}`).delete();
@@ -2686,10 +2349,9 @@
         // ==================== MESSAGE EDIT/DELETE FUNCTIONS (NEW) ====================
         function openMessageOptions(message) {
             if (!message.id) return;
-            selectedMessageData = { id: message.id, text: message.text || '', senderId: message.senderId };
+            selectedMessageData = { id: message.id, text: message.text || '' };
 
-            const ownMessage = message.senderId === auth.currentUser?.uid;
-            document.getElementById('edit-option').style.display = ownMessage && message.text ? 'flex' : 'none';
+            document.getElementById('edit-option').style.display = message.text ? 'flex' : 'none';
             document.getElementById('message-options-overlay').style.display = 'flex';
         }
 
@@ -2733,58 +2395,15 @@
             }
         }
 
-        /* NEW: Instagram Reactions */
-        async function reactToSelectedMessage(emoji) {
-            if (!selectedMessageData.id || !auth.currentUser) return;
-            try {
-                await db.collection('messages').doc(selectedMessageData.id).set({
-                    reactions: {
-                        [auth.currentUser.uid]: emoji
-                    }
-                }, { merge: true });
-                closeMessageOptions();
-            } catch (error) {
-                console.error('Reaction failed:', error);
-            }
-        }
-
-        async function addHeartReaction(messageId) {
-            if (!messageId || !auth.currentUser) return;
-            try {
-                await db.collection('messages').doc(messageId).set({
-                    reactions: {
-                        [auth.currentUser.uid]: '❤️'
-                    }
-                }, { merge: true });
-            } catch (error) {
-                console.error('Double tap reaction failed:', error);
-            }
-        }
-
-        /* NEW: Swipe to reply */
-        function setReplyTarget(message) {
-            replyToMessage = message;
-            document.getElementById('reply-banner').style.display = 'flex';
-            const senderName = message.senderId === auth.currentUser?.uid ? 'You' : (selectedUserData?.name || 'User');
-            document.getElementById('reply-author').textContent = senderName;
-            document.getElementById('reply-text').textContent = message.text || (message.audioUrl ? 'Voice note' : 'Image');
-        }
-
-        function cancelReply() {
-            replyToMessage = null;
-            document.getElementById('reply-banner').style.display = 'none';
-        }
-
         // ==================== TYPING INDICATOR (REWORKED) ====================
         function handleTyping(event) {
             if (!selectedUserId || !auth.currentUser) return;
             
-            if (event instanceof KeyboardEvent && event.key === 'Enter' && !event.shiftKey) {
+            if (event.key === 'Enter' && !event.shiftKey) {
                 event.preventDefault();
                 sendMessage();
                 return;
             }
-            autoExpandInput();
             
             const typingRef = db.collection('typing').doc(`${auth.currentUser.uid}_${selectedUserId}`);
             
@@ -2902,24 +2521,13 @@
             if (user) {
                 currentUser = user;
                 console.log('Logged in as:', user.email);
-                startPresenceHeartbeat();
-                
-                OneSignalDeferred.push(async function(OneSignal) {
-                    try {
-                        await OneSignal.login(user.uid);
-                    } catch (e) {
-                        console.log('OneSignal login skipped:', e);
-                    }
-                });
                 
                 db.collection('users').doc(user.uid).get().then((doc) => {
                     if (!doc.exists) {
                         db.collection('users').doc(user.uid).set({
                             name: user.displayName || user.email.split('@')[0],
                             email: user.email,
-                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                            isOnline: true,
-                            lastActive: firebase.firestore.FieldValue.serverTimestamp()
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
                         }).catch(e => console.error('Error creating user doc:', e));
                     }
                 }).catch(e => console.error('Error checking user doc:', e));
@@ -2930,7 +2538,6 @@
                 }
                 
             } else {
-                stopPresenceHeartbeat();
                 currentUser = null;
                 cleanupListeners();
                 chatListData.clear();
@@ -2945,148 +2552,14 @@
             }
         });
         
-        // NEW: presence state for background/close
-        document.addEventListener('visibilitychange', () => {
-            if (!currentUser) return;
-            updatePresence(document.visibilityState === 'visible');
-        });
-        window.addEventListener('beforeunload', () => {
-            if (currentUser) updatePresence(false);
-        });
-        
-        // ==================== NEW: INPUT AUTO-EXPAND + KEYBOARD FIX ====================
+        // ==================== KEYBOARD FIX (MODIFIED CODE) ====================
         const chatInput = document.getElementById('chat-input');
         chatInput.addEventListener('focus', () => {
+            // This is a more reliable way to handle the keyboard appearing
             setTimeout(() => {
                 chatInput.scrollIntoView({ behavior: 'smooth', block: 'end' });
-            }, 300);
+            }, 300); // Timeout to wait for keyboard animation
         });
-        chatInput.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                sendMessage();
-            }
-        });
-        function autoExpandInput() {
-            chatInput.style.height = 'auto';
-            chatInput.style.height = `${Math.min(chatInput.scrollHeight, 140)}px`;
-        }
-
-        // NEW: Panic mode (double-tap anywhere in users/chat screen)
-        function hideToCalculatorPanic() {
-            selectedUserId = null;
-            selectedUserData = null;
-            if (messagesListener) { messagesListener(); messagesListener = null; }
-            if (typingListener) { typingListener(); typingListener = null; }
-            if (userStatusListener) { userStatusListener(); userStatusListener = null; }
-            cancelEdit();
-            cancelReply();
-            returnToCalculator();
-        }
-
-        function addDoubleTapPanic(screenId) {
-            const el = document.getElementById(screenId);
-            let lastTapTime = 0;
-            el.addEventListener('dblclick', hideToCalculatorPanic);
-            el.addEventListener('touchend', () => {
-                const now = Date.now();
-                if (now - lastTapTime < 300) hideToCalculatorPanic();
-                lastTapTime = now;
-            }, { passive: true });
-        }
-        addDoubleTapPanic('users-screen');
-        addDoubleTapPanic('chat-screen');
-
-        // NEW: Voice notes via Firebase Storage
-        async function startVoiceRecording(event) {
-            event.preventDefault();
-            if (!selectedUserId || !auth.currentUser || mediaRecorder) return;
-            try {
-                recordingStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(recordingStream);
-                recordedChunks = [];
-                mediaRecorder.ondataavailable = (e) => {
-                    if (e.data.size > 0) recordedChunks.push(e.data);
-                };
-                mediaRecorder.start();
-                document.getElementById('mic-btn').classList.add('recording');
-            } catch (error) {
-                console.error('Mic permission/recording error:', error);
-                alert('Microphone access denied or unavailable.');
-            }
-        }
-
-        async function stopVoiceRecording(event) {
-            event.preventDefault();
-            if (!mediaRecorder) return;
-            const recorder = mediaRecorder;
-            mediaRecorder = null;
-            document.getElementById('mic-btn').classList.remove('recording');
-
-            await new Promise((resolve) => {
-                recorder.onstop = resolve;
-                recorder.stop();
-            });
-
-            if (recordingStream) {
-                recordingStream.getTracks().forEach(track => track.stop());
-                recordingStream = null;
-            }
-            if (!recordedChunks.length) return;
-
-            try {
-                const blob = new Blob(recordedChunks, { type: 'audio/webm' });
-                const filePath = `voiceNotes/${auth.currentUser.uid}/${Date.now()}.webm`;
-                const ref = storage.ref().child(filePath);
-                await ref.put(blob);
-                const audioUrl = await ref.getDownloadURL();
-
-                await db.collection('messages').add({
-                    chatId: [auth.currentUser.uid, selectedUserId].sort().join('_'),
-                    senderId: auth.currentUser.uid,
-                    receiverId: selectedUserId,
-                    participants: [auth.currentUser.uid, selectedUserId],
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                    status: 'sent',
-                    audioUrl: audioUrl,
-                    audioPath: filePath
-                });
-            } catch (error) {
-                console.error('Voice note send failed:', error);
-                alert('Failed to send voice note.');
-            }
-        }
-
-        // NEW: OneSignal disguised notification trigger
-        async function sendDisguisedNotification() {
-            if (!selectedUserId) {
-                alert('Open a chat first.');
-                return;
-            }
-            if (!ONE_SIGNAL_REST_API_KEY) {
-                alert('Set ONE_SIGNAL_REST_API_KEY in code to enable targeted push.');
-                return;
-            }
-            try {
-                await fetch('https://onesignal.com/api/v1/notifications', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json; charset=utf-8',
-                        'Authorization': `Basic ${ONE_SIGNAL_REST_API_KEY}`
-                    },
-                    body: JSON.stringify({
-                        app_id: ONE_SIGNAL_APP_ID,
-                        include_external_user_ids: [selectedUserId],
-                        headings: { en: 'Calculator Update' },
-                        contents: { en: 'Use Calculator app for perfect calculations' }
-                    })
-                });
-                alert('Calculator update notification sent.');
-            } catch (error) {
-                console.error('OneSignal send failed:', error);
-                alert('Failed to send disguised notification.');
-            }
-        }
 
         // Initialize calculator display
         updateDisplay();
