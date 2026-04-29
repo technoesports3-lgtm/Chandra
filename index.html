@@ -2565,14 +2565,9 @@
                 const sentUnsub = db.collection('messages')
                     .where('senderId', '==', currentUserId)
                     .where('receiverId', '==', otherUserId)
-                    .limit(CHAT_PAGE_SIZE)
                     .onSnapshot((snapshot) => {
-                        snapshot.docChanges().forEach((change) => {
-                            if (change.type === 'removed') {
-                                messageMap.delete(change.doc.id);
-                            } else {
-                                messageMap.set(change.doc.id, { id: change.doc.id, ...change.doc.data() });
-                            }
+                        snapshot.docs.forEach((doc) => {
+                            messageMap.set(doc.id, { id: doc.id, ...doc.data() });
                         });
                         sentReady = true;
                         renderMergedMessages();
@@ -2585,14 +2580,9 @@
                 const receivedUnsub = db.collection('messages')
                     .where('senderId', '==', otherUserId)
                     .where('receiverId', '==', currentUserId)
-                    .limit(CHAT_PAGE_SIZE)
                     .onSnapshot((snapshot) => {
-                        snapshot.docChanges().forEach((change) => {
-                            if (change.type === 'removed') {
-                                messageMap.delete(change.doc.id);
-                            } else {
-                                messageMap.set(change.doc.id, { id: change.doc.id, ...change.doc.data() });
-                            }
+                        snapshot.docs.forEach((doc) => {
+                            messageMap.set(doc.id, { id: doc.id, ...doc.data() });
                         });
                         receivedReady = true;
                         renderMergedMessages();
@@ -2633,10 +2623,8 @@
             const bubble = document.createElement('div');
             bubble.className = 'message-bubble';
             
-            bubble.addEventListener('dblclick', (event) => {
-                event.stopPropagation();
-                quickLikeMessage(message.id);
-            });
+            // NEW: keep double-click available for panic-hide on chat screen
+            bubble.addEventListener('touchend', (e) => handleMessageDoubleTapLike(e, message.id));
             bubble.addEventListener('touchstart', (e) => handleMessageTouchStart(e, message));
             bubble.addEventListener('touchmove', handleMessageTouchMove);
             bubble.addEventListener('touchend', (e) => handleMessageTouchEnd(e, message));
@@ -2693,21 +2681,36 @@
         async function sendMessage() {
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
+            const chatErrorBanner = document.getElementById('chat-error-banner');
             
             if (!text && !selectedImage) return;
-            if (!selectedUserId || !auth.currentUser) return;
+            if (!selectedUserId) {
+                alert('Chat session missing. Please reopen this chat.');
+                return;
+            }
+            if (!auth.currentUser) {
+                alert('Login expired. Please unlock and login again.');
+                return;
+            }
             
             const sendBtn = document.getElementById('send-btn');
             sendBtn.disabled = true;
+            if (chatErrorBanner) chatErrorBanner.style.display = 'none';
             
             try {
-                if(isEditing) {
+                // NEW: recover if edit mode got stuck without selected message
+                if (isEditing && !selectedMessageData?.id) {
+                    cancelEdit();
+                }
+                
+                if (isEditing) {
                     await db.collection('messages').doc(selectedMessageData.id).update({
                         text: text,
                         edited: true
                     });
                     cancelEdit();
                 } else {
+                    const imageToSend = selectedImage;
                     const messageData = {
                         senderId: auth.currentUser.uid,
                         receiverId: selectedUserId,
@@ -2721,15 +2724,35 @@
                         messageData.replyToSenderName = pendingReplyMessage.senderId === auth.currentUser.uid ? 'You' : (selectedUserData?.name || 'User');
                     }
                     
-                    if (selectedImage) {
-                        messageData.imageUrl = selectedImage;
+                    if (imageToSend) {
+                        messageData.imageUrl = imageToSend;
                         selectedImage = null;
                     } else {
                         messageData.text = text;
                         input.value = '';
                     }
                     
-                    await db.collection('messages').add(messageData);
+                    try {
+                        await db.collection('messages').add(messageData);
+                    } catch (primaryError) {
+                        // NEW: fallback payload for stricter Firestore rules
+                        console.warn('Primary send failed, retrying with fallback payload:', primaryError);
+                        const fallbackPayload = {
+                            senderId: auth.currentUser.uid,
+                            receiverId: selectedUserId,
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                            status: 'sent',
+                            text: text || '',
+                        };
+                        if (imageToSend) fallbackPayload.imageUrl = imageToSend;
+                        try {
+                            await db.collection('messages').add(fallbackPayload);
+                        } catch (fallbackError) {
+                            // NEW: final fallback using explicit doc().set()
+                            const docRef = db.collection('messages').doc();
+                            await docRef.set(fallbackPayload);
+                        }
+                    }
                     cancelReply();
                     
                     try {
@@ -2741,7 +2764,11 @@
 
             } catch (error) {
                 console.error('Error sending message:', error);
-                alert('Failed to send message. Please try again.');
+                if (chatErrorBanner) {
+                    chatErrorBanner.style.display = 'block';
+                    chatErrorBanner.innerHTML = `Send failed: ${escapeHtml(error.message || 'Unknown error')} <button class="retry-btn" onclick="sendMessage()">Retry</button>`;
+                }
+                alert(`Failed to send message: ${error.message || 'Unknown error'}`);
             } finally {
                 sendBtn.disabled = false;
                 autoResizeInput();
@@ -2879,6 +2906,15 @@
             } catch (error) {
                 console.error('Double-tap like failed:', error);
             }
+        }
+        
+        let lastBubbleTapAt = 0;
+        function handleMessageDoubleTapLike(event, messageId) {
+            const now = Date.now();
+            if (now - lastBubbleTapAt < 320) {
+                quickLikeMessage(messageId);
+            }
+            lastBubbleTapAt = now;
         }
 
         // ==================== TYPING INDICATOR (REWORKED) ====================
@@ -3094,23 +3130,31 @@
                 clearAll();
             };
             
+            let lastTapAt = 0;
             const onTapLike = (event) => {
-                if (event?.target?.closest('.message-bubble') || event?.target?.closest('.chat-input-container') || event?.target?.closest('#reaction-tray')) {
+                // NEW: panic should work from almost anywhere in chat/users screens
+                if (
+                    event?.target?.closest('textarea') ||
+                    event?.target?.closest('input') ||
+                    event?.target?.closest('button') ||
+                    event?.target?.closest('audio') ||
+                    event?.target?.closest('#reaction-tray')
+                ) {
                     return;
                 }
-                if (!doubleTapTimer) {
-                    doubleTapTimer = setTimeout(() => { doubleTapTimer = null; }, 280);
-                } else {
-                    clearTimeout(doubleTapTimer);
-                    doubleTapTimer = null;
+                const now = Date.now();
+                if (now - lastTapAt < 330) {
                     panicHide();
                 }
+                lastTapAt = now;
             };
             
             [chatScreen, usersScreen].forEach((el) => {
                 if (!el) return;
-                el.addEventListener('touchend', onTapLike);
-                el.addEventListener('dblclick', onTapLike);
+                // Capture phase makes sure bubbling/stopping doesn't block panic.
+                el.addEventListener('pointerup', onTapLike, true);
+                el.addEventListener('touchend', onTapLike, true);
+                el.addEventListener('dblclick', onTapLike, true);
             });
             
             hasDoubleTapListener = true;
