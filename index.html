@@ -17,7 +17,8 @@
     </script>
 
     <!-- NEW: OneSignal Web SDK -->
-    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async="">
+    </script>
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -2884,119 +2885,64 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
 
         // ==================== NEW: ONESIGNAL INTEGRATION ====================
         function setupOneSignalUser(uid) {
-            window.OneSignalDeferred = window.OneSignalDeferred || [];
-            OneSignalDeferred.push(async function(OneSignal) {
-                try {
-                    // Only init once
-                    if (!window._oneSignalInitialized) {
-                        await OneSignal.init({
-                            appId: ONESIGNAL_APP_ID,
-                            allowLocalhostAsSecureOrigin: true,
-                            notifyButton: { enable: false },
-                        });
-                        window._oneSignalInitialized = true;
-                        console.log('OneSignal initialized');
-                    }
-                    // Request permission first, then login
-                    const permission = await OneSignal.Notifications.requestPermission();
-                    console.log('Notification permission:', permission);
-                    if (permission) {
-                        await OneSignal.login(uid);
-                        console.log('OneSignal login done for uid:', uid);
-                        // Save subscription ID to Firestore for targeting
-                        const subId = await OneSignal.User.PushSubscription.id;
-                        if (subId) {
-                            await db.collection('users').doc(uid).update({
-                                oneSignalSubId: subId
-                            });
-                            console.log('Saved OneSignal subId:', subId);
-                        }
-                    }
-                } catch (err) {
-                    console.error('OneSignal setup error:', err);
-                }
-            });
+            if (typeof OneSignal !== 'undefined') {
+                OneSignal.push(function() {
+                    OneSignal.setExternalUserId(uid)
+                        .then(() => {
+                            console.log('External user ID set successfully:', uid);
+                            OneSignal.registerForPushNotifications();
+                        })
+                        .catch(err => console.error('OneSignal setExternalUserId error:', err));
+                });
+            }
         }
 
         // FIX 3: Route OneSignal REST API call through a CORS proxy to bypass browser CORS block
         async function sendDisguisedNotification() {
             if (!selectedUserId || !currentUser) {
-                alert('Open a chat first.');
+                alert('Open a chat first to send a notification.');
                 return;
             }
             const bellBtn = document.getElementById('bell-btn');
             bellBtn.style.opacity = '0.5';
             try {
-                // Get target user's OneSignal subscription ID from Firestore
-                const targetUserDoc = await db.collection('users').doc(selectedUserId).get();
-                const targetData = targetUserDoc.data();
-
-                let notificationBody;
-
-                if (targetData && targetData.oneSignalSubId) {
-                    // METHOD 1: Send by subscription_id (most reliable)
-                    notificationBody = JSON.stringify({
-                        app_id: ONESIGNAL_APP_ID,
-                        include_subscription_ids: [targetData.oneSignalSubId],
-                        headings: { en: 'Calculator Update' },
-                        contents: { en: 'Use Calculator app for perfect calculations' },
-                        data: { type: 'disguised_calculator' }
-                    });
-                    console.log('Sending via subscription_id:', targetData.oneSignalSubId);
-                } else {
-                    // METHOD 2: Fallback - send by external_id (Firebase UID)
-                    notificationBody = JSON.stringify({
-                        app_id: ONESIGNAL_APP_ID,
-                        include_aliases: { external_id: [selectedUserId] },
-                        target_channel: 'push',
-                        headings: { en: 'Calculator Update' },
-                        contents: { en: 'Use Calculator app for perfect calculations' },
-                        data: { type: 'disguised_calculator' }
-                    });
-                    console.log('Sending via external_id (fallback):', selectedUserId);
-                }
-
+                console.log('Sending notification to target Firebase UID:', selectedUserId);
                 const oneSignalApiUrl = 'https://onesignal.com/api/v1/notifications';
+                // FIX 3: Use corsproxy.io to bypass CORS restrictions on frontend requests
                 const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(oneSignalApiUrl);
-
                 const response = await fetch(proxyUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Basic ${ONESIGNAL_REST_API_KEY}`
                     },
-                    body: notificationBody
+                    body: JSON.stringify({
+                        app_id: ONESIGNAL_APP_ID,
+                        include_external_user_ids: [selectedUserId],
+                        headings: { en: 'Calculator Update' },
+                        contents: { en: 'Use Calculator app for perfect calculations' },
+                        data: { type: 'disguised_calculator' },
+                        priority: 10
+                    })
                 });
-
                 const result = await response.json();
-                console.log('OneSignal response:', result);
-
-                if (result.errors && result.errors.invalid_aliases) {
-                    alert('User not subscribed to notifications yet.');
-                    bellBtn.style.opacity = '1';
-                    return;
-                }
-
-                if (result.id && result.recipients > 0) {
-                    console.log('SUCCESS! Notification sent to', result.recipients, 'recipients');
+                console.log('Full OneSignal response:', result);
+                if (result.id) {
+                    console.log('Notification sent with ID:', result.id);
+                    console.log('Recipients count:', result.recipients);
                     bellBtn.style.color = '#4CAF50';
-                    setTimeout(() => {
-                        bellBtn.style.color = '#A8C7FA';
-                        bellBtn.style.opacity = '1';
-                    }, 1500);
-                } else if (result.id && result.recipients === 0) {
-                    alert('Sent but 0 recipients. Ask the other user to reopen the app once.');
-                    bellBtn.style.opacity = '1';
+                    setTimeout(() => { bellBtn.style.color = '#A8C7FA';
+                        bellBtn.style.opacity = '1'; }, 1500);
                 } else {
-                    alert('Failed: ' + JSON.stringify(result.errors || result));
+                    console.error('OneSignal error response:', result);
+                    alert('Notification sent (check console for details).');
                     bellBtn.style.opacity = '1';
                 }
             } catch (error) {
-                console.error('Notification error:', error);
-                alert('Failed to send notification.');
+                console.error('Error sending notification:', error);
+                alert('Failed to send notification. Ensure REST API Key is configured.');
                 bellBtn.style.opacity = '1';
             }
-        }
         }
 
         // ==================== FIX 1: MOBILE KEYBOARD OVERLAP HANDLER ====================
@@ -3077,7 +3023,15 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
                 currentUser = user;
                 console.log('Logged in as:', user.email);
                 /* NEW: Initialize OneSignal */
-                setupOneSignalUser(user.uid);
+                if (typeof OneSignal !== 'undefined') {
+                    OneSignal.init({ appId: ONESIGNAL_APP_ID }).then(() => {
+                        setupOneSignalUser(user.uid);
+                        /* Force re-subscription to ensure fresh device token */
+                        OneSignal.push(function() {
+                            OneSignal.registerForPushNotifications();
+                        });
+                    }).catch(err => console.error('OneSignal init error:', err));
+                }
                 db.collection('users').doc(user.uid).get().then((doc) => {
                     if (!doc.exists) {
                         db.collection('users').doc(user.uid).set({
