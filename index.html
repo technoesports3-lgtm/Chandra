@@ -1607,6 +1607,15 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
         /* NEW: Reactions cache */
         let reactionsCache = new Map();
 
+        // ==================== PAGINATION VARIABLES ====================
+        let allMessages = [];
+        let messagesSet = new Set();
+        let lastVisibleDoc = null;
+        let isLoadingMore = false;
+        let noMoreMessages = false;
+        let messagesObserver = null;
+        const PAGE_SIZE = 20;
+
         // ==================== PASSWORD TOGGLE ====================
         function togglePasswordVisibility(inputId, element) {
             const input = document.getElementById(inputId);
@@ -2253,6 +2262,15 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
             document.getElementById('chat-error-banner').style.display = 'none';
             cancelEdit();
             cancelReply();
+            
+            // Reset pagination state
+            allMessages = [];
+            messagesSet = new Set();
+            lastVisibleDoc = null;
+            isLoadingMore = false;
+            noMoreMessages = false;
+            if (messagesObserver) messagesObserver.disconnect();
+            
             markAllMessagesAsRead(userId);
             loadMessages(userId);
             setupTypingListener(userId);
@@ -2290,46 +2308,79 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
             const errorBanner = document.getElementById('chat-error-banner');
             const currentUserId = auth.currentUser?.uid;
             if (!currentUserId || !otherUserId) return;
+
+            // Reset pagination state
+            allMessages = [];
+            messagesSet = new Set();
+            lastVisibleDoc = null;
+            isLoadingMore = false;
+            noMoreMessages = false;
+            if (messagesObserver) messagesObserver.disconnect();
+
             container.innerHTML = '<div class="loading-spinner"></div>';
             errorBanner.style.display = 'none';
+
             try {
-                messagesListener = db.collection('messages')
-                    .orderBy('timestamp', 'asc')
-                    .onSnapshot((snapshot) => {
-                        container.innerHTML = '';
-                        let messageCount = 0;
-                        let lastSentMsgId = null;
-                        const allMessages = [];
-                        snapshot.forEach((doc) => {
-                            const msg = { id: doc.id, ...doc.data() };
-                            if ((msg.senderId === currentUserId && msg.receiverId === otherUserId) ||
-                                (msg.senderId === otherUserId && msg.receiverId === currentUserId)) {
-                                allMessages.push(msg);
-                                messageCount++;
-                            }
-                        });
-                        for (let i = allMessages.length - 1; i >= 0; i--) {
-                            if (allMessages[i].senderId === currentUserId) {
-                                lastSentMsgId = allMessages[i].id;
-                                break;
-                            }
+                // Query to get all messages between these two users, ordered descending
+                const query = db.collection('messages')
+                    .orderBy('timestamp', 'desc')
+                    .limit(PAGE_SIZE);
+
+                query.get().then((snapshot) => {
+                    const messages = [];
+                    snapshot.forEach((doc) => {
+                        const msg = { id: doc.id, ...doc.data() };
+                        if ((msg.senderId === currentUserId && msg.receiverId === otherUserId) ||
+                            (msg.senderId === otherUserId && msg.receiverId === currentUserId)) {
+                            messages.push(msg);
+                            messagesSet.add(msg.id);
                         }
-                        allMessages.forEach(msg => {
-                            const messageEl = createMessageElement(msg, msg.id ===
-                                lastSentMsgId);
-                            container.appendChild(messageEl);
-                        });
-                        if (messageCount === 0) container.innerHTML =
-                            '<div style="text-align:center;color:#888;padding:20px;">No messages yet. Say hello! 👋</div>';
-                        scrollChatToBottom();
-                        errorBanner.style.display = 'none';
-                    }, (error) => {
-                        console.error('Messages listener error:', error);
-                        container.innerHTML = '';
-                        errorBanner.style.display = 'block';
                     });
+
+                    // Keep track of the last doc in the full result set for pagination
+                    let lastDocFromQuery = null;
+                    snapshot.forEach(() => {
+                        // This will be the last doc in the snapshot
+                    });
+                    if (snapshot.docs.length > 0) {
+                        lastDocFromQuery = snapshot.docs[snapshot.docs.length - 1];
+                    }
+
+                    // Reverse to chronological order and store
+                    allMessages = messages.reverse();
+                    
+                    // For pagination, we need to track the oldest message we have
+                    if (messages.length > 0) {
+                        lastVisibleDoc = lastDocFromQuery;
+                    }
+                    
+                    // Check if there are potentially more messages
+                    if (snapshot.docs.length < PAGE_SIZE) {
+                        noMoreMessages = true;
+                    }
+
+                    // Render messages
+                    renderAllMessages();
+
+                    // Set up real-time listener for new messages
+                    setUpRealTimeListener(otherUserId, currentUserId);
+
+                    // Set up pagination observer
+                    setupPaginationObserver();
+
+                    if (allMessages.length === 0) {
+                        container.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">No messages yet. Say hello! 👋</div>';
+                    }
+
+                    scrollChatToBottom();
+                    errorBanner.style.display = 'none';
+                }).catch((error) => {
+                    console.error('Error loading messages:', error);
+                    container.innerHTML = '';
+                    errorBanner.style.display = 'block';
+                });
             } catch (error) {
-                console.error('Error setting up messages listener:', error);
+                console.error('Error setting up messages loader:', error);
                 container.innerHTML = '';
                 errorBanner.style.display = 'block';
             }
@@ -2342,6 +2393,174 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
 
         function retryLoadMessages() {
             if (selectedUserId) loadMessages(selectedUserId);
+        }
+
+        function renderAllMessages() {
+            const container = document.getElementById('messages-container');
+            const currentUserId = auth.currentUser?.uid;
+
+            // Clear container but preserve sentinel
+            container.innerHTML = '<div id="messages-sentinel" style="height:1px;"></div>';
+
+            if (allMessages.length === 0) {
+                container.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">No messages yet. Say hello! 👋</div>';
+                return;
+            }
+
+            // Rebuild all message elements from allMessages
+            let lastSentMsgId = null;
+            for (let i = allMessages.length - 1; i >= 0; i--) {
+                if (allMessages[i].senderId === currentUserId) {
+                    lastSentMsgId = allMessages[i].id;
+                    break;
+                }
+            }
+
+            allMessages.forEach(msg => {
+                const messageEl = createMessageElement(msg, msg.id === lastSentMsgId);
+                container.appendChild(messageEl);
+            });
+
+            // Re-setup pagination observer
+            setupPaginationObserver();
+        }
+
+        function setupPaginationObserver() {
+            const container = document.getElementById('messages-container');
+            const sentinel = document.getElementById('messages-sentinel');
+            
+            if (!sentinel) return;
+
+            if (messagesObserver) messagesObserver.disconnect();
+
+            messagesObserver = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting && !isLoadingMore && !noMoreMessages) {
+                        loadOlderMessages();
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            messagesObserver.observe(sentinel);
+        }
+
+        async function loadOlderMessages() {
+            if (isLoadingMore || noMoreMessages || !lastVisibleDoc) return;
+
+            isLoadingMore = true;
+            const currentUserId = auth.currentUser?.uid;
+            const otherUserId = selectedUserId;
+
+            if (!currentUserId || !otherUserId) {
+                isLoadingMore = false;
+                return;
+            }
+
+            try {
+                // Save current scroll position
+                const container = document.getElementById('messages-container');
+                const scrollPosition = container.scrollTop;
+                const scrollHeight = container.scrollHeight;
+
+                // Fetch next 20 messages, ordered descending from the last visible doc
+                const query = db.collection('messages')
+                    .orderBy('timestamp', 'desc')
+                    .startAfter(lastVisibleDoc)
+                    .limit(PAGE_SIZE);
+
+                const snapshot = await query.get();
+                const messages = [];
+                
+                snapshot.forEach((doc) => {
+                    const msg = { id: doc.id, ...doc.data() };
+                    if ((msg.senderId === currentUserId && msg.receiverId === otherUserId) ||
+                        (msg.senderId === otherUserId && msg.receiverId === currentUserId)) {
+                        if (!messagesSet.has(msg.id)) {
+                            messages.push(msg);
+                            messagesSet.add(msg.id);
+                        }
+                    }
+                });
+
+                if (messages.length > 0) {
+                    // Reverse and prepend to allMessages
+                    messages.reverse();
+                    allMessages = messages.concat(allMessages);
+                }
+
+                // Update the cursor for next page
+                if (snapshot.docs.length > 0) {
+                    lastVisibleDoc = snapshot.docs[snapshot.docs.length - 1];
+                }
+
+                if (snapshot.docs.length < PAGE_SIZE) {
+                    noMoreMessages = true;
+                }
+
+                // Re-render messages
+                renderAllMessages();
+
+                // Restore scroll position relative to new content
+                const newScrollHeight = container.scrollHeight;
+                const heightDifference = newScrollHeight - scrollHeight;
+                container.scrollTop = scrollPosition + heightDifference;
+            } catch (error) {
+                console.error('Error loading older messages:', error);
+            } finally {
+                isLoadingMore = false;
+            }
+        }
+
+        function setUpRealTimeListener(otherUserId, currentUserId) {
+            if (messagesListener) messagesListener();
+
+            // Get timestamp of last message in allMessages
+            let startAfterTimestamp = null;
+            if (allMessages.length > 0) {
+                const lastMsg = allMessages[allMessages.length - 1];
+                startAfterTimestamp = lastMsg.timestamp;
+            }
+
+            // Listen to all messages, ordered ascending
+            let query = db.collection('messages')
+                .orderBy('timestamp', 'asc');
+
+            if (startAfterTimestamp) {
+                query = query.startAfter(startAfterTimestamp);
+            }
+
+            messagesListener = query.onSnapshot((snapshot) => {
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === 'added') {
+                        const msg = { id: change.doc.id, ...change.doc.data() };
+                        // Check if this message is between the current user and other user
+                        if ((msg.senderId === currentUserId && msg.receiverId === otherUserId) ||
+                            (msg.senderId === otherUserId && msg.receiverId === currentUserId)) {
+                            if (!messagesSet.has(msg.id)) {
+                                allMessages.push(msg);
+                                messagesSet.add(msg.id);
+                                appendNewMessagesToDOM();
+                            }
+                        }
+                    }
+                });
+            });
+        }
+
+        function appendNewMessagesToDOM() {
+            const container = document.getElementById('messages-container');
+            const currentUserId = auth.currentUser?.uid;
+
+            // Check if at bottom before rendering
+            const isAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+
+            // Re-render the message list
+            renderAllMessages();
+
+            // Auto-scroll if was at bottom
+            if (isAtBottom) {
+                scrollChatToBottom();
+            }
         }
 
         /* NEW: Create message element with reaction, reply, voice note, read receipt support */
@@ -2513,8 +2732,27 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
                             reactionsCache.delete(change.doc.id);
                         }
                     });
-                    if (selectedUserId) loadMessages(selectedUserId);
+                    // Update reaction displays without reloading messages
+                    updateReactionDisplays();
                 });
+        }
+
+        function updateReactionDisplays() {
+            // Update all visible reaction emojis based on reactionsCache
+            reactionsCache.forEach((emoji, messageId) => {
+                const bubble = document.querySelector(`[data-msg-id="${messageId}"]`);
+                if (bubble) {
+                    const existingReaction = bubble.querySelector('.message-reaction');
+                    if (!existingReaction) {
+                        const reactionSpan = document.createElement('span');
+                        reactionSpan.className = 'message-reaction';
+                        reactionSpan.textContent = emoji;
+                        bubble.appendChild(reactionSpan);
+                    } else {
+                        existingReaction.textContent = emoji;
+                    }
+                }
+            });
         }
 
         function handleEditFromTray() {
