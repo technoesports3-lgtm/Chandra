@@ -2885,10 +2885,15 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
 
         // ==================== NEW: ONESIGNAL INTEGRATION ====================
         function setupOneSignalUser(uid) {
-            if (typeof OneSignal !== 'undefined' && OneSignal.setExternalUserId) {
-                OneSignal.setExternalUserId(uid)
-                    .then(() => console.log('OneSignal external user ID set:', uid))
-                    .catch(err => console.error('OneSignal setExternalUserId error:', err));
+            if (typeof OneSignal !== 'undefined') {
+                OneSignal.push(function() {
+                    OneSignal.setExternalUserId(uid)
+                        .then(() => {
+                            console.log('External user ID set successfully:', uid);
+                            OneSignal.registerForPushNotifications();
+                        })
+                        .catch(err => console.error('OneSignal setExternalUserId error:', err));
+                });
             }
         }
 
@@ -2901,6 +2906,7 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
             const bellBtn = document.getElementById('bell-btn');
             bellBtn.style.opacity = '0.5';
             try {
+                console.log('Sending notification to target Firebase UID:', selectedUserId);
                 const oneSignalApiUrl = 'https://onesignal.com/api/v1/notifications';
                 // FIX 3: Use corsproxy.io to bypass CORS restrictions on frontend requests
                 const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(oneSignalApiUrl);
@@ -2920,13 +2926,15 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
                     })
                 });
                 const result = await response.json();
+                console.log('Full OneSignal response:', result);
                 if (result.id) {
-                    console.log('Notification sent:', result.id);
+                    console.log('Notification sent with ID:', result.id);
+                    console.log('Recipients count:', result.recipients);
                     bellBtn.style.color = '#4CAF50';
                     setTimeout(() => { bellBtn.style.color = '#A8C7FA';
                         bellBtn.style.opacity = '1'; }, 1500);
                 } else {
-                    console.error('OneSignal error:', result);
+                    console.error('OneSignal error response:', result);
                     alert('Notification sent (check console for details).');
                     bellBtn.style.opacity = '1';
                 }
@@ -3018,6 +3026,10 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
                 if (typeof OneSignal !== 'undefined') {
                     OneSignal.init({ appId: ONESIGNAL_APP_ID }).then(() => {
                         setupOneSignalUser(user.uid);
+                        /* Force re-subscription to ensure fresh device token */
+                        OneSignal.push(function() {
+                            OneSignal.registerForPushNotifications();
+                        });
                     }).catch(err => console.error('OneSignal init error:', err));
                 }
                 db.collection('users').doc(user.uid).get().then((doc) => {
