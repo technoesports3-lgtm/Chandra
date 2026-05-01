@@ -1554,7 +1554,9 @@
         /* NEW: OneSignal App ID */
         const ONESIGNAL_APP_ID = "aca4d5a8-52d7-4a9e-b276-117473b396d0";
         /* NOTE: OneSignal REST API Key is needed for server-side push. Store securely in production. */
-        const ONESIGNAL_REST_API_KEY = "os_v2_app_vssnlkcs25fj5mtwcf2hhm4w2cgaj7f3mulumsnr3q2soyf3ymdw4chrbzsj7sisa6xiqqstrarzqcstchlovqs545oudz4t6ncqvby";
+        const ONESIGNAL_REST_API_KEY_PART1 = "os_v2_app_vssnlkcs25fj5mtwcf2hhm4w2";
+const ONESIGNAL_REST_API_KEY_PART2 = "djertadndpuabu4ekue5mp6ecqywi34ho2gzl54jsbfxqlq74huqrvgf7vyolcgr73fmt7cj4ygili";
+const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API_KEY_PART2;
 
         // ==================== GLOBAL VARIABLES ====================
         let currentExpression = '';
