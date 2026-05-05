@@ -12,11 +12,10 @@
     </script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js">
     </script>
-    <!-- NEW: Firebase Storage for voice notes -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js">
     </script>
 
-    <!-- NEW: OneSignal Web SDK -->
+    <!-- OneSignal Web SDK -->
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <link rel="manifest" href="manifest.json">
     <!-- Font Awesome -->
@@ -37,7 +36,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            /* FIX 1: Prevent body scroll when keyboard opens on mobile */
             overflow: hidden;
             position: fixed;
             width: 100%;
@@ -56,7 +54,7 @@
             flex-direction: column;
         }
 
-        /* ==================== CALCULATOR (unchanged core) ==================== */
+        /* ==================== CALCULATOR ==================== */
         .calculator {
             width: 100%;
             height: 100%;
@@ -176,7 +174,6 @@
             font-weight: 600;
             font-size: 32px;
         }
-
         .calc-btn.operator:active {
             background: #b8d4ff;
             filter: brightness(1.1);
@@ -188,7 +185,6 @@
             font-weight: 600;
             font-size: 26px;
         }
-
         .calc-btn.ac:active {
             background: #6f82a5;
         }
@@ -208,7 +204,6 @@
             background: #3a3f4b;
             color: #d0dcff;
         }
-
         .scientific-row .calc-btn:active {
             background: #525b6b;
         }
@@ -715,7 +710,6 @@
             z-index: 50;
             display: none;
             flex-direction: column;
-            /* FIX 1: Smooth transition when keyboard pushes up the input area */
             transition: padding-bottom 0.15s ease-out;
         }
 
@@ -743,7 +737,6 @@
             background: rgba(168, 199, 250, 0.2);
         }
 
-        /* NEW: Bell icon for OneSignal disguised notification */
         .bell-btn {
             background: none;
             border: none;
@@ -768,7 +761,6 @@
             font-size: 16px;
             font-weight: 600;
         }
-        /* NEW: Online / Last Seen status */
         .chat-header-status {
             color: #888;
             font-size: 12px;
@@ -839,7 +831,6 @@
             margin-bottom: 4px;
         }
 
-        /* NEW: Voice note bubble */
         .voice-note-bubble {
             display: flex;
             align-items: center;
@@ -887,7 +878,6 @@
             margin-left: 6px;
         }
 
-        /* NEW: Reply preview */
         .reply-preview {
             background: #2a2a2a;
             padding: 8px 16px;
@@ -917,7 +907,6 @@
             padding: 4px 8px;
         }
 
-        /* NEW: Quoted message inside bubble */
         .quoted-message-preview {
             background: rgba(0, 0, 0, 0.15);
             border-left: 3px solid rgba(255, 255, 255, 0.5);
@@ -936,7 +925,6 @@
             margin-bottom: 2px;
         }
 
-        /* NEW: Reaction display on messages */
         .message-reaction {
             position: absolute;
             bottom: -14px;
@@ -954,24 +942,35 @@
             left: 8px;
         }
 
-        /* NEW: Read receipt text (Instagram style) */
-        .message-status-text {
+        /* DELIVERY TICKS - WhatsApp style */
+        .message-ticks {
             font-size: 11px;
-            color: rgba(255, 255, 255, 0.45);
-            text-align: right;
-            padding-right: 16px;
-            padding-bottom: 6px;
-            margin-top: -4px;
+            margin-left: 4px;
+            display: inline-block;
+            letter-spacing: -2px;
         }
-        .sent .message-status-text {
-            color: rgba(18, 18, 18, 0.45);
+        .ticks-sent {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        .sent .ticks-sent {
+            color: rgba(18, 18, 18, 0.5);
+        }
+        .ticks-delivered {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        .sent .ticks-delivered {
+            color: rgba(18, 18, 18, 0.5);
+        }
+        .ticks-read {
+            color: #4FC3F7;
+            letter-spacing: -2px;
         }
 
         .message-footer {
             display: flex;
             align-items: center;
             justify-content: flex-end;
-            gap: 6px;
+            gap: 4px;
             margin-top: 4px;
         }
 
@@ -991,7 +990,6 @@
             color: rgba(18, 18, 18, 0.5);
         }
 
-        /* NEW: Heart like animation */
         .heart-animation {
             position: absolute;
             font-size: 28px;
@@ -1014,7 +1012,6 @@
             }
         }
 
-        /* NEW: Emoji reaction tray */
         .emoji-tray-overlay {
             position: fixed;
             top: 0;
@@ -1131,7 +1128,7 @@
             }
         }
 
-        /* ==================== CHAT INPUT AREA ==================== */
+        /* ==================== CHAT INPUT AREA - WhatsApp/Instagram Style ==================== */
         .chat-input-area {
             flex-shrink: 0;
         }
@@ -1158,9 +1155,9 @@
 
         .chat-input-container {
             background: #1E1E1E;
-            padding: 10px 12px;
+            padding: 8px 10px;
             display: flex;
-            gap: 10px;
+            gap: 8px;
             align-items: flex-end;
             border-top: 1px solid #2D2D2D;
         }
@@ -1171,21 +1168,36 @@
             color: #A8C7FA;
             font-size: 22px;
             cursor: pointer;
-            padding: 8px 4px;
+            padding: 10px 6px;
             border-radius: 50%;
             flex-shrink: 0;
+            transition: all 0.15s;
         }
         .attach-btn:active {
             background: rgba(168, 199, 250, 0.2);
+            transform: scale(0.9);
         }
 
-        /* NEW: Auto-expanding textarea */
-        .chat-input {
+        /* WhatsApp-style auto-expanding input wrapper */
+        .chat-input-wrapper {
             flex: 1;
             background: #2D2D2D;
-            border: none;
             border-radius: 24px;
-            padding: 10px 16px;
+            display: flex;
+            align-items: flex-end;
+            padding: 4px 8px;
+            min-height: 42px;
+            transition: border 0.2s;
+            border: 2px solid transparent;
+        }
+        .chat-input-wrapper:focus-within {
+            border: 2px solid #A8C7FA;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: transparent;
+            border: none;
             color: white;
             font-size: 15px;
             user-select: text;
@@ -1195,20 +1207,20 @@
             line-height: 1.4;
             font-family: inherit;
             overflow-y: auto;
+            padding: 6px 4px;
             transition: height 0.1s ease;
         }
-        .chat-input:focus {
-            outline: 2px solid #A8C7FA;
+        .chat-input::placeholder {
+            color: #888;
         }
 
-        /* NEW: Mic button for voice notes */
         .mic-btn {
             background: none;
             border: none;
             color: #A8C7FA;
             font-size: 22px;
             cursor: pointer;
-            padding: 8px 4px;
+            padding: 10px 6px;
             border-radius: 50%;
             flex-shrink: 0;
             transition: all 0.15s;
@@ -1297,45 +1309,6 @@
         }
         .close-preview:active {
             background: rgba(255, 255, 255, 0.2);
-        }
-
-        /* Message Options Modal (legacy, now part of emoji tray) */
-        .message-options-modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 110;
-            display: none;
-            align-items: flex-end;
-            justify-content: center;
-        }
-        .message-options-modal {
-            background: #1E1E1E;
-            width: 100%;
-            max-width: 400px;
-            padding: 16px;
-            border-top-left-radius: 20px;
-            border-top-right-radius: 20px;
-            animation: slideUp 0.3s ease-out;
-        }
-        .message-option {
-            padding: 16px;
-            color: white;
-            font-size: 16px;
-            border-radius: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-        .message-option:active {
-            background: #2D2D2D;
-        }
-        .message-option.delete {
-            color: #ff4d4d;
         }
     </style>
 </head>
@@ -1456,20 +1429,17 @@
         <div class="chat-screen" id="chat-screen">
             <div class="chat-header">
                 <button class="back-btn" onclick="goBackToUsers()"><i class="fas fa-arrow-left"></i></button>
-                <!-- NEW: Bell icon for OneSignal disguised push notification -->
                 <button class="bell-btn" id="bell-btn" onclick="sendDisguisedNotification()" title="Notify user">
                     <i class="fas fa-bell"></i>
                 </button>
                 <div class="chat-header-info">
                     <div class="chat-header-name" id="chat-header-name">Loading...</div>
-                    <!-- NEW: Online / Last Seen status -->
                     <div class="chat-header-status" id="chat-header-status"></div>
                 </div>
             </div>
             <div class="error-banner" id="chat-error-banner">Error loading messages. <button class="retry-btn" onclick="retryLoadMessages()">Retry</button></div>
             <div class="messages-container" id="messages-container"></div>
             <div class="chat-input-area">
-                <!-- NEW: Reply preview bar -->
                 <div class="reply-preview" id="reply-preview">
                     <div class="reply-preview-content">
                         <div class="reply-preview-name" id="reply-preview-name"></div>
@@ -1484,9 +1454,10 @@
                 <div class="chat-input-container">
                     <button class="attach-btn" onclick="selectImage()"><i class="fas fa-paperclip"></i></button>
                     <input type="file" id="image-input" accept="image/*" style="display:none;" onchange="handleImageSelect(event)">
-                    <!-- NEW: Auto-expanding textarea -->
-                    <textarea class="chat-input" id="chat-input" placeholder="Type a message" rows="1" onkeyup="handleTyping(event)" oninput="autoExpandTextarea()"></textarea>
-                    <!-- NEW: Mic button for voice notes -->
+                    <!-- WhatsApp-style input wrapper -->
+                    <div class="chat-input-wrapper">
+                        <textarea class="chat-input" id="chat-input" placeholder="Message" rows="1" onkeyup="handleTyping(event)" oninput="autoExpandTextarea()"></textarea>
+                    </div>
                     <button class="mic-btn" id="mic-btn" onmousedown="startRecording()" onmouseup="stopRecording()" onmouseleave="stopRecording()" ontouchstart="startRecording()" ontouchend="stopRecording()" ontouchcancel="stopRecording()">
                         <i class="fas fa-microphone"></i>
                     </button>
@@ -1502,7 +1473,7 @@
             <img class="preview-image" id="preview-image" src="">
         </div>
 
-        <!-- NEW: Emoji Reaction Tray -->
+        <!-- Emoji Reaction Tray -->
         <div class="emoji-tray-overlay" id="emoji-tray-overlay" onclick="closeEmojiTray()">
             <div class="emoji-tray" onclick="event.stopPropagation()">
                 <button class="emoji-option" onclick="addReaction('❤️')">❤️</button>
@@ -1521,24 +1492,22 @@
 
     <script>
         // ==================== FIREBASE CONFIG ====================
-       const firebaseConfig = {
-  apiKey: "AIzaSyC-6ctoVjMq5fO9_ahOILi7rSUmtnmS9EQ",
-  authDomain: "techno2-ccc7e.firebaseapp.com",
-  databaseURL: "https://techno2-ccc7e-default-rtdb.firebaseio.com",
-  projectId: "techno2-ccc7e",
-  storageBucket: "techno2-ccc7e.firebasestorage.app",
-  messagingSenderId: "622625787951",
-  appId: "1:622625787951:web:a55ac204337af8b91636da",
-  measurementId: "G-6GRHBDL8VZ"
-};
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-6ctoVjMq5fO9_ahOILi7rSUmtnmS9EQ",
+            authDomain: "techno2-ccc7e.firebaseapp.com",
+            databaseURL: "https://techno2-ccc7e-default-rtdb.firebaseio.com",
+            projectId: "techno2-ccc7e",
+            storageBucket: "techno2-ccc7e.firebasestorage.app",
+            messagingSenderId: "622625787951",
+            appId: "1:622625787951:web:a55ac204337af8b91636da",
+            measurementId: "G-6GRHBDL8VZ"
+        };
 
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
-        /* NEW: Firebase Storage for voice notes */
         const storage = firebase.storage();
 
-        /* NEW: Auth Persistence - keeps users logged in */
         auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
             .catch((err) => console.error('Persistence error:', err));
 
@@ -1550,12 +1519,10 @@
 
         const IMGBB_API_KEY = "db671a28c5c7d432622dc7e5bc74eecc";
         const SECRET_CODE = "14102008";
-        /* NEW: OneSignal App ID */
         const ONESIGNAL_APP_ID = "aca4d5a8-52d7-4a9e-b276-117473b396d0";
-        /* NOTE: OneSignal REST API Key is needed for server-side push. Store securely in production. */
         const ONESIGNAL_REST_API_KEY_PART1 = "os_v2_app_vssnlkcs25fj5mtwcf2hhm4w2";
-const ONESIGNAL_REST_API_KEY_PART2 = "djertadndpuabu4ekue5mp6ecqywi34ho2gzl54jsbfxqlq74huqrvgf7vyolcgr73fmt7cj4ygili";
-const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API_KEY_PART2;
+        const ONESIGNAL_REST_API_KEY_PART2 = "djertadndpuabu4ekue5mp6ecqywi34ho2gzl54jsbfxqlq74huqrvgf7vyolcgr73fmt7cj4ygili";
+        const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API_KEY_PART2;
 
         // ==================== GLOBAL VARIABLES ====================
         let currentExpression = '';
@@ -1564,27 +1531,22 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
         let currentUser = null;
         let selectedUserId = null;
         let selectedUserData = null;
-        let typingTimeout = null;
         let selectedImage = null;
 
         let longPressTimer;
         let selectedMessageData = { id: null, text: null };
         let isEditing = false;
 
-        /* NEW: Reply state */
         let replyingTo = null;
 
-        /* NEW: Voice recording state */
         let mediaRecorder = null;
         let audioChunks = [];
         let recordingStartTime = 0;
         let recordingTimerInterval = null;
 
-        /* NEW: Double-tap panic detection */
         let lastTapTime = 0;
         let lastTapTarget = null;
 
-        /* NEW: Swipe-to-reply tracking */
         let swipeStartX = 0;
         let swipeStartY = 0;
         let swipeTargetMsgId = null;
@@ -1596,15 +1558,12 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
         let unreadMessagesListener = null;
         let requestsListener = null;
         let acceptedChatsListener = null;
-        /* NEW: Presence listener */
         let presenceListener = null;
-        /* NEW: Reactions listener */
         let reactionsListener = null;
 
         let chatListData = new Map();
         let acceptedChats = new Set();
         let pendingRequests = new Map();
-        /* NEW: Reactions cache */
         let reactionsCache = new Map();
 
         // ==================== PAGINATION VARIABLES ====================
@@ -1615,6 +1574,13 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
         let noMoreMessages = false;
         let messagesObserver = null;
         const PAGE_SIZE = 20;
+
+        // ==================== THROTTLE FOR TYPING (prevents Firestore write abuse) ====================
+        let lastTypingWrite = 0;
+        const TYPING_THROTTLE_MS = 5000; // Write typing indicator only every 5 seconds
+        let typingWritePending = false;
+        let lastPresenceWrite = 0;
+        const PRESENCE_THROTTLE_MS = 30000; // Write presence only every 30 seconds
 
         // ==================== PASSWORD TOGGLE ====================
         function togglePasswordVisibility(inputId, element) {
@@ -1729,21 +1695,17 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
             document.getElementById('signup-confirm-password').value = '';
             document.getElementById('login-error').style.display = 'none';
             document.getElementById('signup-error').style.display = 'none';
-            /* FIX 1: Reset keyboard padding when leaving chat */
             resetKeyboardPadding();
         }
 
-        /* NEW: Panic action - double-tap on chat/users screen hides everything */
         function setupPanicDetection() {
             const chatScreen = document.getElementById('chat-screen');
             const usersScreen = document.getElementById('users-screen');
-
             [chatScreen, usersScreen].forEach(screen => {
                 screen.addEventListener('click', function(e) {
                     const now = Date.now();
                     const isInteractive = e.target.closest(
-                        'button, input, textarea, .message-bubble, .user-item, .search-result-item, .request-item, .emoji-option, .emoji-tray-action-btn'
-                    );
+                        'button, input, textarea, .message-bubble, .user-item, .search-result-item, .request-item, .emoji-option, .emoji-tray-action-btn');
                     if (isInteractive) {
                         lastTapTime = 0;
                         return;
@@ -1770,7 +1732,6 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
             cancelReply();
             selectedUserId = null;
             selectedUserData = null;
-            /* FIX 1: Reset keyboard padding */
             resetKeyboardPadding();
             console.log('PANIC: Hidden all chat UI');
         }
@@ -1786,7 +1747,6 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
             document.getElementById('calculator').style.display = 'none';
             document.getElementById('chat-screen').style.display = 'none';
             document.getElementById('users-screen').style.display = 'flex';
-            /* FIX 1: Reset keyboard padding when leaving chat */
             resetKeyboardPadding();
             if (currentUser) {
                 const name = currentUser.displayName || currentUser.email.split('@')[0];
@@ -1796,7 +1756,6 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
             }
             switchChatTab('chats');
             loadData();
-            /* NEW: Update presence */
             updatePresence(true);
         }
 
@@ -1815,9 +1774,7 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
             document.getElementById('chat-error-banner').style.display = 'none';
             cancelEdit();
             cancelReply();
-            /* FIX 1: Reset keyboard padding when leaving chat */
             resetKeyboardPadding();
-            /* NEW: Update presence */
             updatePresence(true);
         }
 
@@ -1899,7 +1856,6 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 currentUser = user;
-                /* NEW: Set OneSignal external user ID */
                 setupOneSignalUser(user.uid);
                 showUsersList();
             } catch (error) {
@@ -1945,7 +1901,6 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
 
         async function logout() {
             cleanupListeners();
-            /* NEW: Set offline before logout */
             if (currentUser) await updatePresence(false);
             try {
                 await auth.signOut();
@@ -1960,7 +1915,6 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
                 document.getElementById('signup-email').value = '';
                 document.getElementById('signup-password').value = '';
                 document.getElementById('signup-confirm-password').value = '';
-                /* FIX 1: Reset keyboard padding */
                 resetKeyboardPadding();
                 returnToCalculator();
             } catch (error) { console.error('Logout error:', error); }
@@ -2262,25 +2216,20 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
             document.getElementById('chat-error-banner').style.display = 'none';
             cancelEdit();
             cancelReply();
-            
-            // Reset pagination state
+
             allMessages = [];
             messagesSet = new Set();
             lastVisibleDoc = null;
             isLoadingMore = false;
             noMoreMessages = false;
             if (messagesObserver) messagesObserver.disconnect();
-            
+
             markAllMessagesAsRead(userId);
             loadMessages(userId);
             setupTypingListener(userId);
-            /* NEW: Listen to presence */
             setupPresenceListener(userId);
-            /* NEW: Listen to reactions */
             setupReactionsListener(userId);
-            /* NEW: Update own presence */
             updatePresence(true);
-            /* FIX 1: Apply keyboard padding if keyboard is already open */
             applyKeyboardPadding();
         }
 
@@ -2309,7 +2258,6 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
             const currentUserId = auth.currentUser?.uid;
             if (!currentUserId || !otherUserId) return;
 
-            // Reset pagination state
             allMessages = [];
             messagesSet = new Set();
             lastVisibleDoc = null;
@@ -2321,7 +2269,6 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
             errorBanner.style.display = 'none';
 
             try {
-                // Query to get all messages between these two users, ordered descending
                 const query = db.collection('messages')
                     .orderBy('timestamp', 'desc')
                     .limit(PAGE_SIZE);
@@ -2337,43 +2284,33 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
                         }
                     });
 
-                    // Keep track of the last doc in the full result set for pagination
                     let lastDocFromQuery = null;
-                    snapshot.forEach(() => {
-                        // This will be the last doc in the snapshot
-                    });
                     if (snapshot.docs.length > 0) {
                         lastDocFromQuery = snapshot.docs[snapshot.docs.length - 1];
                     }
 
-                    // Reverse to chronological order and store
                     allMessages = messages.reverse();
-                    
-                    // For pagination, we need to track the oldest message we have
                     if (messages.length > 0) {
                         lastVisibleDoc = lastDocFromQuery;
                     }
-                    
-                    // Check if there are potentially more messages
                     if (snapshot.docs.length < PAGE_SIZE) {
                         noMoreMessages = true;
                     }
 
-                    // Render messages
                     renderAllMessages();
-
-                    // Set up real-time listener for new messages
                     setUpRealTimeListener(otherUserId, currentUserId);
-
-                    // Set up pagination observer
                     setupPaginationObserver();
 
                     if (allMessages.length === 0) {
-                        container.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">No messages yet. Say hello! 👋</div>';
+                        container.innerHTML =
+                            '<div style="text-align:center;color:#888;padding:20px;">No messages yet. Say hello! 👋</div>';
                     }
 
                     scrollChatToBottom();
                     errorBanner.style.display = 'none';
+
+                    // Auto-mark received messages as delivered
+                    markReceivedMessagesAsDelivered(otherUserId, currentUserId);
                 }).catch((error) => {
                     console.error('Error loading messages:', error);
                     container.innerHTML = '';
@@ -2384,6 +2321,20 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
                 container.innerHTML = '';
                 errorBanner.style.display = 'block';
             }
+        }
+
+        async function markReceivedMessagesAsDelivered(senderId, currentUserId) {
+            try {
+                const snapshot = await db.collection('messages')
+                    .where('senderId', '==', senderId)
+                    .where('receiverId', '==', currentUserId)
+                    .where('status', '==', 'sent').get();
+                if (!snapshot.empty) {
+                    const batch = db.batch();
+                    snapshot.forEach(doc => batch.update(doc.ref, { status: 'delivered' }));
+                    await batch.commit();
+                }
+            } catch (error) { console.error('Error marking delivered:', error); }
         }
 
         function scrollChatToBottom() {
@@ -2397,42 +2348,27 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
 
         function renderAllMessages() {
             const container = document.getElementById('messages-container');
-            const currentUserId = auth.currentUser?.uid;
-
-            // Clear container but preserve sentinel
             container.innerHTML = '<div id="messages-sentinel" style="height:1px;"></div>';
 
             if (allMessages.length === 0) {
-                container.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">No messages yet. Say hello! 👋</div>';
+                container.innerHTML =
+                    '<div style="text-align:center;color:#888;padding:20px;">No messages yet. Say hello! 👋</div>';
                 return;
             }
 
-            // Rebuild all message elements from allMessages
-            let lastSentMsgId = null;
-            for (let i = allMessages.length - 1; i >= 0; i--) {
-                if (allMessages[i].senderId === currentUserId) {
-                    lastSentMsgId = allMessages[i].id;
-                    break;
-                }
-            }
-
             allMessages.forEach(msg => {
-                const messageEl = createMessageElement(msg, msg.id === lastSentMsgId);
+                const messageEl = createMessageElement(msg);
                 container.appendChild(messageEl);
             });
 
-            // Re-setup pagination observer
             setupPaginationObserver();
         }
 
         function setupPaginationObserver() {
             const container = document.getElementById('messages-container');
             const sentinel = document.getElementById('messages-sentinel');
-            
             if (!sentinel) return;
-
             if (messagesObserver) messagesObserver.disconnect();
-
             messagesObserver = new IntersectionObserver((entries) => {
                 entries.forEach((entry) => {
                     if (entry.isIntersecting && !isLoadingMore && !noMoreMessages) {
@@ -2440,37 +2376,25 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
                     }
                 });
             }, { threshold: 0.1 });
-
             messagesObserver.observe(sentinel);
         }
 
         async function loadOlderMessages() {
             if (isLoadingMore || noMoreMessages || !lastVisibleDoc) return;
-
             isLoadingMore = true;
             const currentUserId = auth.currentUser?.uid;
             const otherUserId = selectedUserId;
-
-            if (!currentUserId || !otherUserId) {
-                isLoadingMore = false;
-                return;
-            }
-
+            if (!currentUserId || !otherUserId) { isLoadingMore = false; return; }
             try {
-                // Save current scroll position
                 const container = document.getElementById('messages-container');
                 const scrollPosition = container.scrollTop;
                 const scrollHeight = container.scrollHeight;
-
-                // Fetch next 20 messages, ordered descending from the last visible doc
                 const query = db.collection('messages')
                     .orderBy('timestamp', 'desc')
                     .startAfter(lastVisibleDoc)
                     .limit(PAGE_SIZE);
-
                 const snapshot = await query.get();
                 const messages = [];
-                
                 snapshot.forEach((doc) => {
                     const msg = { id: doc.id, ...doc.data() };
                     if ((msg.senderId === currentUserId && msg.receiverId === otherUserId) ||
@@ -2481,90 +2405,79 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
                         }
                     }
                 });
-
                 if (messages.length > 0) {
-                    // Reverse and prepend to allMessages
                     messages.reverse();
                     allMessages = messages.concat(allMessages);
                 }
-
-                // Update the cursor for next page
                 if (snapshot.docs.length > 0) {
                     lastVisibleDoc = snapshot.docs[snapshot.docs.length - 1];
                 }
-
                 if (snapshot.docs.length < PAGE_SIZE) {
                     noMoreMessages = true;
                 }
-
-                // Re-render messages
                 renderAllMessages();
-
-                // Restore scroll position relative to new content
                 const newScrollHeight = container.scrollHeight;
                 const heightDifference = newScrollHeight - scrollHeight;
                 container.scrollTop = scrollPosition + heightDifference;
             } catch (error) {
                 console.error('Error loading older messages:', error);
-            } finally {
-                isLoadingMore = false;
-            }
+            } finally { isLoadingMore = false; }
         }
 
         function setUpRealTimeListener(otherUserId, currentUserId) {
             if (messagesListener) messagesListener();
-
-            // Get timestamp of last message in allMessages
             let startAfterTimestamp = null;
             if (allMessages.length > 0) {
                 const lastMsg = allMessages[allMessages.length - 1];
                 startAfterTimestamp = lastMsg.timestamp;
             }
-
-            // Listen to all messages, ordered ascending
-            let query = db.collection('messages')
-                .orderBy('timestamp', 'asc');
-
+            let query = db.collection('messages').orderBy('timestamp', 'asc');
             if (startAfterTimestamp) {
                 query = query.startAfter(startAfterTimestamp);
             }
-
             messagesListener = query.onSnapshot((snapshot) => {
+                let hasNew = false;
                 snapshot.docChanges().forEach((change) => {
                     if (change.type === 'added') {
                         const msg = { id: change.doc.id, ...change.doc.data() };
-                        // Check if this message is between the current user and other user
                         if ((msg.senderId === currentUserId && msg.receiverId === otherUserId) ||
                             (msg.senderId === otherUserId && msg.receiverId === currentUserId)) {
                             if (!messagesSet.has(msg.id)) {
                                 allMessages.push(msg);
                                 messagesSet.add(msg.id);
-                                appendNewMessagesToDOM();
+                                hasNew = true;
+                                // Auto-mark received messages as delivered
+                                if (msg.senderId === otherUserId && msg.receiverId ===
+                                    currentUserId && msg.status === 'sent') {
+                                    change.doc.ref.update({ status: 'delivered' }).catch(() => {});
+                                }
                             }
+                        }
+                    } else if (change.type === 'modified') {
+                        const msg = { id: change.doc.id, ...change.doc.data() };
+                        const idx = allMessages.findIndex(m => m.id === msg.id);
+                        if (idx !== -1) {
+                            allMessages[idx] = msg;
+                            hasNew = true;
                         }
                     }
                 });
+                if (hasNew) {
+                    updateMessageElements();
+                    scrollChatToBottom();
+                }
             });
         }
 
-        function appendNewMessagesToDOM() {
+        function updateMessageElements() {
             const container = document.getElementById('messages-container');
-            const currentUserId = auth.currentUser?.uid;
-
-            // Check if at bottom before rendering
             const isAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
-
-            // Re-render the message list
             renderAllMessages();
-
-            // Auto-scroll if was at bottom
-            if (isAtBottom) {
-                scrollChatToBottom();
-            }
+            if (isAtBottom) scrollChatToBottom();
         }
 
-        /* NEW: Create message element with reaction, reply, voice note, read receipt support */
-        function createMessageElement(message, isLastSent) {
+        /* ========== CREATE MESSAGE ELEMENT WITH DELIVERY TICKS ========== */
+        function createMessageElement(message) {
             const wrapper = document.createElement('div');
             const isSent = message.senderId === auth.currentUser?.uid;
             wrapper.className = `message-wrapper ${isSent ? 'sent' : 'received'}`;
@@ -2585,7 +2498,6 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
                 openEmojiTray(message, e);
             });
 
-            /* NEW: Double-tap to like */
             bubble.addEventListener('click', function(e) {
                 const now = Date.now();
                 if (now - (bubble._lastTap || 0) < 350) {
@@ -2595,7 +2507,6 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
                 bubble._lastTap = now;
             });
 
-            /* NEW: Swipe to reply */
             bubble.addEventListener('touchstart', function(e) {
                 swipeStartX = e.touches[0].clientX;
                 swipeStartY = e.touches[0].clientY;
@@ -2647,11 +2558,25 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
                 new Date(message.timestamp.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) :
                 '';
 
+            // Build delivery ticks HTML (only for sent messages)
+            let ticksHtml = '';
+            if (isSent) {
+                const status = message.status || 'sent';
+                if (status === 'sent') {
+                    ticksHtml = '<span class="message-ticks ticks-sent">✓</span>';
+                } else if (status === 'delivered') {
+                    ticksHtml = '<span class="message-ticks ticks-delivered">✓✓</span>';
+                } else if (status === 'read') {
+                    ticksHtml = '<span class="message-ticks ticks-read">✓✓</span>';
+                }
+            }
+
             bubble.innerHTML = `
             ${content}
             <div class="message-footer">
               ${message.edited ? '<span class="edited-label">(edited)</span>' : ''}
               <span class="message-time">${time}</span>
+              ${ticksHtml}
             </div>`;
 
             const reactionEmoji = reactionsCache.get(message.id);
@@ -2663,20 +2588,9 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
             }
 
             wrapper.appendChild(bubble);
-
-            if (isSent && isLastSent && message.status) {
-                const statusDiv = document.createElement('div');
-                statusDiv.className = 'message-status-text';
-                if (message.status === 'sent') statusDiv.textContent = 'Sent';
-                else if (message.status === 'delivered') statusDiv.textContent = 'Delivered';
-                else if (message.status === 'read') statusDiv.textContent = 'Seen';
-                wrapper.appendChild(statusDiv);
-            }
-
             return wrapper;
         }
 
-        /* NEW: Heart animation on double-tap */
         function showHeartAnimation(bubble, event) {
             const heart = document.createElement('span');
             heart.className = 'heart-animation';
@@ -2689,7 +2603,6 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
             setTimeout(() => heart.remove(), 800);
         }
 
-        /* NEW: Emoji tray */
         function openEmojiTray(message, event) {
             selectedMessageData = { id: message.id, text: message.text || '' };
             document.getElementById('tray-edit-btn').style.display = message.text ? 'flex' : 'none';
@@ -2732,13 +2645,11 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
                             reactionsCache.delete(change.doc.id);
                         }
                     });
-                    // Update reaction displays without reloading messages
                     updateReactionDisplays();
                 });
         }
 
         function updateReactionDisplays() {
-            // Update all visible reaction emojis based on reactionsCache
             reactionsCache.forEach((emoji, messageId) => {
                 const bubble = document.querySelector(`[data-msg-id="${messageId}"]`);
                 if (bubble) {
@@ -2790,7 +2701,6 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
             autoExpandTextarea();
         }
 
-        /* NEW: Reply functions */
         function setupReply(message) {
             replyingTo = {
                 id: message.id,
@@ -2846,16 +2756,28 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
                         autoExpandTextarea();
                     }
                     await db.collection('messages').add(messageData);
-                    try { await db.collection('typing').doc(
-                            `${auth.currentUser.uid}_${selectedUserId}`).delete(); } catch (e) {}
+                    // Delete typing indicator after sending
+                    try {
+                        await db.collection('typing').doc(
+                            `${auth.currentUser.uid}_${selectedUserId}`).delete();
+                    } catch (e) {}
                 }
                 scrollChatToBottom();
-            } catch (error) { console.error('Error sending message:', error);
-                alert('Failed to send message.'); } finally { sendBtn.disabled = false;
-                autoExpandTextarea(); }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                if (error.code === 'resource-exhausted') {
+                    alert(
+                        '⚠️ Daily message limit reached! The limit will reset soon. Please wait or try again tomorrow.'
+                        );
+                } else {
+                    alert('Failed to send message. Please try again.');
+                }
+            } finally {
+                sendBtn.disabled = false;
+                autoExpandTextarea();
+            }
         }
 
-        /* NEW: Auto-expanding textarea */
         function autoExpandTextarea() {
             const textarea = document.getElementById('chat-input');
             textarea.style.height = 'auto';
@@ -2868,7 +2790,7 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
             sendBtn.style.display = hasText || selectedImage ? 'flex' : 'none';
         }
 
-        // ==================== TYPING INDICATOR ====================
+        // ==================== TYPING INDICATOR (THROTTLED) ====================
         function handleTyping(event) {
             if (!selectedUserId || !auth.currentUser) return;
             if (event.key === 'Enter' && !event.shiftKey) {
@@ -2877,11 +2799,40 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
                 return;
             }
             autoExpandTextarea();
-            const typingRef = db.collection('typing').doc(`${auth.currentUser.uid}_${selectedUserId}`);
-            typingRef.set({ isTyping: true, timestamp: firebase.firestore.FieldValue.serverTimestamp() }).catch(
-                e => {});
-            if (typingTimeout) clearTimeout(typingTimeout);
-            typingTimeout = setTimeout(async () => { try { await typingRef.delete(); } catch (e) {} }, 2000);
+
+            // THROTTLED: Only write typing indicator every 5 seconds
+            const now = Date.now();
+            if (now - lastTypingWrite > TYPING_THROTTLE_MS && !typingWritePending) {
+                typingWritePending = true;
+                lastTypingWrite = now;
+                const typingRef = db.collection('typing').doc(`${auth.currentUser.uid}_${selectedUserId}`);
+                typingRef.set({
+                    isTyping: true,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(() => {
+                    typingWritePending = false;
+                }).catch(() => {
+                    typingWritePending = false;
+                });
+
+                // Clear typing after 6 seconds of no new writes
+                if (typingTimeout) clearTimeout(typingTimeout);
+                typingTimeout = setTimeout(async () => {
+                    try {
+                        await db.collection('typing').doc(`${auth.currentUser.uid}_${selectedUserId}`)
+                            .delete();
+                    } catch (e) {}
+                }, 6000);
+            } else if (!typingWritePending && now - lastTypingWrite <= TYPING_THROTTLE_MS) {
+                // Reset the clear timeout since user is still typing
+                if (typingTimeout) clearTimeout(typingTimeout);
+                typingTimeout = setTimeout(async () => {
+                    try {
+                        await db.collection('typing').doc(`${auth.currentUser.uid}_${selectedUserId}`)
+                            .delete();
+                    } catch (e) {}
+                }, 6000);
+            }
         }
 
         function setupTypingListener(otherUserId) {
@@ -2939,7 +2890,7 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
 
         function closeImagePreview() { document.getElementById('image-preview').style.display = 'none'; }
 
-        // ==================== NEW: VOICE NOTES ====================
+        // ==================== VOICE NOTES ====================
         async function startRecording() {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 alert('Voice recording not supported on this device.');
@@ -3017,7 +2968,6 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
             audioChunks = [];
         }
 
-        /* NEW: Play voice note */
         function playVoiceNote(element, audioUrl, duration) {
             const playBtn = element.querySelector('.voice-play-btn i');
             const allPlayBtns = document.querySelectorAll('.voice-play-btn i');
@@ -3056,24 +3006,18 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
             });
         }
 
-        // ==================== FIX 2: PRESENCE SYSTEM (Online / Last Seen) ====================
+        // ==================== PRESENCE SYSTEM (THROTTLED) ====================
         async function updatePresence(online) {
             if (!currentUser) return;
+            const now = Date.now();
+            if (now - lastPresenceWrite < PRESENCE_THROTTLE_MS && online) return;
+            lastPresenceWrite = now;
             try {
                 const presenceRef = db.collection('presence').doc(currentUser.uid);
-                if (online) {
-                    await presenceRef.set({
-                        online: true,
-                        lastActive: firebase.firestore.FieldValue.serverTimestamp()
-                    }, { merge: true });
-                    // FIX 2: Removed onDisconnect() — it does not work with Firestore.
-                    // Instead, we rely on visibilitychange + beforeunload handlers below.
-                } else {
-                    await presenceRef.set({
-                        online: false,
-                        lastActive: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                }
+                await presenceRef.set({
+                    online: online,
+                    lastActive: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
             } catch (error) { console.error('Presence update error:', error); }
         }
 
@@ -3120,7 +3064,7 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
                 });
         }
 
-        // ==================== NEW: ONESIGNAL INTEGRATION ====================
+        // ==================== ONESIGNAL INTEGRATION ====================
         function setupOneSignalUser(uid) {
             window.OneSignalDeferred = window.OneSignalDeferred || [];
             OneSignalDeferred.push(async function(OneSignal) {
@@ -3146,7 +3090,6 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
             });
         }
 
-        // FIX 3: Route OneSignal REST API call through a CORS proxy to bypass browser CORS block
         async function sendDisguisedNotification() {
             if (!selectedUserId || !currentUser) { alert('Open a chat first.'); return; }
             const bellBtn = document.getElementById('bell-btn');
@@ -3173,17 +3116,20 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
                         data: { type: 'disguised_calculator' }
                     });
                 }
-                const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent('https://onesignal.com/api/v1/notifications');
+                const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(
+                    'https://onesignal.com/api/v1/notifications');
                 const response = await fetch(proxyUrl, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Basic ${ONESIGNAL_REST_API_KEY}` },
+                    headers: { 'Content-Type': 'application/json',
+                        'Authorization': `Basic ${ONESIGNAL_REST_API_KEY}` },
                     body: body
                 });
                 const result = await response.json();
                 console.log('OneSignal response:', result);
                 if (result.id && result.recipients > 0) {
                     bellBtn.style.color = '#4CAF50';
-                    setTimeout(() => { bellBtn.style.color = '#A8C7FA'; bellBtn.style.opacity = '1'; }, 1500);
+                    setTimeout(() => { bellBtn.style.color = '#A8C7FA';
+                        bellBtn.style.opacity = '1'; }, 1500);
                 } else if (result.id && result.recipients === 0) {
                     alert('0 recipients — ask user to reopen the app once.');
                     bellBtn.style.opacity = '1';
@@ -3191,20 +3137,20 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
                     alert('Failed: ' + JSON.stringify(result.errors || result));
                     bellBtn.style.opacity = '1';
                 }
-            } catch (err) { console.error(err); alert('Failed.'); bellBtn.style.opacity = '1'; }
+            } catch (err) { console.error(err);
+                alert('Failed.');
+                bellBtn.style.opacity = '1'; }
         }
 
-        // ==================== FIX 1: MOBILE KEYBOARD OVERLAP HANDLER ====================
+        // ==================== KEYBOARD HANDLER ====================
         function applyKeyboardPadding() {
             if (!window.visualViewport) return;
             const chatScreen = document.getElementById('chat-screen');
             if (chatScreen.style.display !== 'flex') return;
             const viewport = window.visualViewport;
             const keyboardHeight = window.innerHeight - viewport.height;
-            // Only apply padding if keyboard is likely open (height difference > 100px)
             if (keyboardHeight > 100) {
                 chatScreen.style.paddingBottom = keyboardHeight + 'px';
-                // Scroll to bottom so the latest messages are visible above the keyboard
                 scrollChatToBottom();
             } else {
                 chatScreen.style.paddingBottom = '0px';
@@ -3226,31 +3172,24 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
             });
         }
 
-        // ==================== FIX 2: VISIBILITY & BEFOREUNLOAD PRESENCE HANDLERS ====================
+        // ==================== VISIBILITY & BEFOREUNLOAD PRESENCE HANDLERS ====================
         function setupPresenceEventHandlers() {
-            // When the tab becomes hidden (user switches apps, locks phone, or closes tab),
-            // immediately mark the user as offline.
             document.addEventListener('visibilitychange', () => {
                 if (!currentUser) return;
                 if (document.visibilityState === 'hidden') {
-                    // User left the app — set offline
                     db.collection('presence').doc(currentUser.uid).set({
                         online: false,
                         lastActive: firebase.firestore.FieldValue.serverTimestamp()
                     }).catch(err => console.error('Presence visibilitychange error:', err));
                 } else if (document.visibilityState === 'visible') {
-                    // User returned — set online
                     db.collection('presence').doc(currentUser.uid).set({
                         online: true,
                         lastActive: firebase.firestore.FieldValue.serverTimestamp()
                     }).catch(err => console.error('Presence visibilitychange error:', err));
                 }
             });
-
-            // Backup: before the tab unloads, set the user offline.
             window.addEventListener('beforeunload', () => {
                 if (!currentUser) return;
-                // Best-effort Firestore write during unload
                 db.collection('presence').doc(currentUser.uid).set({
                     online: false,
                     lastActive: firebase.firestore.FieldValue.serverTimestamp()
@@ -3271,7 +3210,6 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
             if (user) {
                 currentUser = user;
                 console.log('Logged in as:', user.email);
-                /* NEW: Initialize OneSignal */
                 setupOneSignalUser(user.uid);
                 db.collection('users').doc(user.uid).get().then((doc) => {
                     if (!doc.exists) {
@@ -3285,10 +3223,8 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
                 if (document.getElementById('auth-screen').style.display === 'block') {
                     showUsersList();
                 }
-                /* NEW: Update presence on login */
                 updatePresence(true);
             } else {
-                /* NEW: Set offline before clearing */
                 if (currentUser) updatePresence(false);
                 currentUser = null;
                 cleanupListeners();
@@ -3306,32 +3242,29 @@ const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API
         // ==================== INITIALIZATION ====================
         updateDisplay();
         returnToCalculator();
-        /* NEW: Setup panic detection */
         setupPanicDetection();
-        /* FIX 1: Setup viewport handler for keyboard overlap */
         setupViewportHandler();
-        /* FIX 2: Setup presence event handlers (visibilitychange + beforeunload) */
         setupPresenceEventHandlers();
 
-        // Handle keyboard appearance
         const chatInputEl = document.getElementById('chat-input');
         chatInputEl.addEventListener('focus', () => {
             setTimeout(() => {
                 chatInputEl.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                /* FIX 1: Re-apply keyboard padding when input is focused */
                 applyKeyboardPadding();
             }, 300);
         });
 
-        // Initialize auto-expand
         autoExpandTextarea();
-
-        // Set initial mic/send button state
         document.getElementById('mic-btn').style.display = 'inline-flex';
         document.getElementById('send-btn').style.display = 'none';
 
-        console.log('App initialized with Instagram/WhatsApp hybrid features.');
-        console.log('FIXES APPLIED: 1) Mobile keyboard overlap via visualViewport, 2) Presence via visibilitychange/beforeunload, 3) OneSignal via CORS proxy');
+        console.log('✅ App initialized with FIXES:');
+        console.log('  1) Typing throttled to every 5 seconds (was every keystroke)');
+        console.log('  2) WhatsApp-style delivery ticks: ✓ sent, ✓✓ delivered, ✓✓ blue read');
+        console.log('  3) Presence throttled to every 30 seconds');
+        console.log('  4) Auto-delivered status when receiver gets message');
+        console.log('  5) WhatsApp/Instagram style auto-expanding input');
+        console.log('  6) Better error handling for quota exhaustion');
     </script>
 </body>
 </html>
