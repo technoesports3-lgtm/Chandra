@@ -1131,11 +1131,6 @@
         /* ==================== CHAT INPUT AREA - WhatsApp/Instagram Style ==================== */
         .chat-input-area {
             flex-shrink: 0;
-            position: sticky;
-            bottom: 0;
-            z-index: 3;
-            background: #1E1E1E;
-            padding-bottom: calc(env(safe-area-inset-bottom, 0px) + var(--keyboard-offset, 0px));
         }
 
         .editing-banner {
@@ -1459,8 +1454,9 @@
                 <div class="chat-input-container">
                     <button class="attach-btn" onclick="selectImage()"><i class="fas fa-paperclip"></i></button>
                     <input type="file" id="image-input" accept="image/*" style="display:none;" onchange="handleImageSelect(event)">
+                    <!-- WhatsApp-style input wrapper -->
                     <div class="chat-input-wrapper">
-                        <textarea class="chat-input" id="chat-input" placeholder="Message" rows="1" onkeyup="handleTyping(event)" oninput="autoExpandTextarea()" onfocus="scrollToInput()"></textarea>
+                        <textarea class="chat-input" id="chat-input" placeholder="Message" rows="1" onkeyup="handleTyping(event)" oninput="autoExpandTextarea()"></textarea>
                     </div>
                     <button class="mic-btn" id="mic-btn" onmousedown="startRecording()" onmouseup="stopRecording()" onmouseleave="stopRecording()" ontouchstart="startRecording()" ontouchend="stopRecording()" ontouchcancel="stopRecording()">
                         <i class="fas fa-microphone"></i>
@@ -1581,11 +1577,8 @@
 
         // ==================== THROTTLE FOR TYPING (prevents Firestore write abuse) ====================
         let lastTypingWrite = 0;
-        const TYPING_THROTTLE_MS = 15000; // Refresh typing at most once every 15 seconds
-        const TYPING_IDLE_CLEAR_MS = 2000; // Clear when user pauses typing
+        const TYPING_THROTTLE_MS = 5000; // Write typing indicator only every 5 seconds
         let typingWritePending = false;
-        let isTypingActive = false;
-        let typingTimeout = null;
         let lastPresenceWrite = 0;
         const PRESENCE_THROTTLE_MS = 30000; // Write presence only every 30 seconds
 
@@ -1781,8 +1774,6 @@
             document.getElementById('chat-error-banner').style.display = 'none';
             cancelEdit();
             cancelReply();
-            if (typingTimeout) clearTimeout(typingTimeout);
-            isTypingActive = false;
             resetKeyboardPadding();
             updatePresence(true);
         }
@@ -2435,7 +2426,15 @@
 
         function setUpRealTimeListener(otherUserId, currentUserId) {
             if (messagesListener) messagesListener();
+            let startAfterTimestamp = null;
+            if (allMessages.length > 0) {
+                const lastMsg = allMessages[allMessages.length - 1];
+                startAfterTimestamp = lastMsg.timestamp;
+            }
             let query = db.collection('messages').orderBy('timestamp', 'asc');
+            if (startAfterTimestamp) {
+                query = query.startAfter(startAfterTimestamp);
+            }
             messagesListener = query.onSnapshot((snapshot) => {
                 let hasNew = false;
                 snapshot.docChanges().forEach((change) => {
@@ -2762,8 +2761,6 @@
                         await db.collection('typing').doc(
                             `${auth.currentUser.uid}_${selectedUserId}`).delete();
                     } catch (e) {}
-                    isTypingActive = false;
-                    if (typingTimeout) clearTimeout(typingTimeout);
                 }
                 scrollChatToBottom();
             } catch (error) {
@@ -2803,16 +2800,9 @@
             }
             autoExpandTextarea();
 
-            const hasText = document.getElementById('chat-input').value.trim().length > 0;
-            if (!hasText) {
-                clearTypingIndicatorSoon(0);
-                return;
-            }
-
-            // Write only when typing starts, then refresh very infrequently.
+            // THROTTLED: Only write typing indicator every 5 seconds
             const now = Date.now();
-            const shouldRefresh = now - lastTypingWrite > TYPING_THROTTLE_MS;
-            if ((!isTypingActive || shouldRefresh) && !typingWritePending) {
+            if (now - lastTypingWrite > TYPING_THROTTLE_MS && !typingWritePending) {
                 typingWritePending = true;
                 lastTypingWrite = now;
                 const typingRef = db.collection('typing').doc(`${auth.currentUser.uid}_${selectedUserId}`);
@@ -2821,24 +2811,28 @@
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 }).then(() => {
                     typingWritePending = false;
-                    isTypingActive = true;
                 }).catch(() => {
                     typingWritePending = false;
                 });
+
+                // Clear typing after 6 seconds of no new writes
+                if (typingTimeout) clearTimeout(typingTimeout);
+                typingTimeout = setTimeout(async () => {
+                    try {
+                        await db.collection('typing').doc(`${auth.currentUser.uid}_${selectedUserId}`)
+                            .delete();
+                    } catch (e) {}
+                }, 6000);
+            } else if (!typingWritePending && now - lastTypingWrite <= TYPING_THROTTLE_MS) {
+                // Reset the clear timeout since user is still typing
+                if (typingTimeout) clearTimeout(typingTimeout);
+                typingTimeout = setTimeout(async () => {
+                    try {
+                        await db.collection('typing').doc(`${auth.currentUser.uid}_${selectedUserId}`)
+                            .delete();
+                    } catch (e) {}
+                }, 6000);
             }
-
-            clearTypingIndicatorSoon(TYPING_IDLE_CLEAR_MS);
-        }
-
-        function clearTypingIndicatorSoon(delayMs = TYPING_IDLE_CLEAR_MS) {
-            if (typingTimeout) clearTimeout(typingTimeout);
-            typingTimeout = setTimeout(async () => {
-                if (!auth.currentUser || !selectedUserId) return;
-                try {
-                    await db.collection('typing').doc(`${auth.currentUser.uid}_${selectedUserId}`).delete();
-                } catch (e) {}
-                isTypingActive = false;
-            }, delayMs);
         }
 
         function setupTypingListener(otherUserId) {
@@ -3154,24 +3148,18 @@
             const chatScreen = document.getElementById('chat-screen');
             if (chatScreen.style.display !== 'flex') return;
             const viewport = window.visualViewport;
-            const keyboardHeight = Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop);
+            const keyboardHeight = window.innerHeight - viewport.height;
             if (keyboardHeight > 100) {
-                document.documentElement.style.setProperty('--keyboard-offset', keyboardHeight + 'px');
+                chatScreen.style.paddingBottom = keyboardHeight + 'px';
                 scrollChatToBottom();
             } else {
-                document.documentElement.style.setProperty('--keyboard-offset', '0px');
+                chatScreen.style.paddingBottom = '0px';
             }
         }
 
         function resetKeyboardPadding() {
-            document.documentElement.style.setProperty('--keyboard-offset', '0px');
-        }
-
-        function scrollToInput() {
-            setTimeout(() => {
-                const input = document.getElementById('chat-input');
-                if (input) input.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-            }, 120);
+            const chatScreen = document.getElementById('chat-screen');
+            chatScreen.style.paddingBottom = '0px';
         }
 
         function setupViewportHandler() {
