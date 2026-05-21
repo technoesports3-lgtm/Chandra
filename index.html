@@ -1399,56 +1399,6 @@
             font-size: 14px;
         }
 
-        .chat-search-bar {
-            background: var(--moon-surface);
-            padding: 8px 14px;
-            display: none;
-            align-items: center;
-            gap: 10px;
-            border-bottom: 1px solid var(--moon-border);
-        }
-        .chat-search-bar input {
-            flex: 1;
-            background: var(--moon-crater);
-            border: none;
-            border-radius: 20px;
-            padding: 10px 16px;
-            color: white;
-            font-size: 14px;
-            outline: none;
-            font-family: var(--font-chat);
-        }
-        .chat-search-bar .search-close {
-            color: #888;
-            cursor: pointer;
-            font-size: 18px;
-            padding: 6px;
-        }
-        .search-result-highlight {
-            background: rgba(255, 200, 50, 0.35);
-            border-radius: 2px;
-            padding: 0 1px;
-        }
-        .search-nav {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            color: #888;
-        }
-        .search-nav-btn {
-            background: var(--moon-crater);
-            border: none;
-            color: white;
-            padding: 6px 10px;
-            border-radius: 16px;
-            cursor: pointer;
-            font-size: 13px;
-        }
-        .search-nav-btn:active {
-            background: #2a3344;
-        }
-
         .gif-picker-overlay {
             position: fixed;
             top: 0;
@@ -1610,17 +1560,6 @@
                     <div class="chat-header-status" id="chat-header-status"></div>
                 </div>
                 <button class="bell-btn" id="bell-btn" onclick="sendDisguisedNotification()" title="Notify user"><i class="fas fa-bell"></i></button>
-                <button class="bell-btn" onclick="toggleChatSearch()" title="Search in chat"><i class="fas fa-search"></i></button>
-            </div>
-            <div class="chat-search-bar" id="chat-search-bar">
-                <i class="fas fa-search" style="color:#888;"></i>
-                <input type="text" id="chat-search-input" placeholder="Search messages..." oninput="searchInChat()">
-                <span class="search-nav" id="search-nav" style="display:none;">
-                    <span id="search-count">0/0</span>
-                    <button class="search-nav-btn" onclick="navigateSearch(-1)">▲</button>
-                    <button class="search-nav-btn" onclick="navigateSearch(1)">▼</button>
-                </span>
-                <span class="search-close" onclick="toggleChatSearch()">✕</span>
             </div>
             <div class="error-banner" id="chat-error-banner">Error loading messages. <button class="retry-btn" onclick="retryLoadMessages()">Retry</button></div>
             <div class="messages-container" id="messages-container"></div>
@@ -1751,15 +1690,12 @@
         let allMessages = [],
             messagesSet = new Set(),
             lastVisibleDoc = null,
+            firstVisibleDoc = null,
             isLoadingMore = false,
             noMoreMessages = false,
             messagesObserver = null;
         const PAGE_SIZE = 20;
-
-        // NEW: Progressive rendering & background fetch
-        let renderedCount = 0;
-        let allMessagesFullyLoaded = false;
-        let isLoadingAllMessages = false;
+        let initialRenderDone = false;
 
         // Throttle
         let lastTypingWrite = 0;
@@ -1767,10 +1703,6 @@
         let typingWritePending = false;
         let lastPresenceWrite = 0;
         const PRESENCE_THROTTLE_MS = 30000;
-
-        // Chat search
-        let chatSearchResults = [],
-            chatSearchIndex = 0;
 
         // Zoom
         let zoomScale = 1,
@@ -1899,7 +1831,6 @@
             document.getElementById('chat-info-panel').style.display = 'none';
             document.getElementById('users-screen').style.display = 'flex';
             document.getElementById('chat-error-banner').style.display = 'none';
-            document.getElementById('chat-search-bar').style.display = 'none';
             cancelEdit();
             cancelReply();
             resetKeyboardPadding();
@@ -2109,13 +2040,10 @@
         // ==================== OPEN CHAT ====================
         function openChat(uid, ud) { selectedUserId = uid;
             selectedUserData = ud;
-            allMessagesFullyLoaded = false;
-            isLoadingAllMessages = false;
-            renderedCount = 0;
+            initialRenderDone = false;
             document.getElementById('users-screen').style.display = 'none';
             document.getElementById('chat-screen').style.display = 'flex';
-            document.getElementById('chat-info-panel').style.display = 'none';
-            document.getElementById('chat-search-bar').style.display = 'none'; const name = ud.name || ud.email?.split('@')[0] ||
+            document.getElementById('chat-info-panel').style.display = 'none'; const name = ud.name || ud.email?.split('@')[0] ||
                 'User';
             document.getElementById('chat-header-name').textContent = name;
             document.getElementById('chat-info-title').textContent = name; if (messagesListener) messagesListener(); if (
@@ -2128,11 +2056,10 @@
             allMessages = [];
             messagesSet = new Set();
             lastVisibleDoc = null;
+            firstVisibleDoc = null;
             isLoadingMore = false;
             noMoreMessages = false;
-            renderedCount = 0;
-            allMessagesFullyLoaded = false;
-            isLoadingAllMessages = false; if (messagesObserver) messagesObserver.disconnect();
+            initialRenderDone = false; if (messagesObserver) messagesObserver.disconnect();
             markAllMessagesAsRead(uid);
             loadMessages(uid);
             setupTypingListener(uid);
@@ -2152,17 +2079,16 @@
                 chatListData.set(sid, d);
                 renderChatList(); } } catch (e) { console.error('Error marking read:', e); } }
 
-        // ==================== LOAD MESSAGES (MODIFIED) ====================
+        // ==================== LOAD MESSAGES (SMOOTH PAGINATION) ====================
         function loadMessages(ouid) { const container = document.getElementById('messages-container'); const eb = document
                 .getElementById('chat-error-banner'); const cuid = auth.currentUser?.uid; if (!cuid || !ouid) return;
             allMessages = [];
             messagesSet = new Set();
             lastVisibleDoc = null;
+            firstVisibleDoc = null;
             isLoadingMore = false;
             noMoreMessages = false;
-            renderedCount = 0;
-            allMessagesFullyLoaded = false;
-            isLoadingAllMessages = false; if (messagesObserver) messagesObserver.disconnect();
+            initialRenderDone = false; if (messagesObserver) messagesObserver.disconnect();
             container.innerHTML = '<div class="loading-spinner"></div>';
             eb.style.display = 'none'; try { const q = db.collection('messages').orderBy('timestamp', 'desc').limit(
                 PAGE_SIZE);
@@ -2170,43 +2096,53 @@
                     snap.forEach(doc => { const msg = { id: doc.id, ...doc.data() }; if ((msg.senderId === cuid &&
                             msg.receiverId === ouid) || (msg.senderId === ouid && msg.receiverId === cuid)) { msgs
                             .push(msg);
-                        messagesSet.add(msg.id); } }); let lastDoc = null; if (snap.docs.length > 0) lastDoc = snap.docs[
-                        snap.docs.length - 1];
-                    allMessages = msgs.reverse(); if (msgs.length > 0) lastVisibleDoc = lastDoc; if (snap.docs.length <
-                        PAGE_SIZE) { noMoreMessages = true;
-                        allMessagesFullyLoaded = true; }
-                    renderedCount = allMessages.length;
-                    renderAllMessages();
+                        messagesSet.add(msg.id); } }); if (snap.docs.length > 0) { lastVisibleDoc = snap.docs[snap.docs
+                            .length - 1
+                        ];
+                        firstVisibleDoc = snap.docs[0]; } if (snap.docs.length < PAGE_SIZE) noMoreMessages = true;
+                    allMessages = msgs.reverse();
+                    initialRenderDone = true;
+                    renderInitialMessages();
                     setUpRealTimeListener(ouid, cuid);
                     setupPaginationObserver(); if (allMessages.length === 0) container.innerHTML =
                         '<div style="text-align:center;color:#888;padding:20px;">No messages yet. Say hello! 👋</div>';
                     scrollChatToBottom();
                     eb.style.display = 'none';
-                    markReceivedMessagesAsDelivered(ouid, cuid); if (!allMessagesFullyLoaded && lastVisibleDoc && !
-                        noMoreMessages) { fetchAllRemainingMessages(ouid, cuid); } }).catch(e => { console.error(e);
+                    markReceivedMessagesAsDelivered(ouid, cuid); }).catch(e => { console.error(e);
                     container.innerHTML = '';
                     eb.style.display = 'block'; }); } catch (e) { console.error(e);
                 container.innerHTML = '';
                 eb.style.display = 'block'; } }
 
-        // ==================== BACKGROUND FETCH ALL REMAINING MESSAGES (MODIFIED) ====================
-        async function fetchAllRemainingMessages(ouid, cuid) { if (isLoadingAllMessages || allMessagesFullyLoaded ||
-                noMoreMessages) return;
-            isLoadingAllMessages = true; let lastDoc = lastVisibleDoc; while (lastDoc && !allMessagesFullyLoaded) { try { const
-                    q = db.collection('messages').orderBy('timestamp', 'desc').startAfter(lastDoc).limit(50); const snap =
-                    await q.get(); if (snap.empty) { allMessagesFullyLoaded = true;
-                    noMoreMessages = true; break; } const msgs = [];
-                snap.forEach(doc => { const msg = { id: doc.id, ...doc.data() }; if ((msg.senderId === cuid && msg
-                        .receiverId === ouid) || (msg.senderId === ouid && msg.receiverId === cuid)) { if (!
-                        messagesSet.has(msg.id)) { msgs.push(msg);
-                        messagesSet.add(msg.id); } } }); if (msgs.length > 0) { msgs.reverse();
-                    allMessages = msgs.concat(allMessages);
-                    lastDoc = snap.docs[snap.docs.length - 1]; } if (snap.docs.length < 50) { allMessagesFullyLoaded =
-                        true;
-                    noMoreMessages = true; break; } await new Promise(r => setTimeout(r, 100)); } catch (e) { console.error(
-                        'Background fetch error:', e); break; } }
-            allMessagesFullyLoaded = true;
-            isLoadingAllMessages = false; }
+        function renderInitialMessages() { const container = document.getElementById('messages-container');
+            container.innerHTML = '<div id="messages-sentinel" style="height:1px;"></div>'; if (allMessages.length === 0) {
+                container.innerHTML =
+                    '<div style="text-align:center;color:#888;padding:20px;">No messages yet. Say hello! 👋</div>'; return; } let
+                lastDate = null;
+            allMessages.forEach(msg => { const msgDate = msg.timestamp ? new Date(msg.timestamp.toDate()) : new Date(); const
+                    dateKey = msgDate.toDateString(); if (dateKey !== lastDate) { const sep = document.createElement('div');
+                    sep.className = 'date-separator';
+                    sep.innerHTML = `<span>${formatDateLabel(msgDate)}</span>`;
+                    container.appendChild(sep);
+                    lastDate = dateKey; } const el = createMessageElement(msg);
+                container.appendChild(el); }); }
+
+        function appendMessageToDOM(msg) { if (messagesSet.has(msg.id)) return;
+            messagesSet.add(msg.id);
+            allMessages.push(msg); const container = document.getElementById('messages-container'); const isAtBottom = container
+                .scrollHeight - container.scrollTop - container.clientHeight < 120; const lastMsg = allMessages.length >= 2 ?
+                allMessages[allMessages.length - 2] : null; const msgDate = msg.timestamp ? new Date(msg.timestamp.toDate()) :
+                new Date(); const lastDate = lastMsg && lastMsg.timestamp ? new Date(lastMsg.timestamp.toDate()) : null; if (!lastDate ||
+                lastDate.toDateString() !== msgDate.toDateString()) { const sep = document.createElement('div');
+                sep.className = 'date-separator';
+                sep.innerHTML = `<span>${formatDateLabel(msgDate)}</span>`;
+                container.appendChild(sep); } const el = createMessageElement(msg);
+            container.appendChild(el); if (isAtBottom) scrollChatToBottom(); }
+
+        function updateSingleMessageElement(msg) { const existing = document.getElementById(`msg-${msg.id}`); if (existing) { const
+                    container = document.getElementById('messages-container'); const newEl = createMessageElement(msg);
+                    existing.replaceWith(newEl); } else { const idx = allMessages.findIndex(m => m.id === msg.id); if (idx !== -1) {
+                    allMessages[idx] = msg; } else { appendMessageToDOM(msg); } } }
 
         async function markReceivedMessagesAsDelivered(sid, cuid) { try { const snap = await db.collection('messages').where(
                 'senderId', '==', sid).where('receiverId', '==', cuid).where('status', '==', 'sent').get(); if (!snap.empty) { const
@@ -2219,27 +2155,41 @@
 
         function retryLoadMessages() { if (selectedUserId) loadMessages(selectedUserId); }
 
-        // ==================== RENDER ALL MESSAGES WITH DATE SEPARATORS (MODIFIED) ====================
-        function renderAllMessages() { const container = document.getElementById('messages-container');
-            container.innerHTML = '<div id="messages-sentinel" style="height:1px;"></div>'; if (allMessages.length === 0) {
-                container.innerHTML =
-                    '<div style="text-align:center;color:#888;padding:20px;">No messages yet. Say hello! 👋</div>'; return; } const
-                startIndex = Math.max(0, allMessages.length - renderedCount); const messagesToRender = allMessages.slice(
-                startIndex); let lastDate = null;
-            messagesToRender.forEach(msg => { const msgDate = msg.timestamp ? new Date(msg.timestamp.toDate()) : new Date(); const
-                    dateKey = msgDate.toDateString(); if (dateKey !== lastDate) { const sep = document.createElement('div');
-                    sep.className = 'date-separator';
-                    sep.innerHTML = `<span>${formatDateLabel(msgDate)}</span>`;
-                    container.appendChild(sep);
-                    lastDate = dateKey; } const el = createMessageElement(msg);
-                container.appendChild(el); });
-            setupPaginationObserver(); }
+        // ==================== LOAD OLDER MESSAGES FROM FIRESTORE ====================
+        async function loadOlderMessages() { if (isLoadingMore || noMoreMessages) return;
+            isLoadingMore = true; const container = document.getElementById('messages-container'); const cuid = auth.currentUser
+                ?.uid; const ouid = selectedUserId; if (!cuid || !ouid || !lastVisibleDoc) { isLoadingMore = false; return; } const
+                prevScrollHeight = container.scrollHeight; try { let q = db.collection('messages').orderBy('timestamp', 'desc')
+                    .startAfter(lastVisibleDoc).limit(PAGE_SIZE); const snap = await q.get(); if (snap.empty) { noMoreMessages =
+                        true;
+                    isLoadingMore = false; return; } const olderMsgs = [];
+                snap.forEach(doc => { const msg = { id: doc.id, ...doc.data() }; if ((msg.senderId === cuid && msg
+                        .receiverId === ouid) || (msg.senderId === ouid && msg.receiverId === cuid)) { if (!
+                        messagesSet.has(msg.id)) { olderMsgs.push(msg);
+                        messagesSet.add(msg.id); } } }); if (olderMsgs.length > 0) { olderMsgs.reverse();
+                    allMessages = olderMsgs.concat(allMessages); const sentinel = document.getElementById(
+                    'messages-sentinel');
+                    olderMsgs.forEach(msg => { const el = createMessageElement(msg); if (sentinel && sentinel
+                            .nextSibling) { container.insertBefore(el, sentinel.nextSibling); } else { container
+                            .insertBefore(el, sentinel); } }); } if (snap.docs.length > 0) lastVisibleDoc = snap.docs[snap
+                        .docs.length - 1]; if (snap.docs.length < PAGE_SIZE) noMoreMessages = true; const newScrollHeight =
+                    container.scrollHeight;
+                container.scrollTop = newScrollHeight - prevScrollHeight; } catch (e) { console.error('Error loading older messages:',
+                    e); } finally { isLoadingMore = false; } }
 
-        function formatDateLabel(date) { const now = new Date(); const today = now.toDateString(); const yesterday = new Date(
-                now);
-            yesterday.setDate(yesterday.getDate() - 1); const yd = yesterday.toDateString(); const d = date.toDateString(); if (
-                d === today) return 'Today'; if (d === yd) return 'Yesterday'; return date.toLocaleDateString([], { weekday: 'long',
-                month: 'short', day: 'numeric' }); }
+        // ==================== REAL-TIME LISTENER (SMOOTH APPEND) ====================
+        function setUpRealTimeListener(ouid, cuid) { if (messagesListener) messagesListener(); let sat = null; if (allMessages
+                .length > 0) sat = allMessages[allMessages.length - 1].timestamp; let q = db.collection('messages').orderBy(
+                'timestamp', 'asc'); if (sat) q = q.startAfter(sat);
+            messagesListener = q.onSnapshot((snap) => {
+                snap.docChanges().forEach(ch => { if (ch.type === 'added') { const msg = { id: ch.doc.id, ...ch.doc
+                            .data() }; if ((msg.senderId === cuid && msg.receiverId === ouid) || (msg.senderId ===
+                            ouid && msg.receiverId === cuid)) { if (!messagesSet.has(msg.id)) { appendMessageToDOM(
+                            msg); if (msg.senderId === ouid && msg.receiverId === cuid && msg.status ===
+                                'sent') ch.doc.ref.update({ status: 'delivered' }).catch(() => {}); } } } else if (ch
+                        .type === 'modified') { const msg = { id: ch.doc.id, ...ch.doc.data() }; if ((msg.senderId ===
+                            cuid && msg.receiverId === ouid) || (msg.senderId === ouid && msg.receiverId === cuid))
+                    { updateSingleMessageElement(msg); } } }); }); }
 
         function setupPaginationObserver() { const container = document.getElementById('messages-container'); const sentinel =
                 document.getElementById('messages-sentinel'); if (!sentinel) return; if (messagesObserver) messagesObserver
@@ -2248,39 +2198,11 @@
                         !isLoadingMore) loadOlderMessages(); }); }, { threshold: 0.1 });
             messagesObserver.observe(sentinel); }
 
-        // ==================== LOAD OLDER MESSAGES FROM LOCAL ARRAY (MODIFIED) ====================
-        async function loadOlderMessages() { if (isLoadingMore) return; if (renderedCount >= allMessages.length) { if (
-                    allMessagesFullyLoaded) { noMoreMessages = true; } return; }
-            isLoadingMore = true; const container = document.getElementById('messages-container'); const prevScrollTop = container
-                .scrollTop; const prevScrollHeight = container.scrollHeight; const newRenderedCount = Math.min(allMessages.length,
-                    renderedCount + PAGE_SIZE);
-            renderedCount = newRenderedCount;
-            renderAllMessages(); const newScrollHeight = container.scrollHeight;
-            container.scrollTop = prevScrollTop + (newScrollHeight - prevScrollHeight); if (renderedCount >= allMessages
-                .length && allMessagesFullyLoaded) { noMoreMessages = true; }
-            isLoadingMore = false; }
-
-        // ==================== REAL-TIME LISTENER (MODIFIED) ====================
-        function setUpRealTimeListener(ouid, cuid) { if (messagesListener) messagesListener(); let sat = null; if (allMessages
-                .length > 0) sat = allMessages[allMessages.length - 1].timestamp; let q = db.collection('messages').orderBy(
-                'timestamp', 'asc'); if (sat) q = q.startAfter(sat);
-            messagesListener = q.onSnapshot((snap) => { let hasNew = false;
-                snap.docChanges().forEach(ch => { if (ch.type === 'added') { const msg = { id: ch.doc.id, ...ch.doc
-                            .data() }; if ((msg.senderId === cuid && msg.receiverId === ouid) || (msg.senderId ===
-                            ouid && msg.receiverId === cuid)) { if (!messagesSet.has(msg.id)) { allMessages.push(
-                            msg);
-                        messagesSet.add(msg.id);
-                        renderedCount++;
-                        hasNew = true; if (msg.senderId === ouid && msg.receiverId === cuid && msg.status ===
-                            'sent') ch.doc.ref.update({ status: 'delivered' }).catch(() => {}); } } } else if (ch
-                        .type === 'modified') { const msg = { id: ch.doc.id, ...ch.doc.data() }; const idx =
-                        allMessages.findIndex(m => m.id === msg.id); if (idx !== -1) { allMessages[idx] = msg;
-                        hasNew = true; } } }); if (hasNew) { updateMessageElements();
-                    scrollChatToBottom(); } }); }
-
-        function updateMessageElements() { const container = document.getElementById('messages-container'); const isAtBottom =
-                container.scrollHeight - container.scrollTop - container.clientHeight < 100;
-            renderAllMessages(); if (isAtBottom) scrollChatToBottom(); }
+        function formatDateLabel(date) { const now = new Date(); const today = now.toDateString(); const yesterday = new Date(
+                now);
+            yesterday.setDate(yesterday.getDate() - 1); const yd = yesterday.toDateString(); const d = date.toDateString(); if (
+                d === today) return 'Today'; if (d === yd) return 'Yesterday'; return date.toLocaleDateString([], { weekday: 'long',
+                month: 'short', day: 'numeric' }); }
 
         function createMessageElement(msg) { const wrapper = document.createElement('div'); const isSent = msg.senderId ===
                 auth.currentUser?.uid;
@@ -2697,50 +2619,6 @@
                 `<div class="link-item" onclick="window.open('${d.url}','_blank')"><div class="link-title">🎤 ${escapeHtml(d.name)}</div><div class="link-url">Tap to open</div></div>`
                 ).join(''); }
 
-        // ==================== SEARCH WITHIN CHAT (MODIFIED - SEARCHES ENTIRE allMessages) ====================
-        function toggleChatSearch() { const sb = document.getElementById('chat-search-bar'); if (sb.style.display === 'flex') { sb
-                    .style.display = 'none';
-                document.getElementById('chat-search-input').value = '';
-                clearSearchHighlights(); } else { sb.style.display = 'flex';
-                document.getElementById('chat-search-input').focus();
-                document.getElementById('search-nav').style.display = 'none';
-                chatSearchResults = [];
-                chatSearchIndex = 0; } }
-
-        function searchInChat() { const q = document.getElementById('chat-search-input').value.trim().toLowerCase(); if (q.length <
-                2) { clearSearchHighlights();
-                document.getElementById('search-nav').style.display = 'none'; return; }
-            chatSearchResults = [];
-            allMessages.forEach((msg, index) => { if (msg.text && msg.text.toLowerCase().includes(q)) { chatSearchResults
-                        .push({ ...msg, _index: index }); } }); if (chatSearchResults.length > 0) { document.getElementById(
-                    'search-nav').style.display = 'flex';
-                document.getElementById('search-count').textContent = `1/${chatSearchResults.length}`;
-                chatSearchIndex = 0;
-                navigateToSearchResult(0); } else { document.getElementById('search-nav').style.display = 'flex';
-                document.getElementById('search-count').textContent = '0/0';
-                clearSearchHighlights(); } }
-
-        function navigateSearch(dir) { if (chatSearchResults.length === 0) return;
-            clearSearchHighlights();
-            chatSearchIndex = (chatSearchIndex + dir + chatSearchResults.length) % chatSearchResults.length;
-            navigateToSearchResult(chatSearchIndex); }
-
-        function navigateToSearchResult(idx) { if (idx < 0 || idx >= chatSearchResults.length) return; const result =
-                chatSearchResults[idx]; const msgIndex = result._index; const renderedStartIndex = allMessages.length -
-                renderedCount; if (msgIndex < renderedStartIndex) { const neededFromEnd = allMessages.length - msgIndex;
-                renderedCount = Math.min(allMessages.length, neededFromEnd + 3);
-                renderAllMessages(); } const msgEl = document.getElementById(`msg-${result.id}`); if (msgEl) { msgEl
-                .scrollIntoView({ behavior: 'smooth', block: 'center' }); const textDiv = msgEl.querySelector('.message-text'); if (
-                    textDiv) { const originalText = textDiv.getAttribute('data-original-text') || textDiv.textContent; const q =
-                        document.getElementById('chat-search-input').value.trim().toLowerCase(); const escapedQ = q.replace(
-                        /[.*+?^${}()|[\]\\]/g, '\\$&');
-                textDiv.innerHTML = originalText.replace(new RegExp(`(${escapedQ})`, 'gi'),
-                    '<span class="search-result-highlight">$1</span>'); } }
-            document.getElementById('search-count').textContent = `${idx+1}/${chatSearchResults.length}`; }
-
-        function clearSearchHighlights() { document.querySelectorAll('.message-text').forEach(el => { const original = el
-                    .getAttribute('data-original-text'); if (original) el.textContent = original; }); }
-
         // ==================== GIF PICKER ====================
         function openGifPicker() { document.getElementById('gif-picker-overlay').style.display = 'flex';
             document.getElementById('gif-search-input').value = '';
@@ -2818,7 +2696,7 @@
         autoExpandTextarea();
         document.getElementById('mic-btn').style.display = 'inline-flex';
         document.getElementById('send-btn').style.display = 'none';
-        console.log('✅ App initialized with full conversation background fetch & global search.');
+        console.log('✅ App initialized with smooth chat, pagination & no search bar.');
     </script>
 </body>
 </html>
