@@ -1792,9 +1792,6 @@
         let lastPresenceWrite = 0;
         const PRESENCE_THROTTLE_MS = 30000;
 
-        // Chat search
-        let chatSearchResults = [],
-            chatSearchIndex = 0;
 
         // Zoom
         let zoomScale = 1,
@@ -2811,10 +2808,9 @@
                 .getElementById('no-links-msg'); if (links.length === 0) { list.innerHTML = '';
                 noMsg.style.display = 'block'; return; }
             noMsg.style.display = 'none';
-            list.innerHTML = links.map(bubbles = document.querySelectorAll('.message-bubble');
-            bubbles.forEach(b => { const textEl = b.querySelector('.message-text'); if (textEl) { const origText = textEl
-                        .textContent || ''; if (origText.toLowerCase().includes(q)) { chatSearchResults.push({ element: textEl,
-                            original: origText, bubble: b });
+            list.innerHTML = links.map(l =>
+                `<div class="link-item" onclick="window.open('${l.url}','_blank')"><div class="link-title">${escapeHtml((l.text||l.url).substring(0,60))}</div><div class="link-url">${escapeHtml(l.url)}</div></div>`
+            ).join(''); }
 
         function renderDocsList(docs) { const list = document.getElementById('docs-list'); const noMsg = document.getElementById(
                 'no-docs-msg'); if (docs.length === 0) { list.innerHTML = '';
