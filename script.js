@@ -1,13 +1,13 @@
 // ==================== FIREBASE CONFIG ====================
 const firebaseConfig = {
-  apiKey: "AIzaSyC-6ctoVjMq5fO9_ahOILi7rSUmtnmS9EQ",
-  authDomain: "techno2-ccc7e.firebaseapp.com",
-  databaseURL: "https://techno2-ccc7e-default-rtdb.firebaseio.com",
-  projectId: "techno2-ccc7e",
-  storageBucket: "techno2-ccc7e.firebasestorage.app",
-  messagingSenderId: "622625787951",
-  appId: "1:622625787951:web:a55ac204337af8b91636da",
-  measurementId: "G-6GRHBDL8VZ"
+  apiKey: "AIzaSyAO51sUnrKtGbIn5S3G-mJ-S-sCn0qPg6s",
+  authDomain: "calculator-921ca.firebaseapp.com",
+  databaseURL: "https://calculator-921ca-default-rtdb.firebaseio.com",
+  projectId: "calculator-921ca",
+  storageBucket: "calculator-921ca.firebasestorage.app",
+  messagingSenderId: "27345618961",
+  appId: "1:27345618961:web:bf9c4064e66b582f8249b0",
+  measurementId: "G-XJVR74N4PF"
 };
 
 firebase.initializeApp(firebaseConfig);
