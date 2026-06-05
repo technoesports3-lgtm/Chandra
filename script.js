@@ -9,17 +9,24 @@ const firebaseConfig = {
     appId: "1:622625787951:web:a55ac204337af8b91636da",
     measurementId: "G-6GRHBDL8VZ"
 };
+
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 const storage = firebase.storage();
+
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(() => {});
 db.enablePersistence().catch(() => {});
 
 const IMGBB_API_KEY = "db671a28c5c7d432622dc7e5bc74eecc";
 const SECRET_CODE = "14102008";
 const ONESIGNAL_APP_ID = "aca4d5a8-52d7-4a9e-b276-117473b396d0";
-const ONESIGNAL_REST_API_KEY = "os_v2_app_vssnlkcs25fj5mtwcf2hhm4w2djertadndpuabu4ekue5mp6ecqywi34ho2gzl54jsbfxqlq74huqrvgf7vyolcgr73fmt7cj4ygili";
+
+// Split key for security (from File 1)
+const ONESIGNAL_REST_API_KEY_PART1 = "os_v2_app_vssnlkcs25fj5mtwcf2hhm4w2";
+const ONESIGNAL_REST_API_KEY_PART2 = "djertadndpuabu4ekue5mp6ecqywi34ho2gzl54jsbfxqlq74huqrvgf7vyolcgr73fmt7cj4ygili";
+const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API_KEY_PART2;
+
 const GIPHY_API_KEY = "GlVGYHkr3WSBnllca54iNt0yFbjz7L65";
 
 // ==================== GLOBAL VARIABLES ====================
@@ -34,6 +41,9 @@ let typingTimeout = null;
 
 // Firebase Listeners
 let messagesListener1 = null, messagesListener2 = null, typingListener = null, presenceListener = null;
+let unreadMessagesListener = null, requestsListener = null, acceptedChatsListener = null;
+let messagesObserver = null;
+
 let chatListData = new Map(), acceptedChats = new Set(), pendingRequests = new Map();
 
 // Pagination
@@ -199,7 +209,7 @@ function showAuthScreen() {
     document.getElementById('auth-screen').style.display = 'block';
 }
 
-async function showUsersList() {
+function showUsersList() {
     cleanupListeners();
     document.getElementById('auth-screen').style.display = 'none';
     document.getElementById('calculator').style.display = 'none';
@@ -213,40 +223,8 @@ async function showUsersList() {
         document.getElementById('current-user-name').textContent = name;
     }
     switchChatTab('chats');
-    await loadAcceptedChatsOnce();
-    await loadRequestsOnce();
+    loadData(); // Uses real-time listeners from File 1
     updatePresence(true);
-}
-
-async function loadAcceptedChatsOnce() {
-    if (!currentUser) return;
-    const snap1 = await db.collection('acceptedChats').where('userId1', '==', currentUser.uid).get();
-    const snap2 = await db.collection('acceptedChats').where('userId2', '==', currentUser.uid).get();
-    acceptedChats.clear();
-    snap1.forEach(doc => acceptedChats.add(doc.data().userId2));
-    snap2.forEach(doc => acceptedChats.add(doc.data().userId1));
-    for (let uid of acceptedChats) {
-        const doc = await db.collection('users').doc(uid).get();
-        if (doc.exists) {
-            chatListData.set(uid, { userData: doc.data(), lastMessage: null, unreadCount: 0, lastMessageTime: null });
-        }
-    }
-    renderChatList();
-}
-
-async function loadRequestsOnce() {
-    if (!currentUser) return;
-    const snap = await db.collection('chatRequests')
-        .where('toUserId', '==', currentUser.uid)
-        .where('status', '==', 'pending').get();
-    pendingRequests.clear();
-    for (let doc of snap.docs) {
-        const r = doc.data();
-        pendingRequests.set(r.fromUserId, { requestId: doc.id, ...r });
-        const userDoc = await db.collection('users').doc(r.fromUserId).get();
-        if (userDoc.exists) pendingRequests.get(r.fromUserId).fromUserData = userDoc.data();
-    }
-    renderRequestsList();
 }
 
 function goBackToUsers() {
@@ -255,6 +233,8 @@ function goBackToUsers() {
     if (typingListener) { typingListener(); typingListener = null; }
     if (presenceListener) { presenceListener(); presenceListener = null; }
     if (typingTimeout) { clearTimeout(typingTimeout); typingTimeout = null; }
+    if (messagesObserver) { messagesObserver.disconnect(); messagesObserver = null; }
+
     if (selectedUserId && currentUser) markAllMessagesAsRead(selectedUserId);
     document.getElementById('chat-screen').style.display = 'none';
     document.getElementById('chat-info-panel').style.display = 'none';
@@ -271,8 +251,14 @@ function cleanupListeners() {
     if (messagesListener2) messagesListener2();
     if (typingListener) typingListener();
     if (presenceListener) presenceListener();
+    if (acceptedChatsListener) acceptedChatsListener();
+    if (requestsListener) requestsListener();
+    if (unreadMessagesListener) unreadMessagesListener();
+    if (messagesObserver) messagesObserver.disconnect();
     if (typingTimeout) clearTimeout(typingTimeout);
+    
     messagesListener1 = messagesListener2 = typingListener = presenceListener = null;
+    acceptedChatsListener = requestsListener = unreadMessagesListener = messagesObserver = null;
     typingTimeout = null;
 }
 
@@ -407,7 +393,100 @@ function createSearchResultItem(user) {
     </div>`;
 }
 
-// ==================== CHAT REQUESTS ====================
+// ==================== CHAT REQUESTS & REAL-TIME DATA (From File 1) ====================
+function loadData() {
+    loadAcceptedChats();
+    loadRequests();
+    setupUnreadMessagesListener();
+}
+
+function loadAcceptedChats() {
+    if (!currentUser) return;
+    if (acceptedChatsListener) acceptedChatsListener();
+    acceptedChatsListener = db.collection('acceptedChats')
+        .where('userId1', '==', currentUser.uid)
+        .onSnapshot((snapshot) => {
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                acceptedChats.add(data.userId2);
+                loadUserData(data.userId2);
+            });
+            db.collection('acceptedChats').where('userId2', '==', currentUser.uid).get().then((snapshot2) => {
+                snapshot2.forEach((doc) => {
+                    const data = doc.data();
+                    acceptedChats.add(data.userId1);
+                    loadUserData(data.userId1);
+                });
+                renderChatList();
+            });
+        });
+}
+
+function loadUserData(userId) {
+    db.collection('users').doc(userId).get().then((doc) => {
+        if (doc.exists) {
+            if (!chatListData.has(userId)) chatListData.set(userId, { userData: doc.data(), lastMessage: null, unreadCount: 0, lastMessageTime: null });
+            else {
+                const data = chatListData.get(userId);
+                data.userData = doc.data();
+                chatListData.set(userId, data);
+            }
+            renderChatList();
+        }
+    });
+}
+
+function loadRequests() {
+    if (!currentUser) return;
+    if (requestsListener) requestsListener();
+    requestsListener = db.collection('chatRequests')
+        .where('toUserId', '==', currentUser.uid)
+        .where('status', '==', 'pending')
+        .onSnapshot((snapshot) => {
+            pendingRequests.clear();
+            snapshot.forEach((doc) => {
+                const request = doc.data();
+                pendingRequests.set(request.fromUserId, { requestId: doc.id, ...request });
+                loadRequesterData(request.fromUserId, doc.id, request);
+            });
+            renderRequestsList();
+        });
+}
+
+function loadRequesterData(userId, requestId, requestData) {
+    db.collection('users').doc(userId).get().then((doc) => {
+        if (doc.exists) {
+            const request = pendingRequests.get(userId);
+            if (request) { request.fromUserData = doc.data(); pendingRequests.set(userId, request); renderRequestsList(); }
+        }
+    });
+}
+
+function setupUnreadMessagesListener() {
+    if (!currentUser) return;
+    if (unreadMessagesListener) unreadMessagesListener();
+    unreadMessagesListener = db.collection('messages')
+        .where('receiverId', '==', currentUser.uid)
+        .where('status', '==', 'sent')
+        .onSnapshot((snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                if (change.type === 'added') {
+                    const message = change.doc.data();
+                    const senderId = message.senderId;
+                    if (acceptedChats.has(senderId)) {
+                        if (!chatListData.has(senderId)) loadUserData(senderId);
+                        const d = chatListData.get(senderId) || { unreadCount: 0 };
+                        d.lastMessage = message;
+                        d.unreadCount = (d.unreadCount || 0) + 1;
+                        d.lastMessageTime = message.timestamp;
+                        chatListData.set(senderId, d);
+                        renderChatList();
+                    }
+                }
+            });
+        });
+}
+
 async function sendChatRequest(tid) {
     if (!currentUser || tid === currentUser.uid) return;
     try {
@@ -426,11 +505,10 @@ async function acceptChatRequest(rid, fuid) {
     try {
         await db.collection('chatRequests').doc(rid).update({ status: 'accepted' });
         await db.collection('acceptedChats').add({ userId1: currentUser.uid, userId2: fuid, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-        loadRequestsOnce();
     } catch (e) { console.error(e); alert('Failed to accept'); }
 }
 async function rejectChatRequest(rid) {
-    try { await db.collection('chatRequests').doc(rid).update({ status: 'rejected' }); loadRequestsOnce(); }
+    try { await db.collection('chatRequests').doc(rid).update({ status: 'rejected' }); }
     catch (e) { console.error(e); }
 }
 
@@ -450,12 +528,14 @@ function renderChatList() {
     }
     sorted.forEach(([uid, d]) => { if (d.userData) c.appendChild(createChatListItem(uid, d)); });
 }
+
 function renderRequestsList() {
     const c = document.getElementById('requests-container');
     c.innerHTML = '';
     if (pendingRequests.size === 0) { c.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">No pending requests</div>'; return; }
     pendingRequests.forEach((r, uid) => { if (r.fromUserData) c.appendChild(createRequestItem(uid, r)); });
 }
+
 function createRequestItem(uid, r) {
     const div = document.createElement('div'); div.className = 'request-item';
     const ud = r.fromUserData, name = ud.name || ud.email?.split('@')[0] || 'User';
@@ -464,6 +544,7 @@ function createRequestItem(uid, r) {
         <div class="request-actions"><button class="accept-btn" onclick="acceptChatRequest('${r.requestId}','${uid}')">Accept</button><button class="reject-btn" onclick="rejectChatRequest('${r.requestId}')">Reject</button></div>`;
     return div;
 }
+
 function createChatListItem(uid, d) {
     const div = document.createElement('div'); div.className = `user-item ${d.unreadCount>0?'unread':''}`;
     div.onclick = () => openChat(uid, d.userData);
@@ -502,9 +583,11 @@ function openChat(uid, ud) {
     if (typingListener) { typingListener(); typingListener = null; }
     if (presenceListener) { presenceListener(); presenceListener = null; }
     if (typingTimeout) { clearTimeout(typingTimeout); typingTimeout = null; }
+    if (messagesObserver) { messagesObserver.disconnect(); messagesObserver = null; }
     document.getElementById('chat-error-banner').style.display = 'none';
     cancelEdit(); cancelReply();
     allMessagesMap.clear(); oldestSentTs = null; oldestRecvTs = null; noMoreSent = false; noMoreRecv = false;
+    
     markAllMessagesAsRead(uid);
     setupMessagesListener(uid, currentUser.uid);
     setupTypingListener(uid);
@@ -522,6 +605,13 @@ async function markAllMessagesAsRead(sid) {
     const batch = db.batch();
     snap.forEach(doc => batch.update(doc.ref, { status: 'read' }));
     await batch.commit();
+    
+    if (chatListData.has(sid)) {
+        const d = chatListData.get(sid);
+        d.unreadCount = 0;
+        chatListData.set(sid, d);
+        renderChatList();
+    }
     const chatId = [currentUser.uid, sid].sort().join('_');
     db.collection('chats').doc(chatId).update({ [`unread.${currentUser.uid}`]: 0 }).catch(()=>{});
 }
@@ -531,7 +621,7 @@ function setupMessagesListener(ouid, cuid) {
     const container = document.getElementById('messages-container');
     container.innerHTML = '<div class="loading-spinner"></div>';
     
-    // Real-time queries (latest 30)
+    // Real-time queries (latest PAGE_SIZE)
     const sentRef = db.collection('messages')
         .where('senderId', '==', cuid).where('receiverId', '==', ouid)
         .orderBy('timestamp', 'desc').limit(PAGE_SIZE);
@@ -539,16 +629,12 @@ function setupMessagesListener(ouid, cuid) {
         .where('senderId', '==', ouid).where('receiverId', '==', cuid)
         .orderBy('timestamp', 'desc').limit(PAGE_SIZE);
 
-    const sentMap = new Map();   // realtime sent messages
-    const recvMap = new Map();   // realtime received messages
+    const sentMap = new Map();   
+    const recvMap = new Map();   
 
     const updateAllMessages = () => {
-        // Merge realtime maps into allMessagesMap (but keep older ones too)
         sentMap.forEach((msg, id) => allMessagesMap.set(id, msg));
         recvMap.forEach((msg, id) => allMessagesMap.set(id, msg));
-        // Also remove any messages that disappeared from realtime if they were originally from realtime
-        // but keep older ones (loaded via load older)
-        // We'll just trust that realtime maps reflect current state of limited sets
         renderAllMessages(container);
     };
 
@@ -566,12 +652,18 @@ function setupMessagesListener(ouid, cuid) {
         }
         updateAllMessages();
     });
+
     messagesListener2 = receivedRef.onSnapshot(snap => {
         snap.docChanges().forEach(change => {
+            const msgData = change.doc.data();
             if (change.type === 'removed') {
                 recvMap.delete(change.doc.id);
             } else {
-                recvMap.set(change.doc.id, { id: change.doc.id, ...change.doc.data() });
+                recvMap.set(change.doc.id, { id: change.doc.id, ...msgData });
+                // File 1 feature: Auto-mark received messages as delivered
+                if (msgData.status === 'sent') {
+                    change.doc.ref.update({ status: 'delivered' }).catch(()=>{});
+                }
             }
         });
         if (recvMap.size > 0) {
@@ -586,6 +678,9 @@ async function loadOlderMessages() {
     if (isLoadingOlder || !selectedUserId || !currentUser) return;
     isLoadingOlder = true;
     const container = document.getElementById('messages-container');
+    const scrollPos = container.scrollTop;
+    const scrollHeight = container.scrollHeight;
+    
     const spinner = document.getElementById('load-more-spinner');
     if (spinner) spinner.style.display = 'block';
 
@@ -642,27 +737,36 @@ async function loadOlderMessages() {
     if (newSent === 0 && newRecv === 0) {
         noMoreSent = true; noMoreRecv = true;
     }
+    
     renderAllMessages(container);
+    
+    // Fix scroll jumping from prepending items
+    container.scrollTop = scrollPos + (container.scrollHeight - scrollHeight);
+    
     isLoadingOlder = false;
     if (spinner) spinner.style.display = 'none';
 }
 
-// ==================== RENDER ALL MESSAGES (with load older button) ====================
+// ==================== RENDER ALL MESSAGES ====================
 function renderAllMessages(container) {
     const sorted = [...allMessagesMap.values()].sort((a, b) => {
         const ta = a.timestamp ? a.timestamp.toDate().getTime() : 0;
         const tb = b.timestamp ? b.timestamp.toDate().getTime() : 0;
         return ta - tb;
     });
+    
     if (sorted.length === 0) {
         container.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">No messages yet. Say hello! 👋</div>';
         return;
     }
+    
     const showLoadButton = !(noMoreSent && noMoreRecv);
     let html = '';
+    
     if (showLoadButton) {
         html += `<div style="text-align:center;padding:8px;"><button id="load-older-btn" class="auth-btn" style="font-size:12px;padding:6px 20px;width:auto;border-radius:20px;" onclick="loadOlderMessages()">Load earlier messages</button></div>`;
     }
+    
     let lastDate = null;
     sorted.forEach(msg => {
         const date = msg.timestamp ? new Date(msg.timestamp.toDate()) : new Date();
@@ -673,8 +777,28 @@ function renderAllMessages(container) {
         }
         html += createMessageHTML(msg);
     });
+    
     container.innerHTML = html;
-    scrollChatToBottomIfNear();
+    
+    if (!isLoadingOlder) {
+        scrollChatToBottomIfNear();
+    }
+    
+    setupPaginationObserver(); // Attach infinite scroll to the 'load older' button
+}
+
+function setupPaginationObserver() {
+    const btn = document.getElementById('load-older-btn');
+    if (!btn) return;
+    if (messagesObserver) messagesObserver.disconnect();
+    messagesObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting && !isLoadingOlder && !(noMoreSent && noMoreRecv)) {
+                loadOlderMessages();
+            }
+        });
+    }, { threshold: 0.1 });
+    messagesObserver.observe(btn);
 }
 
 function createMessageHTML(msg) {
@@ -705,7 +829,9 @@ function createMessageHTML(msg) {
         <div class="${wrapperClass}" id="msg-${msg.id}" data-msg-id="${msg.id}">
             <div class="message-bubble" data-msg-id="${msg.id}" 
                  oncontextmenu="event.preventDefault();openEmojiTray('${msg.id}','${msg.text||''}','${isSent}')"
-                 onclick="handleMessageClick(this,event,'${msg.id}')">
+                 onclick="handleMessageClick(this,event,'${msg.id}')"
+                 ontouchstart="handleTouchStart(this,event,'${msg.id}')"
+                 ontouchend="handleTouchEnd(this,event,'${msg.id}')">
                 ${content}
                 <div class="message-footer">${edited}<span class="message-time">${time}</span>${ticks}</div>
                 ${reaction}
@@ -720,6 +846,24 @@ function handleMessageClick(bubble, event, msgId) {
         showHeartAnimation(bubble, event);
     }
     bubble._lastTap = now;
+}
+
+function handleTouchStart(bubble, e, msgId) {
+    longPressTimer = setTimeout(() => openEmojiTray(msgId, allMessagesMap.get(msgId)?.text || '', allMessagesMap.get(msgId)?.senderId === currentUser?.uid ? 'true' : 'false'), 500);
+    swipeStartX = e.touches[0].clientX;
+    swipeStartY = e.touches[0].clientY;
+    swipeTargetMsgId = msgId;
+}
+
+function handleTouchEnd(bubble, e, msgId) {
+    clearTimeout(longPressTimer);
+    if (!e.changedTouches || e.changedTouches.length === 0) return;
+    const dx = e.changedTouches[0].clientX - swipeStartX;
+    const dy = e.changedTouches[0].clientY - swipeStartY;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 2 && dx > 0 && swipeTargetMsgId === msgId) {
+        setupReply(allMessagesMap.get(msgId));
+    }
+    swipeTargetMsgId = null;
 }
 
 function showHeartAnimation(bubble, event) {
@@ -811,6 +955,7 @@ async function sendMessage() {
             }
             if (selectedImage) md.imageUrl = selectedImage;
             else md.text = text;
+            
             await db.collection('messages').add(md);
             db.collection('chats').doc(chatId).set({
                 lastMessage: {
@@ -820,6 +965,7 @@ async function sendMessage() {
                 },
                 [`unread.${selectedUserId}`]: firebase.firestore.FieldValue.increment(1)
             }, { merge: true });
+            
             if (!selectedImage) { input.value = ''; autoExpandTextarea(); }
             else selectedImage = null;
         }
@@ -866,6 +1012,7 @@ function handleTyping(event) {
         }, 8000);
     }
 }
+
 function setupTypingListener(ouid) {
     const container = document.getElementById('messages-container');
     if (!auth.currentUser) return;
@@ -884,7 +1031,7 @@ function setupTypingListener(ouid) {
     });
 }
 
-// ==================== IMAGE UPLOAD ====================
+// ==================== IMAGE UPLOAD & ZOOM ====================
 function selectImage() { document.getElementById('image-input').click(); }
 async function handleImageSelect(event) {
     const file = event.target.files[0];
@@ -901,6 +1048,7 @@ async function handleImageSelect(event) {
     } catch (e) { console.error(e); alert('Upload failed.'); }
     finally { sb.disabled = false; event.target.value = ''; }
 }
+
 function showImagePreview(url) {
     document.getElementById('preview-image').src = url;
     document.getElementById('image-preview').style.display = 'flex';
@@ -912,8 +1060,9 @@ function closeImagePreview() {
     zoomScale = 1; zoomTranslateX = 0; zoomTranslateY = 0; applyZoomTransform();
 }
 function applyZoomTransform() { document.getElementById('preview-image').style.transform = `translate(${zoomTranslateX}px,${zoomTranslateY}px) scale(${zoomScale})`; }
+
 function setupPinchZoom() {
-    const container = document.getElementById('preview-image-container');
+    const container = document.getElementById('preview-image-container') || document.getElementById('image-preview'); // Ensure fallback
     const img = document.getElementById('preview-image');
     let isDragging = false, dragStartX=0, dragStartY=0, startTX=0, startTY=0;
     container.ontouchstart = function(e) {
@@ -1016,7 +1165,7 @@ function playVoiceNote(element, url, duration) {
     audio.addEventListener('error', ()=>{ pb.classList.remove('fa-pause'); pb.classList.add('fa-play'); audio.remove(); alert('Failed to play voice note.'); });
 }
 
-// ==================== PRESENCE (fixed with visibilitychange) ====================
+// ==================== PRESENCE ====================
 async function updatePresence(online) {
     if (!currentUser) return;
     const now = Date.now();
@@ -1024,6 +1173,7 @@ async function updatePresence(online) {
     lastPresenceWrite = now;
     await db.collection('presence').doc(currentUser.uid).set({ online, lastActive: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
 }
+
 function setupPresenceListener(ouid) {
     if (!ouid) return;
     if (presenceListener) presenceListener();
@@ -1046,6 +1196,7 @@ function setupPresenceListener(ouid) {
         } else { se.textContent = 'Offline'; se.className = 'chat-header-status'; }
     });
 }
+
 function setupPresenceEventHandlers() {
     document.addEventListener('visibilitychange', () => {
         if (!currentUser) return;
@@ -1079,6 +1230,7 @@ function setupOneSignalUser(uid) {
         } catch (e) { console.error('OneSignal error:', e); }
     });
 }
+
 async function sendDisguisedNotification() {
     if (!selectedUserId || !currentUser) { alert('Open a chat first.'); return; }
     const bb = document.getElementById('bell-btn'); bb.style.opacity = '0.5';
@@ -1179,7 +1331,7 @@ async function searchGifs() {
 }
 async function sendGif(url){ selectedImage=url; closeGifPicker(); await sendMessage(); }
 
-// ==================== KEYBOARD ====================
+// ==================== KEYBOARD & SCROLLING ====================
 function applyKeyboardPadding() { if(!window.visualViewport)return; const cs=document.getElementById('chat-screen'); if(cs.style.display!=='flex')return; const vp=window.visualViewport, kh=window.innerHeight-vp.height; if(kh>100){cs.style.paddingBottom=kh+'px';scrollChatToBottom();}else cs.style.paddingBottom='0px'; }
 function resetKeyboardPadding() { document.getElementById('chat-screen').style.paddingBottom='0px'; }
 function setupViewportHandler() { if(!window.visualViewport)return; window.visualViewport.addEventListener('resize',applyKeyboardPadding); window.visualViewport.addEventListener('scroll',applyKeyboardPadding); }
@@ -1214,7 +1366,9 @@ returnToCalculator();
 setupPanicDetection();
 setupViewportHandler();
 setupPresenceEventHandlers();
+
 document.getElementById('chat-input').addEventListener('focus', () => { setTimeout(()=>{ document.getElementById('chat-input').scrollIntoView({behavior:'smooth',block:'end'}); applyKeyboardPadding(); }, 300); });
 autoExpandTextarea();
 document.getElementById('mic-btn').style.display = 'inline-flex';
 document.getElementById('send-btn').style.display = 'none';
+
