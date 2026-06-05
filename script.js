@@ -1,14 +1,15 @@
 // ==================== FIREBASE CONFIG ====================
 const firebaseConfig = {
-    apiKey: "AIzaSyC-6ctoVjMq5fO9_ahOILi7rSUmtnmS9EQ",
-    authDomain: "techno2-ccc7e.firebaseapp.com",
-    databaseURL: "https://techno2-ccc7e-default-rtdb.firebaseio.com",
-    projectId: "techno2-ccc7e",
-    storageBucket: "techno2-ccc7e.firebasestorage.app",
-    messagingSenderId: "622625787951",
-    appId: "1:622625787951:web:a55ac204337af8b91636da",
-    measurementId: "G-6GRHBDL8VZ"
+  apiKey: "AIzaSyC-6ctoVjMq5fO9_ahOILi7rSUmtnmS9EQ",
+  authDomain: "techno2-ccc7e.firebaseapp.com",
+  databaseURL: "https://techno2-ccc7e-default-rtdb.firebaseio.com",
+  projectId: "techno2-ccc7e",
+  storageBucket: "techno2-ccc7e.firebasestorage.app",
+  messagingSenderId: "622625787951",
+  appId: "1:622625787951:web:a55ac204337af8b91636da",
+  measurementId: "G-6GRHBDL8VZ"
 };
+
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
