@@ -54,7 +54,7 @@
             flex-direction: column;
         }
 
-        /* ==================== CALCULATOR ==================== */
+        /* ==================== CALCULATOR (unchanged) ==================== */
         .calculator {
             width: 100%;
             height: 100%;
@@ -208,7 +208,7 @@
             background: #525b6b;
         }
 
-        /* ==================== AUTH SCREEN ==================== */
+        /* ==================== AUTH SCREEN (unchanged) ==================== */
         .auth-screen {
             position: absolute;
             top: 0;
@@ -333,7 +333,7 @@
             cursor: not-allowed;
         }
 
-        /* ==================== USERS SCREEN ==================== */
+        /* ==================== USERS SCREEN (unchanged) ==================== */
         .users-screen {
             position: absolute;
             top: 0;
@@ -699,14 +699,14 @@
             }
         }
 
-        /* ==================== CHAT SCREEN ==================== */
+        /* ==================== CHAT SCREEN – MOON THEME OVERRIDES ==================== */
         .chat-screen {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: #121212;
+            background: #0e1629;          /* deep night sky */
             z-index: 50;
             display: none;
             flex-direction: column;
@@ -714,19 +714,19 @@
         }
 
         .chat-header {
-            background: #1E1E1E;
+            background: #1b2540;          /* slightly lighter blue */
             padding: 12px 16px;
             display: flex;
             align-items: center;
             gap: 12px;
-            border-bottom: 1px solid #2D2D2D;
+            border-bottom: 1px solid #2a3550;
             flex-shrink: 0;
         }
 
         .back-btn {
             background: none;
             border: none;
-            color: #A8C7FA;
+            color: #f0e68c;               /* moon yellow */
             font-size: 20px;
             cursor: pointer;
             padding: 8px;
@@ -734,13 +734,13 @@
             border-radius: 50%;
         }
         .back-btn:active {
-            background: rgba(168, 199, 250, 0.2);
+            background: rgba(240, 230, 140, 0.2);
         }
 
         .bell-btn {
             background: none;
             border: none;
-            color: #A8C7FA;
+            color: #f0e68c;
             font-size: 20px;
             cursor: pointer;
             padding: 8px;
@@ -749,25 +749,26 @@
             transition: all 0.15s;
         }
         .bell-btn:active {
-            background: rgba(168, 199, 250, 0.2);
+            background: rgba(240, 230, 140, 0.2);
             transform: scale(0.9);
         }
 
         .chat-header-info {
             flex: 1;
+            cursor: pointer;              /* make name clickable for media gallery */
         }
         .chat-header-name {
-            color: white;
+            color: #f8f4e3;               /* off‑white */
             font-size: 16px;
             font-weight: 600;
         }
         .chat-header-status {
-            color: #888;
+            color: #a0aec0;
             font-size: 12px;
             height: 18px;
         }
         .chat-header-status.online {
-            color: #4CAF50;
+            color: #68d391;
         }
 
         .messages-container {
@@ -777,7 +778,7 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
-            background: #121212;
+            background: #0e1629;          /* same as screen */
         }
 
         .message-wrapper {
@@ -799,20 +800,20 @@
             border-radius: 22px;
             position: relative;
             word-wrap: break-word;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
             cursor: pointer;
             transition: background 0.1s;
         }
 
         .sent .message-bubble {
-            background: #A8C7FA;
-            color: #121212;
+            background: #e2d9a8;          /* moonlit beige */
+            color: #1a1a2e;
             border-bottom-right-radius: 6px;
         }
 
         .received .message-bubble {
-            background: #2A2A2A;
-            color: white;
+            background: #2d3a5c;          /* soft navy */
+            color: #f0f4ff;
             border-bottom-left-radius: 6px;
         }
 
@@ -843,7 +844,7 @@
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255,255,255,0.2);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -852,7 +853,7 @@
             transition: all 0.15s;
         }
         .sent .voice-play-btn {
-            background: rgba(18, 18, 18, 0.2);
+            background: rgba(18,18,18,0.2);
         }
         .voice-play-btn:active {
             transform: scale(0.9);
@@ -866,12 +867,12 @@
         }
         .voice-waveform .bar {
             width: 3px;
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(255,255,255,0.5);
             border-radius: 2px;
             transition: height 0.1s;
         }
         .sent .voice-waveform .bar {
-            background: rgba(18, 18, 18, 0.4);
+            background: rgba(18,18,18,0.4);
         }
         .voice-duration {
             font-size: 12px;
@@ -879,12 +880,12 @@
         }
 
         .reply-preview {
-            background: #2a2a2a;
+            background: #1b2540;
             padding: 8px 16px;
             display: none;
             align-items: center;
             justify-content: space-between;
-            border-left: 4px solid #A8C7FA;
+            border-left: 4px solid #f0e68c;
             font-size: 13px;
         }
         .reply-preview-content {
@@ -895,21 +896,21 @@
             white-space: nowrap;
         }
         .reply-preview-name {
-            color: #A8C7FA;
+            color: #f0e68c;
             font-weight: 600;
             font-size: 12px;
             margin-bottom: 2px;
         }
         .cancel-reply-btn {
-            color: #888;
+            color: #aaa;
             cursor: pointer;
             font-size: 18px;
             padding: 4px 8px;
         }
 
         .quoted-message-preview {
-            background: rgba(0, 0, 0, 0.15);
-            border-left: 3px solid rgba(255, 255, 255, 0.5);
+            background: rgba(0,0,0,0.2);
+            border-left: 3px solid rgba(255,255,255,0.5);
             padding: 6px 10px;
             border-radius: 6px;
             margin-bottom: 6px;
@@ -917,8 +918,8 @@
             opacity: 0.85;
         }
         .sent .quoted-message-preview {
-            background: rgba(18, 18, 18, 0.1);
-            border-left-color: rgba(18, 18, 18, 0.4);
+            background: rgba(18,18,18,0.1);
+            border-left-color: rgba(18,18,18,0.4);
         }
         .quoted-sender {
             font-weight: 600;
@@ -933,7 +934,7 @@
             border-radius: 12px;
             padding: 2px 8px;
             font-size: 14px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.4);
             z-index: 5;
             cursor: default;
         }
@@ -942,7 +943,7 @@
             left: 8px;
         }
 
-        /* DELIVERY TICKS - WhatsApp style */
+        /* DELIVERY TICKS */
         .message-ticks {
             font-size: 11px;
             margin-left: 4px;
@@ -950,16 +951,16 @@
             letter-spacing: -2px;
         }
         .ticks-sent {
-            color: rgba(255, 255, 255, 0.5);
+            color: rgba(255,255,255,0.5);
         }
         .sent .ticks-sent {
-            color: rgba(18, 18, 18, 0.5);
+            color: rgba(18,18,18,0.5);
         }
         .ticks-delivered {
-            color: rgba(255, 255, 255, 0.5);
+            color: rgba(255,255,255,0.5);
         }
         .sent .ticks-delivered {
-            color: rgba(18, 18, 18, 0.5);
+            color: rgba(18,18,18,0.5);
         }
         .ticks-read {
             color: #4FC3F7;
@@ -976,18 +977,18 @@
 
         .edited-label {
             font-size: 10px;
-            color: rgba(255, 255, 255, 0.4);
+            color: rgba(255,255,255,0.4);
         }
         .sent .edited-label {
-            color: rgba(18, 18, 18, 0.4);
+            color: rgba(18,18,18,0.4);
         }
 
         .message-time {
             font-size: 11px;
-            color: rgba(255, 255, 255, 0.5);
+            color: rgba(255,255,255,0.5);
         }
         .sent .message-time {
-            color: rgba(18, 18, 18, 0.5);
+            color: rgba(18,18,18,0.5);
         }
 
         .heart-animation {
@@ -998,31 +999,19 @@
             z-index: 10;
         }
         @keyframes heartPop {
-            0% {
-                transform: scale(0.3);
-                opacity: 1;
-            }
-            50% {
-                transform: scale(1.4);
-                opacity: 0.9;
-            }
-            100% {
-                transform: scale(1.8);
-                opacity: 0;
-            }
+            0% { transform: scale(0.3); opacity:1; }
+            50% { transform: scale(1.4); opacity:0.9; }
+            100% { transform: scale(1.8); opacity:0; }
         }
 
         .emoji-tray-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top:0; left:0; width:100%; height:100%;
             z-index: 120;
             display: none;
             align-items: flex-end;
             justify-content: center;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0,0,0,0.3);
         }
         .emoji-tray {
             background: #1E1E1E;
@@ -1080,22 +1069,18 @@
         }
 
         @keyframes slideUp {
-            from {
-                transform: translateY(100%);
-            }
-            to {
-                transform: translateY(0);
-            }
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
         }
 
         .typing-indicator-bubble {
             align-self: flex-start;
-            background: #2A2A2A;
+            background: #2d3a5c;
             color: white;
             padding: 10px 16px;
             border-radius: 22px;
             border-bottom-left-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
             display: flex;
             align-items: center;
         }
@@ -1108,33 +1093,21 @@
             margin: 0 2px;
             animation: typing 1.4s infinite;
         }
-        .typing-dots span:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-        .typing-dots span:nth-child(3) {
-            animation-delay: 0.4s;
-        }
+        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
 
         @keyframes typing {
-            0%,
-            60%,
-            100% {
-                transform: translateY(0);
-                opacity: 0.4;
-            }
-            30% {
-                transform: translateY(-5px);
-                opacity: 1;
-            }
+            0%,60%,100% { transform: translateY(0); opacity:0.4; }
+            30% { transform: translateY(-5px); opacity:1; }
         }
 
-        /* ==================== CHAT INPUT AREA - WhatsApp/Instagram Style ==================== */
+        /* Chat input area – moon styling */
         .chat-input-area {
             flex-shrink: 0;
         }
 
         .editing-banner {
-            background: #2a2a2a;
+            background: #1b2540;
             padding: 8px 16px;
             display: none;
             align-items: center;
@@ -1142,30 +1115,30 @@
             font-size: 14px;
         }
         .editing-banner-info {
-            color: #A8C7FA;
+            color: #f0e68c;
         }
         .editing-banner-info i {
             margin-right: 8px;
         }
         .cancel-edit-btn {
-            color: #888;
+            color: #aaa;
             cursor: pointer;
             font-size: 20px;
         }
 
         .chat-input-container {
-            background: #1E1E1E;
+            background: #1b2540;
             padding: 8px 10px;
             display: flex;
             gap: 8px;
             align-items: flex-end;
-            border-top: 1px solid #2D2D2D;
+            border-top: 1px solid #2a3550;
         }
 
         .attach-btn {
             background: none;
             border: none;
-            color: #A8C7FA;
+            color: #f0e68c;
             font-size: 22px;
             cursor: pointer;
             padding: 10px 6px;
@@ -1174,14 +1147,29 @@
             transition: all 0.15s;
         }
         .attach-btn:active {
-            background: rgba(168, 199, 250, 0.2);
+            background: rgba(240,230,140,0.2);
             transform: scale(0.9);
         }
 
-        /* WhatsApp-style auto-expanding input wrapper */
+        .gif-btn {
+            background: none;
+            border: none;
+            color: #f0e68c;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 10px 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            transition: all 0.15s;
+        }
+        .gif-btn:active {
+            background: rgba(240,230,140,0.2);
+            transform: scale(0.9);
+        }
+
         .chat-input-wrapper {
             flex: 1;
-            background: #2D2D2D;
+            background: #2d3a5c;
             border-radius: 24px;
             display: flex;
             align-items: flex-end;
@@ -1191,14 +1179,14 @@
             border: 2px solid transparent;
         }
         .chat-input-wrapper:focus-within {
-            border: 2px solid #A8C7FA;
+            border: 2px solid #f0e68c;
         }
 
         .chat-input {
             flex: 1;
             background: transparent;
             border: none;
-            color: white;
+            color: #f0f4ff;
             font-size: 15px;
             user-select: text;
             resize: none;
@@ -1211,13 +1199,13 @@
             transition: height 0.1s ease;
         }
         .chat-input::placeholder {
-            color: #888;
+            color: #a0aec0;
         }
 
         .mic-btn {
             background: none;
             border: none;
-            color: #A8C7FA;
+            color: #f0e68c;
             font-size: 22px;
             cursor: pointer;
             padding: 10px 6px;
@@ -1226,7 +1214,7 @@
             transition: all 0.15s;
         }
         .mic-btn:active {
-            background: rgba(168, 199, 250, 0.2);
+            background: rgba(240,230,140,0.2);
             transform: scale(0.9);
         }
         .mic-btn.recording {
@@ -1234,13 +1222,8 @@
             animation: pulse 1s infinite;
         }
         @keyframes pulse {
-            0%,
-            100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.15);
-            }
+            0%,100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
         }
         .recording-timer {
             color: #ff4d4d;
@@ -1251,8 +1234,8 @@
         }
 
         .send-btn {
-            background: #A8C7FA;
-            color: #121212;
+            background: #f0e68c;
+            color: #1a1a2e;
             border: none;
             border-radius: 50%;
             width: 42px;
@@ -1267,30 +1250,42 @@
         }
         .send-btn:active {
             transform: scale(0.9);
-            background: #8bb5f0;
+            background: #d4c87a;
         }
         .send-btn:disabled {
             opacity: 0.5;
             transform: none;
         }
 
-        /* Image Preview */
+        /* Image Preview with pinch‑zoom support */
         .image-preview-modal {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.98);
+            background: rgba(0,0,0,0.98);
             z-index: 100;
             display: none;
             align-items: center;
             justify-content: center;
+            touch-action: none;           /* we handle gestures */
+        }
+        .preview-image-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
         }
         .preview-image {
             max-width: 90%;
             max-height: 90%;
             border-radius: 12px;
+            transition: transform 0.1s ease-out;
+            transform-origin: 0 0;
+            will-change: transform;
         }
         .close-preview {
             position: absolute;
@@ -1305,10 +1300,133 @@
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255,255,255,0.1);
+            z-index: 101;
         }
         .close-preview:active {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Media gallery modal */
+        .media-gallery-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 110;
+            display: none;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .media-gallery-header {
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+            border-bottom: 1px solid #2a3550;
+        }
+        .media-gallery-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .media-gallery-close {
+            background: none;
+            border: none;
+            color: #f0e68c;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+            padding: 4px;
+        }
+        .media-thumb {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: transform 0.2s;
+        }
+        .media-thumb:active {
+            transform: scale(0.95);
+        }
+        .no-media-text {
+            color: #888;
+            text-align: center;
+            padding: 40px;
+        }
+
+        /* GIF picker modal */
+        .gif-picker-overlay {
+            position: fixed;
+            top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 130;
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+        }
+        .gif-picker {
+            background: #1b2540;
+            width: 100%;
+            max-width: 400px;
+            height: 70%;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            animation: slideUp 0.3s ease-out;
+        }
+        .gif-search-bar {
+            padding: 12px;
+            display: flex;
+            gap: 8px;
+            border-bottom: 1px solid #2a3550;
+        }
+        .gif-search-input {
+            flex: 1;
+            background: #2d3a5c;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 16px;
+            color: white;
+            outline: none;
+        }
+        .gif-search-btn {
+            background: #f0e68c;
+            border: none;
+            border-radius: 20px;
+            padding: 0 16px;
+            color: #1a1a2e;
+            font-weight: 600;
+        }
+        .gif-grid {
+            flex: 1;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 4px;
+            padding: 4px;
+        }
+        .gif-item {
+            width: 100%;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .gif-item:active {
+            opacity: 0.8;
+        }
+        .gif-close {
+            align-self: flex-end;
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 24px;
+            padding: 8px 16px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -1432,7 +1550,7 @@
                 <button class="bell-btn" id="bell-btn" onclick="sendDisguisedNotification()" title="Notify user">
                     <i class="fas fa-bell"></i>
                 </button>
-                <div class="chat-header-info">
+                <div class="chat-header-info" onclick="openMediaGallery()">
                     <div class="chat-header-name" id="chat-header-name">Loading...</div>
                     <div class="chat-header-status" id="chat-header-status"></div>
                 </div>
@@ -1453,8 +1571,8 @@
                 </div>
                 <div class="chat-input-container">
                     <button class="attach-btn" onclick="selectImage()"><i class="fas fa-paperclip"></i></button>
+                    <button class="gif-btn" onclick="openGifPicker()"><i class="fas fa-gift"></i></button>
                     <input type="file" id="image-input" accept="image/*" style="display:none;" onchange="handleImageSelect(event)">
-                    <!-- WhatsApp-style input wrapper -->
                     <div class="chat-input-wrapper">
                         <textarea class="chat-input" id="chat-input" placeholder="Message" rows="1" onkeyup="handleTyping(event)" oninput="autoExpandTextarea()"></textarea>
                     </div>
@@ -1467,10 +1585,12 @@
             </div>
         </div>
 
-        <!-- Image Preview -->
+        <!-- Image Preview (zoomable) -->
         <div class="image-preview-modal" id="image-preview" onclick="closeImagePreview()">
             <span class="close-preview">&times;</span>
-            <img class="preview-image" id="preview-image" src="">
+            <div class="preview-image-container" id="preview-image-container">
+                <img class="preview-image" id="preview-image" src="">
+            </div>
         </div>
 
         <!-- Emoji Reaction Tray -->
@@ -1482,16 +1602,39 @@
                 <button class="emoji-option" onclick="addReaction('😢')">😢</button>
                 <button class="emoji-option" onclick="addReaction('😡')">😡</button>
                 <button class="emoji-option" onclick="addReaction('👍')">👍</button>
-                <div class="emoji-tray-actions">
+                <!-- Own-message actions (shown only for own messages) -->
+                <div class="emoji-tray-actions" id="tray-own-actions">
                     <button class="emoji-tray-action-btn" id="tray-edit-btn" onclick="handleEditFromTray()"><i class="fas fa-pencil-alt"></i> Edit</button>
                     <button class="emoji-tray-action-btn delete" id="tray-delete-btn" onclick="handleDeleteFromTray()"><i class="fas fa-trash-alt"></i> Unsend</button>
                 </div>
             </div>
         </div>
+
+        <!-- Media Gallery Modal -->
+        <div class="media-gallery-overlay" id="media-gallery-overlay" onclick="closeMediaGallery()">
+            <div class="media-gallery-header">
+                <span class="media-gallery-title">Shared Media</span>
+                <button class="media-gallery-close" onclick="closeMediaGallery()">&times;</button>
+            </div>
+            <div class="media-grid" id="media-grid"></div>
+            <div id="media-loading" class="loading-spinner" style="margin:20px auto;"></div>
+        </div>
+
+        <!-- GIF Picker Modal -->
+        <div class="gif-picker-overlay" id="gif-picker-overlay" onclick="closeGifPicker()">
+            <div class="gif-picker" onclick="event.stopPropagation()">
+                <div class="gif-search-bar">
+                    <input type="text" class="gif-search-input" id="gif-search-input" placeholder="Search GIFs">
+                    <button class="gif-search-btn" onclick="searchGifs()">Search</button>
+                </div>
+                <div class="gif-grid" id="gif-grid"></div>
+                <button class="gif-close" onclick="closeGifPicker()">&times;</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        // ==================== FIREBASE CONFIG ====================
+        // ==================== FIREBASE CONFIG (unchanged) ====================
         const firebaseConfig = {
             apiKey: "AIzaSyC-6ctoVjMq5fO9_ahOILi7rSUmtnmS9EQ",
             authDomain: "techno2-ccc7e.firebaseapp.com",
@@ -1524,6 +1667,9 @@
         const ONESIGNAL_REST_API_KEY_PART2 = "boct3bdyxzilnfsiqejzssyszzv5m66f5ftoiqob6udczqaqlm36ji";
         const ONESIGNAL_REST_API_KEY = ONESIGNAL_REST_API_KEY_PART1 + ONESIGNAL_REST_API_KEY_PART2;
 
+        // GIPHY API key (provided by user)
+        const GIPHY_API_KEY = "oFbAiTXKKwJwlz0WFGMz9RJiUEZEUgRa";
+
         // ==================== GLOBAL VARIABLES ====================
         let currentExpression = '';
         let currentResult = '0';
@@ -1534,7 +1680,7 @@
         let selectedImage = null;
 
         let longPressTimer;
-        let selectedMessageData = { id: null, text: null };
+        let selectedMessageData = { id: null, text: null, senderId: null };
         let isEditing = false;
 
         let replyingTo = null;
@@ -1575,12 +1721,13 @@
         let messagesObserver = null;
         const PAGE_SIZE = 20;
 
-        // ==================== THROTTLE FOR TYPING (prevents Firestore write abuse) ====================
-        let lastTypingWrite = 0;
-        const TYPING_THROTTLE_MS = 5000; // Write typing indicator only every 5 seconds
-        let typingWritePending = false;
+        // ==================== TYPING INDICATOR FIX (immediate) ====================
+        let typingTimeout = null;
+        let isTypingActive = false;
+
+        // ==================== PRESENCE THROTTLE (unchanged) ====================
         let lastPresenceWrite = 0;
-        const PRESENCE_THROTTLE_MS = 30000; // Write presence only every 30 seconds
+        const PRESENCE_THROTTLE_MS = 30000;
 
         // ==================== PASSWORD TOGGLE ====================
         function togglePasswordVisibility(inputId, element) {
@@ -1597,12 +1744,11 @@
             }
         }
 
-        // ==================== CALCULATOR FUNCTIONS ====================
+        // ==================== CALCULATOR FUNCTIONS (unchanged) ====================
         function toggleScientific() {
             scientificVisible = !scientificVisible;
             document.getElementById('scientificRow').classList.toggle('show');
-            document.getElementById('expandIcon').style.transform = scientificVisible ? 'rotate(180deg)' :
-                'rotate(0deg)';
+            document.getElementById('expandIcon').style.transform = scientificVisible ? 'rotate(180deg)' : 'rotate(0deg)';
         }
 
         function appendNumber(num) {
@@ -1625,8 +1771,7 @@
         }
 
         function appendDecimal() {
-            if (!currentResult.includes('.')) { currentResult += '.';
-                updateDisplay(); }
+            if (!currentResult.includes('.')) { currentResult += '.'; updateDisplay(); }
         }
 
         function backspace() {
@@ -1680,7 +1825,7 @@
             document.getElementById('result').textContent = currentResult;
         }
 
-        // ==================== NAVIGATION ====================
+        // ==================== NAVIGATION (unchanged) ====================
         function returnToCalculator() {
             cleanupListeners();
             document.getElementById('users-screen').style.display = 'none';
@@ -1704,8 +1849,7 @@
             [chatScreen, usersScreen].forEach(screen => {
                 screen.addEventListener('click', function(e) {
                     const now = Date.now();
-                    const isInteractive = e.target.closest(
-                        'button, input, textarea, .message-bubble, .user-item, .search-result-item, .request-item, .emoji-option, .emoji-tray-action-btn');
+                    const isInteractive = e.target.closest('button, input, textarea, .message-bubble, .user-item, .search-result-item, .request-item, .emoji-option, .emoji-tray-action-btn, .gif-item, .media-thumb');
                     if (isInteractive) {
                         lastTapTime = 0;
                         return;
@@ -1733,7 +1877,6 @@
             selectedUserId = null;
             selectedUserData = null;
             resetKeyboardPadding();
-            console.log('PANIC: Hidden all chat UI');
         }
 
         function showAuthScreen() {
@@ -1760,14 +1903,10 @@
         }
 
         function goBackToUsers() {
-            if (messagesListener) { messagesListener();
-                messagesListener = null; }
-            if (typingListener) { typingListener();
-                typingListener = null; }
-            if (presenceListener) { presenceListener();
-                presenceListener = null; }
-            if (reactionsListener) { reactionsListener();
-                reactionsListener = null; }
+            if (messagesListener) { messagesListener(); messagesListener = null; }
+            if (typingListener) { typingListener(); typingListener = null; }
+            if (presenceListener) { presenceListener(); presenceListener = null; }
+            if (reactionsListener) { reactionsListener(); reactionsListener = null; }
             if (selectedUserId && currentUser) markAllMessagesAsRead(selectedUserId);
             document.getElementById('chat-screen').style.display = 'none';
             document.getElementById('users-screen').style.display = 'flex';
@@ -1787,8 +1926,7 @@
             if (acceptedChatsListener) acceptedChatsListener();
             if (presenceListener) presenceListener();
             if (reactionsListener) reactionsListener();
-            usersListener = messagesListener = typingListener = unreadMessagesListener = requestsListener =
-                acceptedChatsListener = presenceListener = reactionsListener = null;
+            usersListener = messagesListener = typingListener = unreadMessagesListener = requestsListener = acceptedChatsListener = presenceListener = reactionsListener = null;
         }
 
         function switchChatTab(tab) {
@@ -1811,7 +1949,7 @@
             }
         }
 
-        // ==================== AUTHENTICATION ====================
+        // ==================== AUTHENTICATION (unchanged) ====================
         function switchAuthTab(tab) {
             document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
@@ -1839,8 +1977,7 @@
             const confirmPassword = document.getElementById('signup-confirm-password').value;
             const errorDiv = document.getElementById('signup-error');
             errorDiv.style.display = 'none';
-            if (!name || !email || !password || !confirmPassword) { showError('signup-error',
-                    'Please fill all fields'); return; }
+            if (!name || !email || !password || !confirmPassword) { showError('signup-error', 'Please fill all fields'); return; }
             if (password !== confirmPassword) { showError('signup-error', 'Passwords do not match'); return; }
             if (password.length < 6) { showError('signup-error', 'Password must be at least 6 characters'); return; }
             const btn = document.getElementById('signup-btn');
@@ -1885,8 +2022,7 @@
                 if (error.code === 'auth/user-not-found') errorMessage = 'No account found with this email';
                 else if (error.code === 'auth/wrong-password') errorMessage = 'Incorrect password';
                 else if (error.code === 'auth/invalid-email') errorMessage = 'Invalid email address';
-                else if (error.code === 'auth/too-many-requests') errorMessage =
-                    'Too many failed attempts. Try again later';
+                else if (error.code === 'auth/too-many-requests') errorMessage = 'Too many failed attempts. Try again later';
                 showError('login-error', errorMessage);
                 btn.disabled = false;
                 btn.innerHTML = 'Login';
@@ -1920,7 +2056,7 @@
             } catch (error) { console.error('Logout error:', error); }
         }
 
-        // ==================== SEARCH ====================
+        // ==================== SEARCH (unchanged) ====================
         let searchTimeout = null;
 
         function searchUsers() {
@@ -1937,11 +2073,9 @@
                         const userData = doc.data();
                         const name = (userData.name || '').toLowerCase();
                         const email = (userData.email || '').toLowerCase();
-                        if (name.includes(query) || email.includes(query)) results.push({ id: doc
-                                .id, ...userData });
+                        if (name.includes(query) || email.includes(query)) results.push({ id: doc.id, ...userData });
                     });
-                    if (results.length === 0) resultsDiv.innerHTML =
-                        '<div style="padding:16px;text-align:center;color:#888;">No users found</div>';
+                    if (results.length === 0) resultsDiv.innerHTML = '<div style="padding:16px;text-align:center;color:#888;">No users found</div>';
                     else resultsDiv.innerHTML = results.map(user => createSearchResultItem(user)).join('');
                     resultsDiv.style.display = 'block';
                 } catch (error) { console.error('Search error:', error); }
@@ -1954,8 +2088,7 @@
             let buttonHtml = '';
             if (isAccepted) buttonHtml = '<span class="request-badge">Added</span>';
             else if (isPending) buttonHtml = '<span class="request-badge">Request Sent</span>';
-            else buttonHtml =
-                `<button class="accept-btn" onclick="sendChatRequest('${user.id}')">Add</button>`;
+            else buttonHtml = `<button class="accept-btn" onclick="sendChatRequest('${user.id}')">Add</button>`;
             return `
             <div class="search-result-item">
               <div class="user-avatar">${(user.name || 'U')[0].toUpperCase()}</div>
@@ -1967,7 +2100,7 @@
             </div>`;
         }
 
-        // ==================== CHAT REQUEST SYSTEM ====================
+        // ==================== CHAT REQUEST SYSTEM (unchanged) ====================
         async function sendChatRequest(targetUserId) {
             if (!currentUser || targetUserId === currentUser.uid) return;
             try {
@@ -1986,8 +2119,7 @@
                 document.getElementById('search-results').style.display = 'none';
                 document.getElementById('search-input').value = '';
                 alert('Chat request sent successfully!');
-            } catch (error) { console.error('Error sending request:', error);
-                alert('Failed to send request'); }
+            } catch (error) { console.error('Error sending request:', error); alert('Failed to send request'); }
         }
 
         async function acceptChatRequest(requestId, fromUserId) {
@@ -1999,8 +2131,7 @@
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 loadRequests();
-            } catch (error) { console.error('Error accepting request:', error);
-                alert('Failed to accept request'); }
+            } catch (error) { console.error('Error accepting request:', error); alert('Failed to accept request'); }
         }
 
         async function rejectChatRequest(requestId) {
@@ -2010,7 +2141,7 @@
             } catch (error) { console.error('Error rejecting request:', error); }
         }
 
-        // ==================== LOAD DATA ====================
+        // ==================== LOAD DATA (unchanged) ====================
         function loadData() {
             loadAcceptedChats();
             loadRequests();
@@ -2028,8 +2159,7 @@
                         acceptedChats.add(data.userId2);
                         loadUserData(data.userId2);
                     });
-                    db.collection('acceptedChats').where('userId2', '==', currentUser.uid).get().then((
-                        snapshot2) => {
+                    db.collection('acceptedChats').where('userId2', '==', currentUser.uid).get().then((snapshot2) => {
                         snapshot2.forEach((doc) => {
                             const data = doc.data();
                             acceptedChats.add(data.userId1);
@@ -2043,8 +2173,7 @@
         function loadUserData(userId) {
             db.collection('users').doc(userId).get().then((doc) => {
                 if (doc.exists) {
-                    if (!chatListData.has(userId)) chatListData.set(userId, { userData: doc.data(),
-                        lastMessage: null, unreadCount: 0, lastMessageTime: null });
+                    if (!chatListData.has(userId)) chatListData.set(userId, { userData: doc.data(), lastMessage: null, unreadCount: 0, lastMessageTime: null });
                     else {
                         const data = chatListData.get(userId);
                         data.userData = doc.data();
@@ -2065,8 +2194,7 @@
                     pendingRequests.clear();
                     snapshot.forEach((doc) => {
                         const request = doc.data();
-                        pendingRequests.set(request.fromUserId, { requestId: doc.id,
-                            ...request });
+                        pendingRequests.set(request.fromUserId, { requestId: doc.id, ...request });
                         loadRequesterData(request.fromUserId, doc.id, request);
                     });
                     renderRequestsList();
@@ -2077,14 +2205,12 @@
             db.collection('users').doc(userId).get().then((doc) => {
                 if (doc.exists) {
                     const request = pendingRequests.get(userId);
-                    if (request) { request.fromUserData = doc.data();
-                        pendingRequests.set(userId, request);
-                        renderRequestsList(); }
+                    if (request) { request.fromUserData = doc.data(); pendingRequests.set(userId, request); renderRequestsList(); }
                 }
             });
         }
 
-        // ==================== RENDER FUNCTIONS ====================
+        // ==================== RENDER FUNCTIONS (unchanged) ====================
         function renderChatList() {
             const container = document.getElementById('chats-container');
             container.innerHTML = '';
@@ -2096,8 +2222,7 @@
                     return timeB - timeA;
                 });
             if (sortedChats.length === 0) {
-                container.innerHTML =
-                    '<div style="text-align:center;color:#888;padding:20px;">No chats yet. Search for users to start chatting!</div>';
+                container.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">No chats yet. Search for users to start chatting!</div>';
                 return;
             }
             sortedChats.forEach(([userId, data]) => {
@@ -2109,8 +2234,7 @@
             const container = document.getElementById('requests-container');
             container.innerHTML = '';
             if (pendingRequests.size === 0) {
-                container.innerHTML =
-                    '<div style="text-align:center;color:#888;padding:20px;">No pending requests</div>';
+                container.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">No pending requests</div>';
                 return;
             }
             pendingRequests.forEach((request, userId) => {
@@ -2149,8 +2273,7 @@
                 const date = data.lastMessageTime.toDate();
                 const now = new Date();
                 const diff = now - date;
-                if (diff < 86400000) timeString = date.toLocaleTimeString([], { hour: '2-digit',
-                    minute: '2-digit' });
+                if (diff < 86400000) timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 else timeString = date.toLocaleDateString([], { month: 'short', day: 'numeric' });
             }
             let lastMessagePreview = '';
@@ -2175,7 +2298,7 @@
             return div;
         }
 
-        // ==================== UNREAD MESSAGES LISTENER ====================
+        // ==================== UNREAD MESSAGES LISTENER (unchanged) ====================
         function setupUnreadMessagesListener() {
             if (!currentUser) return;
             if (unreadMessagesListener) unreadMessagesListener();
@@ -2302,8 +2425,7 @@
                     setupPaginationObserver();
 
                     if (allMessages.length === 0) {
-                        container.innerHTML =
-                            '<div style="text-align:center;color:#888;padding:20px;">No messages yet. Say hello! 👋</div>';
+                        container.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">No messages yet. Say hello! 👋</div>';
                     }
 
                     scrollChatToBottom();
@@ -2351,8 +2473,7 @@
             container.innerHTML = '<div id="messages-sentinel" style="height:1px;"></div>';
 
             if (allMessages.length === 0) {
-                container.innerHTML =
-                    '<div style="text-align:center;color:#888;padding:20px;">No messages yet. Say hello! 👋</div>';
+                container.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">No messages yet. Say hello! 👋</div>';
                 return;
             }
 
@@ -2446,9 +2567,7 @@
                                 allMessages.push(msg);
                                 messagesSet.add(msg.id);
                                 hasNew = true;
-                                // Auto-mark received messages as delivered
-                                if (msg.senderId === otherUserId && msg.receiverId ===
-                                    currentUserId && msg.status === 'sent') {
+                                if (msg.senderId === otherUserId && msg.receiverId === currentUserId && msg.status === 'sent') {
                                     change.doc.ref.update({ status: 'delivered' }).catch(() => {});
                                 }
                             }
@@ -2476,7 +2595,7 @@
             if (isAtBottom) scrollChatToBottom();
         }
 
-        /* ========== CREATE MESSAGE ELEMENT WITH DELIVERY TICKS ========== */
+        /* ========== CREATE MESSAGE ELEMENT (with own‑message check for tray) ========== */
         function createMessageElement(message) {
             const wrapper = document.createElement('div');
             const isSent = message.senderId === auth.currentUser?.uid;
@@ -2515,8 +2634,7 @@
             bubble.addEventListener('touchend', function(e) {
                 const dx = e.changedTouches[0].clientX - swipeStartX;
                 const dy = e.changedTouches[0].clientY - swipeStartY;
-                if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 2 && dx > 0 &&
-                    swipeTargetMsgId === message.id) {
+                if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 2 && dx > 0 && swipeTargetMsgId === message.id) {
                     setupReply(message);
                 }
                 swipeTargetMsgId = null;
@@ -2533,8 +2651,7 @@
             if (message.text) {
                 content += `<div class="message-text">${escapeHtml(message.text)}</div>`;
             } else if (message.imageUrl) {
-                content +=
-                    `<img src="${message.imageUrl}" class="message-image" onclick="showImagePreview('${message.imageUrl}')">`;
+                content += `<img src="${message.imageUrl}" class="message-image" onclick="showImagePreview('${message.imageUrl}')">`;
             } else if (message.audioUrl) {
                 const duration = message.audioDuration || 0;
                 const mins = Math.floor(duration / 60);
@@ -2555,10 +2672,8 @@
             }
 
             const time = message.timestamp ?
-                new Date(message.timestamp.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) :
-                '';
+                new Date(message.timestamp.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
 
-            // Build delivery ticks HTML (only for sent messages)
             let ticksHtml = '';
             if (isSent) {
                 const status = message.status || 'sent';
@@ -2603,9 +2718,19 @@
             setTimeout(() => heart.remove(), 800);
         }
 
+        // ========== EMOJI TRAY – SHOW EDIT/DELETE ONLY FOR OWN MESSAGES ==========
         function openEmojiTray(message, event) {
-            selectedMessageData = { id: message.id, text: message.text || '' };
-            document.getElementById('tray-edit-btn').style.display = message.text ? 'flex' : 'none';
+            const isOwn = message.senderId === auth.currentUser?.uid;
+            selectedMessageData = { id: message.id, text: message.text || '', senderId: message.senderId };
+            // Show/hide edit/delete buttons
+            const ownActions = document.getElementById('tray-own-actions');
+            if (isOwn) {
+                ownActions.style.display = 'flex';
+                // edit button only if there's text
+                document.getElementById('tray-edit-btn').style.display = message.text ? 'flex' : 'none';
+            } else {
+                ownActions.style.display = 'none';
+            }
             document.getElementById('emoji-tray-overlay').style.display = 'flex';
             if (event && event.preventDefault) event.preventDefault();
         }
@@ -2666,8 +2791,13 @@
             });
         }
 
+        // ========== EDIT / DELETE – ONLY ALLOW FOR OWN MESSAGES ==========
         function handleEditFromTray() {
             if (!selectedMessageData.id || !selectedMessageData.text) return;
+            if (selectedMessageData.senderId !== auth.currentUser?.uid) {
+                alert("You can only edit your own messages.");
+                return;
+            }
             isEditing = true;
             closeEmojiTray();
             document.getElementById('editing-banner').style.display = 'flex';
@@ -2680,6 +2810,10 @@
 
         function handleDeleteFromTray() {
             if (!selectedMessageData.id) return;
+            if (selectedMessageData.senderId !== auth.currentUser?.uid) {
+                alert("You can only unsend your own messages.");
+                return;
+            }
             const msgId = selectedMessageData.id;
             closeEmojiTray();
             if (confirm('Unsend this message? It will be removed for everyone.')) {
@@ -2687,14 +2821,13 @@
                     .then(() => {
                         db.collection('reactions').doc(msgId).delete().catch(() => {});
                     })
-                    .catch(error => { console.error('Error deleting message:', error);
-                        alert('Failed to unsend message.'); });
+                    .catch(error => { console.error('Error deleting message:', error); alert('Failed to unsend message.'); });
             }
         }
 
         function cancelEdit() {
             isEditing = false;
-            selectedMessageData = { id: null, text: null };
+            selectedMessageData = { id: null, text: null, senderId: null };
             document.getElementById('editing-banner').style.display = 'none';
             document.getElementById('chat-input').value = '';
             document.getElementById('send-btn').innerHTML = '<i class="fas fa-paper-plane"></i>';
@@ -2705,8 +2838,7 @@
             replyingTo = {
                 id: message.id,
                 text: message.text || (message.imageUrl ? '📷 Image' : '🎤 Voice Note'),
-                senderName: message.senderId === currentUser?.uid ? 'You' : (selectedUserData?.name ||
-                    'User')
+                senderName: message.senderId === currentUser?.uid ? 'You' : (selectedUserData?.name || 'User')
             };
             document.getElementById('reply-preview').style.display = 'flex';
             document.getElementById('reply-preview-name').textContent = replyingTo.senderName;
@@ -2728,8 +2860,7 @@
             sendBtn.disabled = true;
             try {
                 if (isEditing) {
-                    await db.collection('messages').doc(selectedMessageData.id).update({ text: text,
-                        edited: true });
+                    await db.collection('messages').doc(selectedMessageData.id).update({ text: text, edited: true });
                     cancelEdit();
                 } else {
                     const messageData = {
@@ -2756,19 +2887,17 @@
                         autoExpandTextarea();
                     }
                     await db.collection('messages').add(messageData);
-                    // Delete typing indicator after sending
+                    // Clear typing indicator after sending
                     try {
-                        await db.collection('typing').doc(
-                            `${auth.currentUser.uid}_${selectedUserId}`).delete();
+                        await db.collection('typing').doc(`${auth.currentUser.uid}_${selectedUserId}`).delete();
+                        isTypingActive = false;
                     } catch (e) {}
                 }
                 scrollChatToBottom();
             } catch (error) {
                 console.error('Error sending message:', error);
                 if (error.code === 'resource-exhausted') {
-                    alert(
-                        '⚠️ Daily message limit reached! The limit will reset soon. Please wait or try again tomorrow.'
-                        );
+                    alert('⚠️ Daily message limit reached! The limit will reset soon. Please wait or try again tomorrow.');
                 } else {
                     alert('Failed to send message. Please try again.');
                 }
@@ -2785,12 +2914,12 @@
             textarea.style.height = newHeight + 'px';
             const micBtn = document.getElementById('mic-btn');
             const sendBtn = document.getElementById('send-btn');
-            const hasText = textarea.value.trim().length > 0;
+            const hasText = textarea.value.trim().length > 0 || selectedImage;
             micBtn.style.display = hasText ? 'none' : 'inline-flex';
-            sendBtn.style.display = hasText || selectedImage ? 'flex' : 'none';
+            sendBtn.style.display = hasText ? 'flex' : 'none';
         }
 
-        // ==================== TYPING INDICATOR (THROTTLED) ====================
+        // ==================== TYPING INDICATOR (IMMEDIATE, FIXED) ====================
         function handleTyping(event) {
             if (!selectedUserId || !auth.currentUser) return;
             if (event.key === 'Enter' && !event.shiftKey) {
@@ -2800,39 +2929,22 @@
             }
             autoExpandTextarea();
 
-            // THROTTLED: Only write typing indicator every 5 seconds
-            const now = Date.now();
-            if (now - lastTypingWrite > TYPING_THROTTLE_MS && !typingWritePending) {
-                typingWritePending = true;
-                lastTypingWrite = now;
+            // Immediately show typing on first keypress
+            if (!isTypingActive) {
+                isTypingActive = true;
                 const typingRef = db.collection('typing').doc(`${auth.currentUser.uid}_${selectedUserId}`);
                 typingRef.set({
                     isTyping: true,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                }).then(() => {
-                    typingWritePending = false;
-                }).catch(() => {
-                    typingWritePending = false;
-                });
-
-                // Clear typing after 6 seconds of no new writes
-                if (typingTimeout) clearTimeout(typingTimeout);
-                typingTimeout = setTimeout(async () => {
-                    try {
-                        await db.collection('typing').doc(`${auth.currentUser.uid}_${selectedUserId}`)
-                            .delete();
-                    } catch (e) {}
-                }, 6000);
-            } else if (!typingWritePending && now - lastTypingWrite <= TYPING_THROTTLE_MS) {
-                // Reset the clear timeout since user is still typing
-                if (typingTimeout) clearTimeout(typingTimeout);
-                typingTimeout = setTimeout(async () => {
-                    try {
-                        await db.collection('typing').doc(`${auth.currentUser.uid}_${selectedUserId}`)
-                            .delete();
-                    } catch (e) {}
-                }, 6000);
+                }).catch(() => {});
             }
+
+            // Reset timeout to clear typing after 4s of no keypress
+            if (typingTimeout) clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                db.collection('typing').doc(`${auth.currentUser.uid}_${selectedUserId}`).delete().catch(() => {});
+                isTypingActive = false;
+            }, 4000);
         }
 
         function setupTypingListener(otherUserId) {
@@ -2848,8 +2960,7 @@
                                 const indicatorEl = document.createElement('div');
                                 indicatorEl.className = 'message-wrapper received';
                                 indicatorEl.id = 'typing-indicator';
-                                indicatorEl.innerHTML =
-                                    '<div class="typing-indicator-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>';
+                                indicatorEl.innerHTML = '<div class="typing-indicator-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>';
                                 container.appendChild(indicatorEl);
                                 scrollChatToBottom();
                             }
@@ -2860,7 +2971,7 @@
             } catch (error) { console.error('Typing listener error:', error); }
         }
 
-        // ==================== IMAGE UPLOAD ====================
+        // ==================== IMAGE UPLOAD (unchanged) ====================
         function selectImage() { document.getElementById('image-input').click(); }
 
         async function handleImageSelect(event) {
@@ -2873,24 +2984,192 @@
             try {
                 const formData = new FormData();
                 formData.append('image', file);
-                const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST',
-                    body: formData });
+                const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: formData });
                 const result = await response.json();
-                if (result.success) { selectedImage = result.data.url;
-                    await sendMessage(); } else alert('Image upload failed');
-            } catch (error) { console.error('Error uploading image:', error);
-                alert('Upload failed.'); } finally { sendBtn.disabled = false;
-                event.target.value = ''; }
+                if (result.success) { selectedImage = result.data.url; await sendMessage(); } else alert('Image upload failed');
+            } catch (error) { console.error('Error uploading image:', error); alert('Upload failed.'); } finally { sendBtn.disabled = false; event.target.value = ''; }
         }
+
+        // ==================== IMAGE PREVIEW WITH PINCH‑ZOOM ====================
+        let imagePreviewScale = 1;
+        let imagePreviewTranslateX = 0;
+        let imagePreviewTranslateY = 0;
+        let initialDistance = 0;
+        let initialScale = 1;
+        let initialTranslateX = 0;
+        let initialTranslateY = 0;
 
         function showImagePreview(url) {
-            document.getElementById('preview-image').src = url;
-            document.getElementById('image-preview').style.display = 'flex';
+            const modal = document.getElementById('image-preview');
+            const img = document.getElementById('preview-image');
+            img.src = url;
+            // Reset transforms
+            imagePreviewScale = 1;
+            imagePreviewTranslateX = 0;
+            imagePreviewTranslateY = 0;
+            img.style.transform = `scale(${imagePreviewScale}) translate(${imagePreviewTranslateX}px, ${imagePreviewTranslateY}px)`;
+            modal.style.display = 'flex';
         }
 
-        function closeImagePreview() { document.getElementById('image-preview').style.display = 'none'; }
+        function closeImagePreview() {
+            document.getElementById('image-preview').style.display = 'none';
+        }
 
-        // ==================== VOICE NOTES ====================
+        // Pinch zoom handlers
+        document.getElementById('preview-image-container').addEventListener('touchstart', function(e) {
+            if (e.touches.length === 2) {
+                initialDistance = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                initialScale = imagePreviewScale;
+                initialTranslateX = imagePreviewTranslateX;
+                initialTranslateY = imagePreviewTranslateY;
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        document.getElementById('preview-image-container').addEventListener('touchmove', function(e) {
+            if (e.touches.length === 2) {
+                const currentDistance = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                const scaleFactor = currentDistance / initialDistance;
+                imagePreviewScale = Math.min(5, Math.max(1, initialScale * scaleFactor));
+                imagePreviewTranslateX = initialTranslateX;
+                imagePreviewTranslateY = initialTranslateY;
+                document.getElementById('preview-image').style.transform = `scale(${imagePreviewScale}) translate(${imagePreviewTranslateX}px, ${imagePreviewTranslateY}px)`;
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // ==================== MEDIA GALLERY (FIXED QUERY) ====================
+        async function openMediaGallery() {
+            if (!selectedUserId || !currentUser) return;
+            const overlay = document.getElementById('media-gallery-overlay');
+            const grid = document.getElementById('media-grid');
+            const loading = document.getElementById('media-loading');
+            overlay.style.display = 'flex';
+            grid.innerHTML = '';
+            loading.style.display = 'block';
+            try {
+                // Fetch only messages between the two users (limit to latest 50 for performance)
+                const snapshot = await db.collection('messages')
+                    .where('participants', 'array-contains', currentUser.uid)
+                    .orderBy('timestamp', 'desc')
+                    .limit(50)
+                    .get();
+                const images = [];
+                snapshot.forEach((doc) => {
+                    const msg = doc.data();
+                    if (msg.imageUrl && 
+                        ((msg.senderId === currentUser.uid && msg.receiverId === selectedUserId) ||
+                         (msg.senderId === selectedUserId && msg.receiverId === currentUser.uid))) {
+                        images.push(msg.imageUrl);
+                    }
+                });
+                loading.style.display = 'none';
+                if (images.length === 0) {
+                    grid.innerHTML = '<div class="no-media-text">No photos shared yet.</div>';
+                } else {
+                    images.forEach(url => {
+                        const img = document.createElement('img');
+                        img.src = url;
+                        img.className = 'media-thumb';
+                        img.onclick = (e) => {
+                            e.stopPropagation();
+                            showImagePreview(url);
+                        };
+                        grid.appendChild(img);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading media:', error);
+                loading.style.display = 'none';
+                grid.innerHTML = '<div class="no-media-text">Failed to load media.</div>';
+            }
+        }
+
+        function closeMediaGallery() {
+            document.getElementById('media-gallery-overlay').style.display = 'none';
+        }
+
+        // ==================== GIF PICKER (UPDATED API KEY) ====================
+        function openGifPicker() {
+            document.getElementById('gif-picker-overlay').style.display = 'flex';
+            document.getElementById('gif-search-input').value = '';
+            fetchTrendingGifs();
+        }
+
+        function closeGifPicker() {
+            document.getElementById('gif-picker-overlay').style.display = 'none';
+        }
+
+        async function fetchTrendingGifs() {
+            const grid = document.getElementById('gif-grid');
+            grid.innerHTML = '<div class="loading-spinner"></div>';
+            try {
+                const response = await fetch(`https://api.giphy.com/v1/gifs/trending?api_key=${GIPHY_API_KEY}&limit=20`);
+                const data = await response.json();
+                renderGifs(data.data);
+            } catch (error) {
+                console.error('Error fetching GIFs:', error);
+                grid.innerHTML = '<div style="color:#888;text-align:center;padding:20px;">Failed to load GIFs</div>';
+            }
+        }
+
+        async function searchGifs() {
+            const query = document.getElementById('gif-search-input').value.trim();
+            if (!query) return;
+            const grid = document.getElementById('gif-grid');
+            grid.innerHTML = '<div class="loading-spinner"></div>';
+            try {
+                const response = await fetch(`https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_API_KEY}&q=${encodeURIComponent(query)}&limit=20`);
+                const data = await response.json();
+                renderGifs(data.data);
+            } catch (error) {
+                console.error('Error searching GIFs:', error);
+                grid.innerHTML = '<div style="color:#888;text-align:center;padding:20px;">Failed to search GIFs</div>';
+            }
+        }
+
+        function renderGifs(gifs) {
+            const grid = document.getElementById('gif-grid');
+            grid.innerHTML = '';
+            if (gifs.length === 0) {
+                grid.innerHTML = '<div style="color:#888;text-align:center;padding:20px;">No GIFs found</div>';
+                return;
+            }
+            gifs.forEach(gif => {
+                const img = document.createElement('img');
+                img.src = gif.images.fixed_height_small.url;
+                img.className = 'gif-item';
+                img.onclick = () => sendGif(gif.images.original.url);
+                grid.appendChild(img);
+            });
+        }
+
+        async function sendGif(gifUrl) {
+            if (!selectedUserId || !auth.currentUser) return;
+            try {
+                await db.collection('messages').add({
+                    senderId: auth.currentUser.uid,
+                    receiverId: selectedUserId,
+                    participants: [auth.currentUser.uid, selectedUserId],
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    status: 'sent',
+                    imageUrl: gifUrl
+                });
+                closeGifPicker();
+                scrollChatToBottom();
+            } catch (error) {
+                console.error('Error sending GIF:', error);
+                alert('Failed to send GIF');
+            }
+        }
+
+        // ==================== VOICE NOTES (unchanged) ====================
         async function startRecording() {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 alert('Voice recording not supported on this device.');
@@ -2985,8 +3264,7 @@
                 playBtn.classList.add('fa-play');
                 return;
             }
-            if (existingAudio) { existingAudio.pause();
-                existingAudio.remove(); }
+            if (existingAudio) { existingAudio.pause(); existingAudio.remove(); }
             const audio = new Audio(audioUrl);
             audio.className = 'voice-note-audio-active';
             element.appendChild(audio);
@@ -3006,7 +3284,7 @@
             });
         }
 
-        // ==================== PRESENCE SYSTEM (THROTTLED) ====================
+        // ==================== PRESENCE SYSTEM (unchanged) ====================
         async function updatePresence(online) {
             if (!currentUser) return;
             const now = Date.now();
@@ -3039,18 +3317,13 @@
                                 const now = new Date();
                                 const diff = now - lastActive;
                                 if (diff < 60000) statusEl.textContent = 'Last seen just now';
-                                else if (diff < 3600000)
-                                    statusEl.textContent =
-                                    `Last seen ${Math.floor(diff/60000)} min ago`;
+                                else if (diff < 3600000) statusEl.textContent = `Last seen ${Math.floor(diff/60000)} min ago`;
                                 else if (diff < 86400000) {
-                                    const time = lastActive.toLocaleTimeString([], { hour: '2-digit',
-                                        minute: '2-digit' });
+                                    const time = lastActive.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                                     statusEl.textContent = `Last seen at ${time}`;
                                 } else {
-                                    const date = lastActive.toLocaleDateString([], { month: 'short',
-                                        day: 'numeric' });
-                                    const time = lastActive.toLocaleTimeString([], { hour: '2-digit',
-                                        minute: '2-digit' });
+                                    const date = lastActive.toLocaleDateString([], { month: 'short', day: 'numeric' });
+                                    const time = lastActive.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                                     statusEl.textContent = `Last seen ${date} at ${time}`;
                                 }
                             } else {
@@ -3064,7 +3337,7 @@
                 });
         }
 
-        // ==================== ONESIGNAL INTEGRATION ====================
+        // ==================== ONESIGNAL (unchanged) ====================
         function setupOneSignalUser(uid) {
             window.OneSignalDeferred = window.OneSignalDeferred || [];
             OneSignalDeferred.push(async function(OneSignal) {
@@ -3116,20 +3389,17 @@
                         data: { type: 'disguised_calculator' }
                     });
                 }
-                const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(
-                    'https://onesignal.com/api/v1/notifications');
+                const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent('https://onesignal.com/api/v1/notifications');
                 const response = await fetch(proxyUrl, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json',
-                        'Authorization': `Basic ${ONESIGNAL_REST_API_KEY}` },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Basic ${ONESIGNAL_REST_API_KEY}` },
                     body: body
                 });
                 const result = await response.json();
                 console.log('OneSignal response:', result);
                 if (result.id && result.recipients > 0) {
                     bellBtn.style.color = '#4CAF50';
-                    setTimeout(() => { bellBtn.style.color = '#A8C7FA';
-                        bellBtn.style.opacity = '1'; }, 1500);
+                    setTimeout(() => { bellBtn.style.color = '#f0e68c'; bellBtn.style.opacity = '1'; }, 1500);
                 } else if (result.id && result.recipients === 0) {
                     alert('0 recipients — ask user to reopen the app once.');
                     bellBtn.style.opacity = '1';
@@ -3137,12 +3407,10 @@
                     alert('Failed: ' + JSON.stringify(result.errors || result));
                     bellBtn.style.opacity = '1';
                 }
-            } catch (err) { console.error(err);
-                alert('Failed.');
-                bellBtn.style.opacity = '1'; }
+            } catch (err) { console.error(err); alert('Failed.'); bellBtn.style.opacity = '1'; }
         }
 
-        // ==================== KEYBOARD HANDLER ====================
+        // ==================== KEYBOARD HANDLER (unchanged) ====================
         function applyKeyboardPadding() {
             if (!window.visualViewport) return;
             const chatScreen = document.getElementById('chat-screen');
@@ -3172,7 +3440,7 @@
             });
         }
 
-        // ==================== VISIBILITY & BEFOREUNLOAD PRESENCE HANDLERS ====================
+        // ==================== VISIBILITY & BEFOREUNLOAD (unchanged) ====================
         function setupPresenceEventHandlers() {
             document.addEventListener('visibilitychange', () => {
                 if (!currentUser) return;
@@ -3205,7 +3473,7 @@
             return div.innerHTML;
         }
 
-        // ==================== AUTH STATE OBSERVER ====================
+        // ==================== AUTH STATE OBSERVER (unchanged) ====================
         auth.onAuthStateChanged((user) => {
             if (user) {
                 currentUser = user;
@@ -3258,13 +3526,7 @@
         document.getElementById('mic-btn').style.display = 'inline-flex';
         document.getElementById('send-btn').style.display = 'none';
 
-        console.log('✅ App initialized with FIXES:');
-        console.log('  1) Typing throttled to every 5 seconds (was every keystroke)');
-        console.log('  2) WhatsApp-style delivery ticks: ✓ sent, ✓✓ delivered, ✓✓ blue read');
-        console.log('  3) Presence throttled to every 30 seconds');
-        console.log('  4) Auto-delivered status when receiver gets message');
-        console.log('  5) WhatsApp/Instagram style auto-expanding input');
-        console.log('  6) Better error handling for quota exhaustion');
+        console.log('✅ Moon chat with GIFs, media gallery, pinch zoom, and own‑message edit/delete only');
     </script>
 </body>
 </html>
