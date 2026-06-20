@@ -2579,11 +2579,27 @@
                             allMessages[idx] = msg;
                             hasNew = true;
                         }
+                    } else if (change.type === 'removed') {
+                        // Handle deletion from other side (only works for messages within startAfter range)
+                        const msgId = change.doc.id;
+                        const idx = allMessages.findIndex(m => m.id === msgId);
+                        if (idx !== -1) {
+                            allMessages.splice(idx, 1);
+                            messagesSet.delete(msgId);
+                            reactionsCache.delete(msgId);
+                            const msgElement = document.getElementById(`msg-${msgId}`);
+                            if (msgElement) msgElement.remove();
+                            hasNew = true;
+                        }
                     }
                 });
                 if (hasNew) {
-                    updateMessageElements();
-                    scrollChatToBottom();
+                    // For additions/modifications we re-render, but for removals we already handled.
+                    const hasOnlyRemovals = snapshot.docChanges().every(c => c.type === 'removed');
+                    if (!hasOnlyRemovals) {
+                        updateMessageElements();
+                        scrollChatToBottom();
+                    }
                 }
             });
         }
@@ -2808,6 +2824,7 @@
             document.getElementById('send-btn').innerHTML = '<i class="fas fa-check"></i>';
         }
 
+        // UPDATED: instant local removal on unsend
         function handleDeleteFromTray() {
             if (!selectedMessageData.id) return;
             if (selectedMessageData.senderId !== auth.currentUser?.uid) {
@@ -2817,11 +2834,28 @@
             const msgId = selectedMessageData.id;
             closeEmojiTray();
             if (confirm('Unsend this message? It will be removed for everyone.')) {
+                // Remove locally right away for instant disappearance
+                const idx = allMessages.findIndex(m => m.id === msgId);
+                if (idx !== -1) {
+                    allMessages.splice(idx, 1);
+                }
+                messagesSet.delete(msgId);
+                reactionsCache.delete(msgId);
+                const msgElement = document.getElementById(`msg-${msgId}`);
+                if (msgElement) {
+                    msgElement.remove();
+                }
+
+                // Now delete from Firestore
                 db.collection('messages').doc(msgId).delete()
                     .then(() => {
+                        // Also remove reaction if any
                         db.collection('reactions').doc(msgId).delete().catch(() => {});
                     })
-                    .catch(error => { console.error('Error deleting message:', error); alert('Failed to unsend message.'); });
+                    .catch(error => { 
+                        console.error('Error deleting message:', error); 
+                        alert('Failed to unsend message. Please try again.');
+                    });
             }
         }
 
@@ -3044,7 +3078,7 @@
             }
         }, { passive: false });
 
-        // ==================== MEDIA GALLERY (FIXED QUERY) ====================
+        // ==================== MEDIA GALLERY (FIXED – no composite index needed) ====================
         async function openMediaGallery() {
             if (!selectedUserId || !currentUser) return;
             const overlay = document.getElementById('media-gallery-overlay');
@@ -3054,32 +3088,49 @@
             grid.innerHTML = '';
             loading.style.display = 'block';
             try {
-                // Fetch only messages between the two users (limit to latest 50 for performance)
-                const snapshot = await db.collection('messages')
-                    .where('participants', 'array-contains', currentUser.uid)
-                    .orderBy('timestamp', 'desc')
-                    .limit(50)
+                const sentQuery = db.collection('messages')
+                    .where('senderId', '==', currentUser.uid)
+                    .where('receiverId', '==', selectedUserId)
                     .get();
-                const images = [];
-                snapshot.forEach((doc) => {
+                const receivedQuery = db.collection('messages')
+                    .where('senderId', '==', selectedUserId)
+                    .where('receiverId', '==', currentUser.uid)
+                    .get();
+
+                const [sentSnap, receivedSnap] = await Promise.all([sentQuery, receivedQuery]);
+                const imageMessages = [];
+
+                sentSnap.forEach(doc => {
                     const msg = doc.data();
-                    if (msg.imageUrl && 
-                        ((msg.senderId === currentUser.uid && msg.receiverId === selectedUserId) ||
-                         (msg.senderId === selectedUserId && msg.receiverId === currentUser.uid))) {
-                        images.push(msg.imageUrl);
+                    if (msg.imageUrl) {
+                        imageMessages.push({ url: msg.imageUrl, timestamp: msg.timestamp });
                     }
                 });
+                receivedSnap.forEach(doc => {
+                    const msg = doc.data();
+                    if (msg.imageUrl) {
+                        imageMessages.push({ url: msg.imageUrl, timestamp: msg.timestamp });
+                    }
+                });
+
+                // Sort by most recent first
+                imageMessages.sort((a, b) => {
+                    const timeA = a.timestamp ? a.timestamp.toDate() : new Date(0);
+                    const timeB = b.timestamp ? b.timestamp.toDate() : new Date(0);
+                    return timeB - timeA;
+                });
+
                 loading.style.display = 'none';
-                if (images.length === 0) {
+                if (imageMessages.length === 0) {
                     grid.innerHTML = '<div class="no-media-text">No photos shared yet.</div>';
                 } else {
-                    images.forEach(url => {
+                    imageMessages.forEach(item => {
                         const img = document.createElement('img');
-                        img.src = url;
+                        img.src = item.url;
                         img.className = 'media-thumb';
                         img.onclick = (e) => {
                             e.stopPropagation();
-                            showImagePreview(url);
+                            showImagePreview(item.url);
                         };
                         grid.appendChild(img);
                     });
@@ -3526,7 +3577,7 @@
         document.getElementById('mic-btn').style.display = 'inline-flex';
         document.getElementById('send-btn').style.display = 'none';
 
-        console.log('✅ Moon chat with GIFs, media gallery, pinch zoom, and own‑message edit/delete only');
+        console.log('✅ Moon chat with instant unsend, full media gallery, pinch zoom');
     </script>
 </body>
 </html>
