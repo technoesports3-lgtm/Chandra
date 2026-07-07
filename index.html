@@ -1778,12 +1778,12 @@
         }
 
         function setupPanicDetection() {
-            const chatScreen = document.getElementById('chat-screen');
+            // FIX: Removed chatScreen from panic detection – now only usersScreen triggers panic hide.
             const usersScreen = document.getElementById('users-screen');
-            [chatScreen, usersScreen].forEach(screen => {
+            [usersScreen].forEach(screen => {
                 screen.addEventListener('click', function(e) {
                     const now = Date.now();
-                    const isInteractive = e.target.closest('button, input, textarea, .message-bubble, .user-item, .search-result-item, .request-item, .emoji-option, .emoji-tray-action-btn, .gif-item, .media-thumb');
+                    const isInteractive = e.target.closest('button, input, textarea, .user-item, .search-result-item, .request-item, .emoji-option, .emoji-tray-action-btn, .gif-item, .media-thumb');
                     if (isInteractive) {
                         lastTapTime = 0;
                         return;
