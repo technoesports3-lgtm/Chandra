@@ -3601,10 +3601,10 @@
         const calculatorEl = document.getElementById('calculator');
         attachDoubleClickDetector(calculatorEl, '.calc-btn, .expand-icon');
 
-        // Chat screen
+        // Chat screen - NOW messages are NOT excluded, so double-tap works everywhere in chat
         const chatScreenEl = document.getElementById('chat-screen');
         const chatIgnoreSelector =
-            '.message-bubble, .message-wrapper, .chat-header, .chat-input, .send-btn, .mic-btn, .attach-btn, .gif-btn, .back-btn, .bell-btn, .chat-header-info, .reply-preview, .editing-banner, .chat-input-container, .chat-input-area';
+            '.chat-header, .chat-input, .send-btn, .mic-btn, .attach-btn, .gif-btn, .back-btn, .bell-btn, .chat-header-info, .reply-preview, .editing-banner, .chat-input-container, .chat-input-area';
         attachDoubleClickDetector(chatScreenEl, chatIgnoreSelector);
 
         const chatInputEl = document.getElementById('chat-input');
@@ -3621,7 +3621,8 @@
 
         console.log('✅ Double-click/double-tap works on ALL screens (Calculator, Chat, Users, Auth)');
         console.log('🤫 No visual feedback — completely stealth.');
-        console.log('📱 Tap twice anywhere (except on buttons/inputs/messages) to open random app.');
+        console.log('📱 Tap twice anywhere (even on messages) to open random app.');
+        console.log('❤️ Heart reaction still works as a bonus (both will happen).');
     </script>
 </body>
 </html>
