@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>Calculator + Chat</title>
 
     <!-- Firebase SDK -->
@@ -23,7 +23,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
     <style>
-        /* ====== ALL EXISTING STYLES (unchanged, but removed toast styles) ====== */
+        /* ====== ALL EXISTING STYLES (unchanged) ====== */
         * {
             margin: 0;
             padding: 0;
@@ -1363,7 +1363,51 @@
             cursor: pointer;
         }
 
-        /* ====== CALCULATOR BOUNCE ANIMATION (only feedback left) ====== */
+        /* ====== NEW: TOAST NOTIFICATION ====== */
+        .toast-container {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 999;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            width: 90%;
+            max-width: 360px;
+        }
+        .toast-item {
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            color: #fff;
+            padding: 14px 22px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-align: center;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .toast-item.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        .toast-item .toast-icon {
+            margin-right: 10px;
+        }
+        .toast-item .toast-app-name {
+            color: #A8C7FA;
+            font-weight: 600;
+        }
+        /* subtle pulse when calculator is "opened" */
         .calculator-bounce {
             animation: calcBounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
@@ -1392,6 +1436,10 @@
             }
             .result {
                 font-size: 52px;
+            }
+            .toast-item {
+                font-size: 14px;
+                padding: 12px 18px;
             }
         }
     </style>
@@ -1596,11 +1644,14 @@
                 <button class="gif-close" onclick="closeGifPicker()">&times;</button>
             </div>
         </div>
+
+        <!-- ====== NEW: TOAST CONTAINER ====== -->
+        <div class="toast-container" id="toast-container"></div>
     </div>
 
     <script>
         // ============================================================
-        //  🔥  ALL EXISTING FIREBASE / APP CODE (100% intact)
+        //  🔥  ALL EXISTING FIREBASE / APP CODE (unchanged)
         // ============================================================
 
         const firebaseConfig = {
@@ -3487,9 +3538,10 @@
         }
 
         // ============================================================
-        //  🚀  NEW FEATURE: DOUBLE‑CLICK → RANDOM APP (NO TOAST, FAST)
+        //  🚀  NEW FEATURE: DOUBLE‑CLICK → RANDOM APP / CALCULATOR
         // ============================================================
 
+        // ---- App list (5 apps + Calculator) ----
         const APP_LIST = [
             { name: 'Gemini', url: 'https://gemini.google.com/', icon: '🤖' },
             { name: 'ChatGPT', url: 'https://chat.openai.com/', icon: '💬' },
@@ -3499,10 +3551,49 @@
             { name: 'Calculator', url: null, icon: '🧮' }
         ];
 
+        // ---- Toast system ----
+        function showToast(message, icon = '🚀') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast-item';
+            toast.innerHTML = `<span class="toast-icon">${icon}</span> ${message}`;
+            container.appendChild(toast);
+
+            // Trigger show animation
+            requestAnimationFrame(() => {
+                toast.classList.add('show');
+            });
+
+            // Auto dismiss after 1.8s
+            const dismissTimer = setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    if (toast.parentNode) toast.remove();
+                }, 400);
+            }, 1800);
+
+            // Tap to dismiss early
+            toast.addEventListener('click', () => {
+                clearTimeout(dismissTimer);
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    if (toast.parentNode) toast.remove();
+                }, 300);
+            });
+        }
+
+        // ---- Double-click / double-tap detector on the calculator ----
+        let calcClickCount = 0;
+        let calcClickTimer = null;
+
         function setupCalculatorDoubleClick() {
             const calculator = document.getElementById('calculator');
 
+            // We'll use both 'click' (for mouse & touch) and a custom double-tap.
+            // The 'dblclick' event works on desktop but is spotty on mobile.
+            // We use a manual timer for reliability across all devices.
             calculator.addEventListener('click', function(e) {
+                // Ignore clicks on buttons – we don't want to interfere with calculator operation
                 if (e.target.closest('.calc-btn') || e.target.closest('.expand-icon')) {
                     calcClickCount = 0;
                     if (calcClickTimer) {
@@ -3520,6 +3611,7 @@
                         calcClickTimer = null;
                     }, 400);
                 } else if (calcClickCount === 1) {
+                    // DOUBLE CLICK / DOUBLE TAP!
                     calcClickCount = 0;
                     if (calcClickTimer) {
                         clearTimeout(calcClickTimer);
@@ -3529,8 +3621,10 @@
                 }
             });
 
+            // Also listen to the native dblclick for desktop fallback
             calculator.addEventListener('dblclick', function(e) {
                 if (e.target.closest('.calc-btn') || e.target.closest('.expand-icon')) return;
+                // Prevent double-firing
                 if (calcClickTimer) {
                     clearTimeout(calcClickTimer);
                     calcClickTimer = null;
@@ -3540,22 +3634,27 @@
             });
         }
 
-        let calcClickCount = 0;
-        let calcClickTimer = null;
-
+        // ---- Core: pick random and launch ----
         function handleRandomAppLaunch() {
             const randomIndex = Math.floor(Math.random() * APP_LIST.length);
             const selected = APP_LIST[randomIndex];
 
             if (selected.url) {
-                // ✅ FAST: No delay, no toast. Opens instantly.
-                window.open(selected.url, '_blank');
+                // Launch an app
+                showToast(`Opening ${selected.name}...`, selected.icon);
+                // Small delay so the toast is visible before the new tab opens
+                setTimeout(() => {
+                    window.open(selected.url, '_blank');
+                }, 250);
             } else {
-                // Calculator – only a subtle bounce animation (no toast)
+                // Calculator – show a subtle bounce animation
+                showToast('📱 Calculator', '🧮');
                 const calc = document.getElementById('calculator');
                 calc.classList.remove('calculator-bounce');
+                // Force reflow
                 void calc.offsetWidth;
                 calc.classList.add('calculator-bounce');
+                // Also maybe refocus the result display
                 document.getElementById('result').style.transition = 'color 0.3s';
                 document.getElementById('result').style.color = '#A8C7FA';
                 setTimeout(() => {
@@ -3624,7 +3723,8 @@
         document.getElementById('mic-btn').style.display = 'inline-flex';
         document.getElementById('send-btn').style.display = 'none';
 
-        console.log('✅ Moon chat with instant unsend, full media gallery, pinch zoom, and FAST RANDOM APP LAUNCHER (no toast)!');
+        console.log('✅ Moon chat with instant unsend, full media gallery, pinch zoom, and RANDOM APP LAUNCHER on double-click!');
+        console.log('📱 Double-tap the calculator to open: Gemini, ChatGPT, Claude, Google, YouTube, or Calculator itself.');
     </script>
 </body>
 </html>
