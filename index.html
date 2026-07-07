@@ -116,7 +116,7 @@
             line-height: 1.1;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
             font-feature-settings: "tnum";
-            transition: none;
+            transition: none; /* no flash */
         }
         .scientific-row {
             display: grid;
@@ -1368,6 +1368,7 @@
         }
 
         /* ====== NO VISUAL FEEDBACK ====== */
+        /* No flash, no bounce styles needed anymore */
     </style>
 </head>
 <body>
@@ -3461,11 +3462,9 @@
         }
 
         // ============================================================
-        //  🚀  DOUBLE-CLICK / DOUBLE-TAP DETECTOR (EVERY SCREEN)
-        //      - NO VISUAL FEEDBACK (stealth)
-        //      - Works on desktop (dblclick) and mobile (touch timer)
-        //      - Now works on ALL screens (calculator, auth, users, chat)
-        //      - No ignore selectors → triggers anywhere on each screen
+        //  🚀  DOUBLE-CLICK / DOUBLE-TAP DETECTOR (BOTH CALCULATOR & CHAT)
+        //      - NO VISUAL FEEDBACK (stealth mode)
+        //      - Works on both desktop (dblclick) and mobile (touch timer)
         // ============================================================
 
         const APP_LIST = [
@@ -3477,68 +3476,22 @@
             { name: 'Calculator', url: null }
         ];
 
-        // ---- App URL helpers: try to open app directly on mobile, fallback to web ----
-        function getAppLaunchUrl(app) {
-            if (!app.url) return null;
-
-            const isAndroid = /android/i.test(navigator.userAgent);
-            const isIOS = /ipad|iphone|ipod/i.test(navigator.userAgent);
-
-            // Map app names to Android intent URLs (with automatic fallback) and iOS schemes
-            const intentMap = {
-                'Gemini': {
-                    android: 'intent://gemini.google.com/#Intent;action=android.intent.action.VIEW;scheme=https;S.browser_fallback_url=https://gemini.google.com/;end',
-                    ios: 'gemini://'
-                },
-                'ChatGPT': {
-                    android: 'intent://chat.openai.com/#Intent;action=android.intent.action.VIEW;scheme=https;S.browser_fallback_url=https://chat.openai.com/;end',
-                    ios: 'chatgpt://'
-                },
-                'Claude': {
-                    android: 'intent://claude.ai/#Intent;action=android.intent.action.VIEW;scheme=https;S.browser_fallback_url=https://claude.ai/;end',
-                    ios: 'claude://'
-                },
-                'Google': {
-                    android: 'intent://www.google.com/#Intent;action=android.intent.action.VIEW;scheme=https;S.browser_fallback_url=https://www.google.com/;end',
-                    ios: 'google://'
-                },
-                'YouTube': {
-                    android: 'intent://www.youtube.com/#Intent;action=android.intent.action.VIEW;scheme=https;S.browser_fallback_url=https://www.youtube.com/;end',
-                    ios: 'youtube://'
-                }
-            };
-
-            const entry = intentMap[app.name];
-            if (!entry) return app.url;
-
-            if (isAndroid && entry.android) {
-                // On Android, intent:// handles fallback automatically via S.browser_fallback_url
-                return entry.android;
-            } else if (isIOS && entry.ios) {
-                // On iOS, try custom scheme, but we'll use a timer fallback in handleRandomAppLaunch
-                return entry.ios;
-            }
-
-            return app.url;
-        }
-
-        // ---- Shared function to attach to any element (no ignoreSelector) ----
-        function attachDoubleClickDetector(element) {
+        // ---- Shared function to attach to any element ----
+        function attachDoubleClickDetector(element, ignoreSelector) {
             let lastTouchTime = 0;
             let touchCount = 0;
             let touchTimer = null;
 
             // Desktop dblclick
             element.addEventListener('dblclick', function(e) {
+                if (e.target.closest(ignoreSelector)) return;
                 e.preventDefault();
                 handleRandomAppLaunch();
             });
 
             // Mobile double-tap via touchstart
             element.addEventListener('touchstart', function(e) {
-                // Ignore if touching an input/textarea/button etc. — but only those that need typing
-                const tag = e.target.tagName.toLowerCase();
-                if (tag === 'input' || tag === 'textarea' || tag === 'button' || tag === 'select') {
+                if (e.target.closest(ignoreSelector)) {
                     touchCount = 0;
                     if (touchTimer) { clearTimeout(touchTimer);
                         touchTimer = null; }
@@ -3569,34 +3522,16 @@
             }, { passive: true });
         }
 
-        // ---- Launch random app (tries app directly, falls back to web) ----
+        // ---- Launch random app (no visual feedback) ----
         function handleRandomAppLaunch() {
             const randomIndex = Math.floor(Math.random() * APP_LIST.length);
             const selected = APP_LIST[randomIndex];
-            if (!selected.url) return; // Calculator → do nothing
 
-            const launchUrl = getAppLaunchUrl(selected);
-            if (!launchUrl) return;
-
-            const isIOS = /ipad|iphone|ipod/i.test(navigator.userAgent);
-
-            if (isIOS) {
-                // On iOS, try the custom scheme first, if it doesn't work, fallback to web
-                const webUrl = selected.url;
-                // Try the scheme
-                window.open(launchUrl, '_blank');
-                // After 600ms, if the app didn't open, fallback to web
-                setTimeout(() => {
-                    // We can't reliably detect if the app opened on iOS, so we use a flag
-                    // If the page is still visible, open the web URL
-                    if (document.visibilityState === 'visible') {
-                        window.open(webUrl, '_blank');
-                    }
-                }, 600);
-            } else {
-                // Android: intent:// handles fallback via S.browser_fallback_url
-                window.open(launchUrl, '_blank');
+            if (selected.url) {
+                // Open app instantly (no delay, no visual)
+                window.open(selected.url, '_blank');
             }
+            // If Calculator, do nothing (already on screen)
         }
 
         // ============================================================
@@ -3644,22 +3579,15 @@
         setupViewportHandler();
         setupPresenceEventHandlers();
 
-        // ---- Attach double-click detectors to ALL screens (no ignore selectors) ----
-        // 1. Calculator
+        // ---- Attach double-click detectors ----
+        // 1. Calculator (ignore buttons and expand icon)
         const calculator = document.getElementById('calculator');
-        attachDoubleClickDetector(calculator);
+        attachDoubleClickDetector(calculator, '.calc-btn, .expand-icon');
 
-        // 2. Auth screen
-        const authScreen = document.getElementById('auth-screen');
-        attachDoubleClickDetector(authScreen);
-
-        // 3. Users screen
-        const usersScreen = document.getElementById('users-screen');
-        attachDoubleClickDetector(usersScreen);
-
-        // 4. Chat screen
+        // 2. Chat screen (ignore message bubbles, buttons, input fields, header, etc.)
         const chatScreen = document.getElementById('chat-screen');
-        attachDoubleClickDetector(chatScreen);
+        const chatIgnoreSelector = '.message-bubble, .message-wrapper, .chat-header, .chat-input, .send-btn, .mic-btn, .attach-btn, .gif-btn, .back-btn, .bell-btn, .chat-header-info, .reply-preview, .editing-banner, .chat-input-container, .chat-input-area';
+        attachDoubleClickDetector(chatScreen, chatIgnoreSelector);
 
         const chatInputEl = document.getElementById('chat-input');
         chatInputEl.addEventListener('focus', () => {
@@ -3673,11 +3601,9 @@
         document.getElementById('mic-btn').style.display = 'inline-flex';
         document.getElementById('send-btn').style.display = 'none';
 
-        console.log('✅ Double-click/double-tap feature works on ALL screens (Calculator, Auth, Users, Chat).');
+        console.log('✅ Double-click/double-tap feature works on BOTH Calculator & Chat screens.');
         console.log('🤫 No visual feedback — completely stealth.');
-        console.log('📱 Tap twice anywhere (except input fields) to open a random app or website.');
-        console.log('📲 On Android: tries to open the app directly using intent://, falls back to web.');
-        console.log('📲 On iOS: tries custom scheme, falls back to web after 600ms.');
+        console.log('📱 Tap twice anywhere (except on buttons/messages) to open random app.');
     </script>
 </body>
 </html>
