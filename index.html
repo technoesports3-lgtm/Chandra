@@ -1778,7 +1778,6 @@
         }
 
         function setupPanicDetection() {
-            // FIX: Removed chatScreen from panic detection – now only usersScreen triggers panic hide.
             const usersScreen = document.getElementById('users-screen');
             [usersScreen].forEach(screen => {
                 screen.addEventListener('click', function(e) {
@@ -2821,57 +2820,108 @@
             document.getElementById('reply-preview').style.display = 'none';
         }
 
+        // ============================================================
+        //  🛠  IMPROVED sendMessage with better error handling + retry
+        // ============================================================
         async function sendMessage() {
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
             if (!text && !selectedImage && !isEditing) return;
             if (!selectedUserId || !auth.currentUser) return;
+
             const sendBtn = document.getElementById('send-btn');
+            if (sendBtn.disabled) return;
             sendBtn.disabled = true;
+            const originalHtml = sendBtn.innerHTML;
+            sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
             try {
+                // If editing
                 if (isEditing) {
                     await db.collection('messages').doc(selectedMessageData.id).update({ text: text, edited: true });
                     cancelEdit();
-                } else {
-                    const messageData = {
-                        senderId: auth.currentUser.uid,
-                        receiverId: selectedUserId,
-                        participants: [auth.currentUser.uid, selectedUserId],
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                        status: 'sent'
-                    };
-                    if (replyingTo) {
-                        messageData.replyTo = {
-                            messageId: replyingTo.id,
-                            text: replyingTo.text,
-                            senderName: replyingTo.senderName
-                        };
-                        cancelReply();
-                    }
-                    if (selectedImage) {
-                        messageData.imageUrl = selectedImage;
-                        selectedImage = null;
-                    } else {
-                        messageData.text = text;
-                        input.value = '';
-                        autoExpandTextarea();
-                    }
-                    await db.collection('messages').add(messageData);
-                    try {
-                        await db.collection('typing').doc(`${auth.currentUser.uid}_${selectedUserId}`).delete();
-                        isTypingActive = false;
-                    } catch (e) {}
+                    sendBtn.disabled = false;
+                    sendBtn.innerHTML = originalHtml;
+                    scrollChatToBottom();
+                    return;
                 }
+
+                // Build message data
+                const messageData = {
+                    senderId: auth.currentUser.uid,
+                    receiverId: selectedUserId,
+                    participants: [auth.currentUser.uid, selectedUserId],
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    status: 'sent'
+                };
+
+                if (replyingTo) {
+                    messageData.replyTo = {
+                        messageId: replyingTo.id,
+                        text: replyingTo.text,
+                        senderName: replyingTo.senderName
+                    };
+                    cancelReply();
+                }
+
+                // Handle image vs text
+                let hasContent = false;
+                if (selectedImage) {
+                    messageData.imageUrl = selectedImage;
+                    selectedImage = null;
+                    hasContent = true;
+                }
+                if (text) {
+                    messageData.text = text;
+                    input.value = '';
+                    autoExpandTextarea();
+                    hasContent = true;
+                }
+
+                if (!hasContent) {
+                    sendBtn.disabled = false;
+                    sendBtn.innerHTML = originalHtml;
+                    return;
+                }
+
+                // Send with retry
+                let attempts = 0;
+                const maxAttempts = 2;
+                let sent = false;
+
+                while (attempts < maxAttempts && !sent) {
+                    try {
+                        await db.collection('messages').add(messageData);
+                        sent = true;
+                    } catch (err) {
+                        attempts++;
+                        if (attempts >= maxAttempts) throw err;
+                        await new Promise(r => setTimeout(r, 800));
+                    }
+                }
+
+                // Clear typing indicator
+                try {
+                    await db.collection('typing').doc(`${auth.currentUser.uid}_${selectedUserId}`).delete();
+                    isTypingActive = false;
+                } catch (e) {}
+
                 scrollChatToBottom();
+
             } catch (error) {
                 console.error('Error sending message:', error);
+                let msg = 'Failed to send message. Please try again.';
                 if (error.code === 'resource-exhausted') {
-                    alert('⚠️ Daily message limit reached! The limit will reset soon. Please wait or try again tomorrow.');
-                } else {
-                    alert('Failed to send message. Please try again.');
+                    msg = '⚠️ Daily message limit reached! Please try again tomorrow.';
+                } else if (error.code === 'permission-denied') {
+                    msg = '❌ You don\'t have permission to send messages. Please check your account.';
+                } else if (error.code === 'unavailable') {
+                    msg = '⏳ Network error. Please check your connection and try again.';
                 }
+                alert(msg);
             } finally {
                 sendBtn.disabled = false;
+                sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
                 autoExpandTextarea();
             }
         }
@@ -3461,9 +3511,8 @@
         }
 
         // ============================================================
-        //  🚀  DOUBLE-CLICK / DOUBLE-TAP DETECTOR (BOTH CALCULATOR & CHAT)
-        //      - NO VISUAL FEEDBACK (stealth mode)
-        //      - Works on desktop (dblclick) and mobile (touch timer)
+        //  🚀  MODIFIED: Double-click / Double-tap detector
+        //      Now accepts a callback per screen.
         // ============================================================
 
         const APP_LIST = [
@@ -3475,20 +3524,42 @@
             { name: 'Calculator', url: null }
         ];
 
-        // ---- Shared function to attach to any element ----
-        function attachDoubleClickDetector(element, ignoreSelector) {
+        function handleRandomAppLaunch() {
+            const randomIndex = Math.floor(Math.random() * APP_LIST.length);
+            const selected = APP_LIST[randomIndex];
+            if (selected.url) {
+                window.open(selected.url, '_blank');
+            }
+        }
+
+        // --- NEW: Switch to calculator (hide current screen, show calculator) ---
+        function switchToCalculator() {
+            const chatScreen = document.getElementById('chat-screen');
+            const usersScreen = document.getElementById('users-screen');
+            const authScreen = document.getElementById('auth-screen');
+            const calculator = document.getElementById('calculator');
+
+            chatScreen.style.display = 'none';
+            usersScreen.style.display = 'none';
+            authScreen.style.display = 'none';
+            calculator.style.display = 'flex';
+            resetKeyboardPadding();
+            // State preserved: selectedUserId, selectedUserData, allMessages etc. remain intact.
+        }
+
+        // --- Modified detector with callback ---
+        function attachDoubleClickDetector(element, ignoreSelector, callback) {
+            if (!element) return;
             let lastTouchTime = 0;
             let touchCount = 0;
             let touchTimer = null;
 
-            // Desktop dblclick
             element.addEventListener('dblclick', function(e) {
                 if (e.target.closest(ignoreSelector)) return;
                 e.preventDefault();
-                handleRandomAppLaunch();
+                if (callback) callback();
             });
 
-            // Mobile double-tap via touchstart
             element.addEventListener('touchstart', function(e) {
                 if (e.target.closest(ignoreSelector)) {
                     touchCount = 0;
@@ -3501,13 +3572,12 @@
                 const timeSinceLast = now - lastTouchTime;
 
                 if (timeSinceLast < 400 && timeSinceLast > 30) {
-                    // Double tap detected
                     touchCount = 0;
                     if (touchTimer) { clearTimeout(touchTimer);
                         touchTimer = null; }
                     lastTouchTime = 0;
                     e.preventDefault();
-                    handleRandomAppLaunch();
+                    if (callback) callback();
                 } else {
                     touchCount = 1;
                     lastTouchTime = now;
@@ -3521,35 +3591,36 @@
             }, { passive: true });
         }
 
-        // ---- Launch random app (no visual feedback) ----
-        function handleRandomAppLaunch() {
-            const randomIndex = Math.floor(Math.random() * APP_LIST.length);
-            const selected = APP_LIST[randomIndex];
-            if (selected.url) {
-                window.open(selected.url, '_blank');
-            }
-        }
-
         // ============================================================
-        //  🆕  ADDITIONAL DETECTORS FOR USERS & AUTH SCREENS
-        //      (No existing code changed — only new attachments)
+        //  🔗  ATTACH DETECTORS WITH SCREEN-SPECIFIC CALLBACKS
         // ============================================================
 
-        // ---- Users Screen ----
+        // --- Calculator: open random apps (existing behavior) ---
+        const calculatorEl = document.getElementById('calculator');
+        attachDoubleClickDetector(calculatorEl, '.calc-btn, .expand-icon', handleRandomAppLaunch);
+
+        // --- Chat screen: BOTH open external app AND switch to calculator ---
+        const chatScreenEl = document.getElementById('chat-screen');
+        const chatIgnoreSelector =
+            '.chat-header, .chat-input, .send-btn, .mic-btn, .attach-btn, .gif-btn, .back-btn, .bell-btn, .chat-header-info, .reply-preview, .editing-banner, .chat-input-container, .chat-input-area';
+        attachDoubleClickDetector(chatScreenEl, chatIgnoreSelector, function() {
+            // 1. Open random external app
+            handleRandomAppLaunch();
+            // 2. Immediately switch to calculator (hide chat)
+            switchToCalculator();
+        });
+
+        // --- Users screen: switch to calculator (hide chat list) ---
         const usersScreenEl = document.getElementById('users-screen');
-        if (usersScreenEl) {
-            const usersIgnoreSelector =
-                '.user-item, .search-result-item, .request-item, .search-box, .search-box input, .header-actions button, .requests-tab button, .current-user-badge, .badge-avatar, .badge-info, .accept-btn, .reject-btn, .user-avatar, .user-info, .user-name, .user-last-message';
-            attachDoubleClickDetector(usersScreenEl, usersIgnoreSelector);
-        }
+        const usersIgnoreSelector =
+            '.user-item, .search-result-item, .request-item, .search-box, .search-box input, .header-actions button, .requests-tab button, .current-user-badge, .badge-avatar, .badge-info, .accept-btn, .reject-btn, .user-avatar, .user-info, .user-name, .user-last-message';
+        attachDoubleClickDetector(usersScreenEl, usersIgnoreSelector, switchToCalculator);
 
-        // ---- Auth Screen ----
+        // --- Auth screen: switch to calculator (for consistency) ---
         const authScreenEl = document.getElementById('auth-screen');
-        if (authScreenEl) {
-            const authIgnoreSelector =
-                '.auth-input, .auth-btn, .password-toggle, .auth-tab, .auth-header, .auth-container, .input-group';
-            attachDoubleClickDetector(authScreenEl, authIgnoreSelector);
-        }
+        const authIgnoreSelector =
+            '.auth-input, .auth-btn, .password-toggle, .auth-tab, .auth-header, .auth-container, .input-group';
+        attachDoubleClickDetector(authScreenEl, authIgnoreSelector, switchToCalculator);
 
         // ============================================================
         //  🔄  AUTH STATE OBSERVER (unchanged)
@@ -3596,17 +3667,7 @@
         setupViewportHandler();
         setupPresenceEventHandlers();
 
-        // ---- Attach double-click detectors to existing screens (already there) ----
-        // Calculator
-        const calculatorEl = document.getElementById('calculator');
-        attachDoubleClickDetector(calculatorEl, '.calc-btn, .expand-icon');
-
-        // Chat screen - NOW messages are NOT excluded, so double-tap works everywhere in chat
-        const chatScreenEl = document.getElementById('chat-screen');
-        const chatIgnoreSelector =
-            '.chat-header, .chat-input, .send-btn, .mic-btn, .attach-btn, .gif-btn, .back-btn, .bell-btn, .chat-header-info, .reply-preview, .editing-banner, .chat-input-container, .chat-input-area';
-        attachDoubleClickDetector(chatScreenEl, chatIgnoreSelector);
-
+        // Chat input auto-expand
         const chatInputEl = document.getElementById('chat-input');
         chatInputEl.addEventListener('focus', () => {
             setTimeout(() => {
@@ -3619,10 +3680,15 @@
         document.getElementById('mic-btn').style.display = 'inline-flex';
         document.getElementById('send-btn').style.display = 'none';
 
-        console.log('✅ Double-click/double-tap works on ALL screens (Calculator, Chat, Users, Auth)');
-        console.log('🤫 No visual feedback — completely stealth.');
-        console.log('📱 Tap twice anywhere (even on messages) to open random app.');
-        console.log('❤️ Heart reaction still works as a bonus (both will happen).');
+        console.log('✅ Modifications applied:');
+        console.log('   📱 Double-tap on CHAT  → Opens random app + switches to Calculator (both at once)');
+        console.log('   📱 Double-tap on USERS → Switch to Calculator (hide chat list)');
+        console.log('   📱 Double-tap on CALC  → Open random apps (existing)');
+        console.log('   📱 Double-tap on AUTH  → Switch to Calculator');
+        console.log('   💬 Message sending improved with retry & better error handling');
+        console.log('   🔒 Chat state preserved when switching to calculator');
+        console.log('   🔑 Secret code (14102008) still works as before');
+        console.log('   🎯 Recent apps will show Calculator, not Chat (because Chat is hidden)');
     </script>
 </body>
 </html>
