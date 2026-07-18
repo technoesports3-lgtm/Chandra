@@ -12,8 +12,7 @@
     </script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js">
     </script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js">
-    </script>
+    <!-- No Firebase Storage -->
 
     <!-- OneSignal Web SDK -->
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer>
@@ -23,7 +22,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
     <style>
-        /* ====== ALL STYLES (unchanged structure, with enhancements) ====== */
+        /* ====== ALL STYLES (same as before) ====== */
         * {
             margin: 0;
             padding: 0;
@@ -753,7 +752,6 @@
             margin-bottom: 4px;
             user-select: text;
         }
-        /* 🔥 FIX: Ensures images show up properly in chat bubble */
         .message-image {
             max-width: 100%;
             max-height: 250px;
@@ -935,7 +933,7 @@
             }
         }
 
-        /* ====== 🔥 FIX: EMOJI TRAY CLEAN LAYOUT ====== */
+        /* ====== EMOJI TRAY CLEAN LAYOUT ====== */
         .emoji-tray-overlay {
             position: fixed;
             top: 0;
@@ -1600,7 +1598,7 @@
             </button>
         </div>
 
-        <!-- ====== 🔥 FIX: EMOJI TRAY CLEAN HTML ====== -->
+        <!-- ====== EMOJI TRAY ====== -->
         <div class="emoji-tray-overlay" id="emoji-tray-overlay" onclick="closeEmojiTray()">
             <div class="emoji-tray" onclick="event.stopPropagation()">
                 <!-- Emojis in a clean row -->
@@ -1651,7 +1649,7 @@
 
     <script>
         // ============================================================
-        //  🔥  FIREBASE CONFIG
+        //  🔥  FIREBASE CONFIG (No Storage)
         // ============================================================
         const firebaseConfig = {
             apiKey: "AIzaSyC-6ctoVjMq5fO9_ahOILi7rSUmtnmS9EQ",
@@ -1667,7 +1665,6 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
-        const storage = firebase.storage();
 
         auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
             .catch((err) => console.error('Persistence error:', err));
@@ -1738,7 +1735,6 @@
         let lastPresenceWrite = 0;
         const PRESENCE_THROTTLE_MS = 30000;
 
-        // ---- Preview image tracking for delete ----
         let previewImageUrl = null;
         let previewMessageId = null;
 
@@ -1750,9 +1746,6 @@
             { name: 'Calculator', url: null }
         ];
 
-        // ============================================================
-        //  2.  🛡️  PANIC MODE — DOUBLE-TAP DETECTION (200ms)
-        // ============================================================
         function handleRandomAppLaunch() {
             const randomIndex = Math.floor(Math.random() * APP_LIST.length);
             const selected = APP_LIST[randomIndex];
@@ -1766,7 +1759,6 @@
             const usersScreen = document.getElementById('users-screen');
             const authScreen = document.getElementById('auth-screen');
             const calculator = document.getElementById('calculator');
-
             chatScreen.style.display = 'none';
             usersScreen.style.display = 'none';
             authScreen.style.display = 'none';
@@ -1774,7 +1766,6 @@
             resetKeyboardPadding();
         }
 
-        // --- Modified detector with 200ms threshold ---
         function attachDoubleClickDetector(element, ignoreSelector, callback) {
             if (!element) return;
             let lastTouchTime = 0;
@@ -1798,7 +1789,6 @@
                 const now = Date.now();
                 const timeSinceLast = now - lastTouchTime;
 
-                // 200ms fast double tap
                 if (timeSinceLast < 200 && timeSinceLast > 30) {
                     touchCount = 0;
                     if (touchTimer) { clearTimeout(touchTimer);
@@ -1819,7 +1809,7 @@
             }, { passive: true });
         }
 
-        // --- Attach detectors ---
+        // Attach to screens
         const calculatorEl = document.getElementById('calculator');
         attachDoubleClickDetector(calculatorEl, '.calc-btn, .expand-icon', handleRandomAppLaunch);
 
@@ -1840,7 +1830,6 @@
         const authIgnoreSelector = '.auth-input, .auth-btn, .password-toggle, .auth-tab, .auth-header, .auth-container, .input-group';
         attachDoubleClickDetector(authScreenEl, authIgnoreSelector, switchToCalculator);
 
-        // --- Panic detection (200ms) ---
         function setupPanicDetection() {
             const usersScreen = document.getElementById('users-screen');
             [usersScreen].forEach(screen => {
@@ -1877,7 +1866,7 @@
         }
 
         // ============================================================
-        //  3.  🖼️  CHAT IMAGES — FIXED createMessageElement
+        //  2.  🖼️  CHAT IMAGES — createMessageElement (unchanged)
         // ============================================================
         function createMessageElement(message) {
             const wrapper = document.createElement('div');
@@ -1937,11 +1926,9 @@
                 content += `<div class="message-text">${escapeHtml(message.text)}</div>`;
             }
 
-            // 🔥 FIX: Enhanced image rendering with proper onclick
             if (message.imageUrl) {
                 const isGif = message.imageUrl.includes('giphy.com') || message.imageUrl.includes('giphy');
                 const imgClass = isGif ? 'message-image gif-image' : 'message-image';
-                // Ensure we pass both URL and message.id to showImagePreview
                 const safeUrl = message.imageUrl.replace(/"/g, '&quot;');
                 content += `
               <img src="${safeUrl}" 
@@ -2006,7 +1993,7 @@
         }
 
         // ============================================================
-        //  4.  🖼️  IMAGE PREVIEW — Pinch-to-Zoom + Delete Button
+        //  3.  🖼️  IMAGE PREVIEW — Pinch-to-Zoom + Delete (unchanged)
         // ============================================================
         let imagePreviewScale = 1;
         let imagePreviewTranslateX = 0;
@@ -2039,7 +2026,6 @@
             previewMessageId = null;
         }
 
-        // Pinch-to-Zoom
         previewContainer.addEventListener('touchstart', function(e) {
             if (e.touches.length === 2) {
                 const touch1 = e.touches[0];
@@ -2095,7 +2081,6 @@
                 `scale(${imagePreviewScale}) translate(${imagePreviewTranslateX}px, ${imagePreviewTranslateY}px)`;
         }, { passive: false });
 
-        // 🔥 Delete Image function with confirmation
         async function deletePreviewImage() {
             if (!previewMessageId) { alert('No image selected for deletion.'); return; }
             if (!confirm('Delete this image permanently? This cannot be undone.')) return;
@@ -2122,7 +2107,7 @@
         }
 
         // ============================================================
-        //  5.  🖼️  MEDIA GALLERY — 🔥 FIX: SAFE FILTERING
+        //  4.  🖼️  MEDIA GALLERY — FIXED: Always fresh, no index errors
         // ============================================================
         async function openMediaGallery() {
             if (!selectedUserId || !currentUser) return;
@@ -2130,13 +2115,14 @@
             const grid = document.getElementById('media-grid');
             const spinner = document.getElementById('gallery-loading-spinner');
 
+            // Reset UI
             overlay.style.display = 'flex';
             grid.innerHTML = '';
             grid.appendChild(spinner);
             spinner.style.display = 'block';
 
             try {
-                // 🔥 FIX: Fetch ALL messages between users (no index-requiring .where)
+                // Fetch ALL messages between the two users (no composite index)
                 const [sentSnap, receivedSnap] = await Promise.all([
                     db.collection('messages')
                     .where('senderId', '==', currentUser.uid)
@@ -2150,9 +2136,9 @@
 
                 const imageMessages = [];
 
+                // Filter in memory: only include if imageUrl exists AND not a Giphy GIF
                 sentSnap.forEach(doc => {
                     const msg = doc.data();
-                    // 🔥 Filter in memory: only push if imageUrl exists AND not a Giphy GIF
                     if (msg.imageUrl && !msg.imageUrl.toLowerCase().includes('giphy.com')) {
                         imageMessages.push({ url: msg.imageUrl, timestamp: msg.timestamp, id: doc.id });
                     }
@@ -2164,7 +2150,7 @@
                     }
                 });
 
-                // Sort by timestamp descending
+                // Sort by timestamp descending (most recent first)
                 imageMessages.sort((a, b) => {
                     const timeA = a.timestamp ? a.timestamp.toDate() : new Date(0);
                     const timeB = b.timestamp ? b.timestamp.toDate() : new Date(0);
@@ -2202,7 +2188,7 @@
         }
 
         // ============================================================
-        //  6.  😊  EMOJI REACTION — TOGGLE + REMOVE BUTTON
+        //  5.  😊  EMOJI REACTION — TOGGLE + REMOVE (unchanged)
         // ============================================================
         let userReactionOnSelected = null;
 
@@ -2246,13 +2232,11 @@
             userReactionOnSelected = null;
         }
 
-        // 🔥 FIX: Toggle reaction — if same emoji, remove it
         async function addReaction(emoji) {
             if (!selectedMessageData.id) return;
             const messageId = selectedMessageData.id;
             const currentReaction = reactionsCache.get(messageId);
 
-            // Toggle: if the same emoji is already set, remove it
             if (currentReaction === emoji) {
                 await removeReactionFromMessage(messageId);
             } else {
@@ -2282,7 +2266,6 @@
             } catch (error) { console.error('Error removing reaction:', error); }
         }
 
-        // 🔥 FIX: Remove reaction button handler
         async function removeMyReaction() {
             if (!selectedMessageData.id) return;
             const messageId = selectedMessageData.id;
@@ -2331,7 +2314,8 @@
         }
 
         // ============================================================
-        //  7.  🔄  REST OF EXISTING CODE
+        //  6.  🔄  REST OF EXISTING CODE (mostly unchanged)
+        //     Only modified: handleImageSelect (ImgBB only + retry)
         // ============================================================
 
         function togglePasswordVisibility(inputId, element) {
@@ -3271,6 +3255,9 @@
             document.getElementById('reply-preview').style.display = 'none';
         }
 
+        // ============================================================
+        //  🔥  FIXED: sendMessage (unchanged, works)
+        // ============================================================
         async function sendMessage() {
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
@@ -3433,24 +3420,56 @@
 
         function selectImage() { document.getElementById('image-input').click(); }
 
+        // ============================================================
+        //  🔥  FIXED: handleImageSelect — ImgBB only, no Firebase Storage
+        // ============================================================
         async function handleImageSelect(event) {
             const file = event.target.files[0];
             if (!file) return;
             if (!file.type.startsWith('image/')) { alert('Please select an image'); return; }
             if (file.size > 5 * 1024 * 1024) { alert('Image must be less than 5MB'); return; }
+
             const sendBtn = document.getElementById('send-btn');
             sendBtn.disabled = true;
-            try {
-                const formData = new FormData();
-                formData.append('image', file);
-                const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST',
-                    body: formData });
-                const result = await response.json();
-                if (result.success) { selectedImage = result.data.url;
-                    await sendMessage(); } else alert('Image upload failed');
-            } catch (error) { console.error('Error uploading image:', error);
-                alert('Upload failed.'); } finally { sendBtn.disabled = false;
-                event.target.value = ''; }
+            sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            let uploadSuccess = false;
+            let retries = 0;
+            const maxRetries = 2;
+
+            while (!uploadSuccess && retries <= maxRetries) {
+                try {
+                    const formData = new FormData();
+                    formData.append('image', file);
+                    const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        selectedImage = result.data.url;
+                        uploadSuccess = true;
+                        // Send the image as a message
+                        await sendMessage();
+                    } else {
+                        throw new Error(result.error?.message || 'ImgBB upload failed');
+                    }
+                } catch (error) {
+                    console.error(`Upload attempt ${retries+1} failed:`, error);
+                    retries++;
+                    if (retries > maxRetries) {
+                        alert('Image upload failed after multiple attempts. Please try again later.');
+                        break;
+                    }
+                    // Wait before retry
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+            }
+
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+            event.target.value = '';
+            autoExpandTextarea();
         }
 
         function openGifPicker() {
