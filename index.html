@@ -1578,9 +1578,9 @@
                     <div class="chat-input-wrapper">
                         <textarea class="chat-input" id="chat-input" placeholder="Message" rows="1" onkeyup="handleTyping(event)" oninput="autoExpandTextarea()"></textarea>
                     </div>
-                    <button class="mic-btn" id="mic-btn" onmousedown="startRecording()" onmouseup="stopRecording()" onmouseleave="stopRecording()" ontouchstart="startRecording()" ontouchend="stopRecording()" ontouchcancel="stopRecording()">
-                        <i class="fas fa-microphone"></i>
-                    </button>
+                    <button class="mic-btn" id="mic-btn">
+    <i class="fas fa-microphone"></i>
+</button>
                     <span class="recording-timer" id="recording-timer">0:00</span>
                     <button class="send-btn" onclick="sendMessage()" id="send-btn"><i class="fas fa-paper-plane"></i></button>
                 </div>
@@ -3590,38 +3590,78 @@
 
         async function uploadVoiceNote() {
             if (audioChunks.length === 0) return;
+
+            // Audio ni file laaga convert chesthunnam
             const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
             const duration = Math.floor((Date.now() - recordingStartTime) / 1000);
-            if (duration < 1) return;
-            const messageId = db.collection('messages').doc().id;
-            const storageRef = storage.ref(`voice_notes/${messageId}.webm`);
+
+            // 1 second kante thakkuva unte send avvadhu
+            if (duration < 1) {
+                audioChunks = [];
+                return;
+            }
+
+            // ==========================================
+            // 🔥 CLOUDINARY DETAILS IKKADA MARchu 🔥
+            // ==========================================
+            const CLOUD_NAME = "tqvtyfsb"; // example: "dyqkwz88x"
+            const UPLOAD_PRESET = "secret_1410"; // example: "secret_chat"
+
+            const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`;
+
             try {
-                const snapshot = await storageRef.put(audioBlob);
-                const audioUrl = await snapshot.ref.getDownloadURL();
-                const messageData = {
-                    senderId: auth.currentUser.uid,
-                    receiverId: selectedUserId,
-                    participants: [auth.currentUser.uid, selectedUserId],
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                    status: 'sent',
-                    audioUrl: audioUrl,
-                    audioDuration: duration
-                };
-                if (replyingTo) {
-                    messageData.replyTo = {
-                        messageId: replyingTo.id,
-                        text: replyingTo.text,
-                        senderName: replyingTo.senderName
+                // Cloudinary ki data prepare chesthunnam
+                const formData = new FormData();
+                formData.append("file", audioBlob);
+                formData.append("upload_preset", UPLOAD_PRESET);
+                formData.append("resource_type", "video"); 
+
+                // Background lo upload chesthunnam
+                const response = await fetch(cloudinaryUrl, {
+                    method: "POST",
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.secure_url) {
+                    const audioUrl = data.secure_url; 
+                    const messageId = db.collection('messages').doc().id;
+
+                    const messageData = {
+                        senderId: auth.currentUser.uid,
+                        receiverId: selectedUserId,
+                        participants: [auth.currentUser.uid, selectedUserId],
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        status: 'sent',
+                        audioUrl: audioUrl, // Firestore lo just chinna link save avuthundi!
+                        audioDuration: duration
                     };
-                    cancelReply();
+
+                    if (replyingTo) {
+                        messageData.replyTo = {
+                            messageId: replyingTo.id,
+                            text: replyingTo.text,
+                            senderName: replyingTo.senderName
+                        };
+                        cancelReply();
+                    }
+
+                    // Firestore Database lo data pettesthunnam
+                    await db.collection('messages').doc(messageId).set(messageData);
+                    scrollChatToBottom();
+                } else {
+                    console.error("Cloudinary Error:", data);
+                    alert("Voice note upload failed.");
                 }
-                await db.collection('messages').doc(messageId).set(messageData);
-                scrollChatToBottom();
+
             } catch (error) {
                 console.error('Error uploading voice note:', error);
-                alert('Failed to send voice note.');
+                alert('Failed to send voice note. Network issue.');
             }
-            audioChunks = [];
+
+            // Next voice note kosam clear chesthunnam
+            audioChunks = []; 
         }
 
         function playVoiceNote(element, audioUrl, duration) {
@@ -3907,6 +3947,30 @@
         autoExpandTextarea();
         document.getElementById('mic-btn').style.display = 'inline-flex';
         document.getElementById('send-btn').style.display = 'none';
+        // PERFECT MIC HOLD & RELEASE LOGIC
+        const micBtnEl = document.getElementById('mic-btn');
+        let isRecording = false;
+
+        function handleRecordStart(e) {
+            e.preventDefault(); // Idhi context menu open avvakunda aaputhundi
+            if (isRecording) return;
+            isRecording = true;
+            startRecording();
+        }
+
+        function handleRecordStop(e) {
+            e.preventDefault();
+            if (!isRecording) return;
+            isRecording = false;
+            stopRecording();
+        }
+
+        micBtnEl.addEventListener('touchstart', handleRecordStart, {passive: false});
+        micBtnEl.addEventListener('touchend', handleRecordStop);
+        micBtnEl.addEventListener('touchcancel', handleRecordStop);
+        micBtnEl.addEventListener('mousedown', handleRecordStart);
+        micBtnEl.addEventListener('mouseup', handleRecordStop);
+        micBtnEl.addEventListener('mouseleave', handleRecordStop);
     </script>
 </body>
 </html>
