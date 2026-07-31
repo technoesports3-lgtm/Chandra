@@ -3566,8 +3566,8 @@
                 document.getElementById('recording-timer').style.display = 'inline';
                 recordingTimerInterval = setInterval(updateRecordingTimer, 200);
             } catch (error) {
-                console.error('Microphone access denied:', error);
-                alert('Please allow microphone access to record voice notes.');
+                console.error('Mic error:', error);
+                alert('Mic Error: ' + error.name + ' - ' + error.message);
             }
         }
 
